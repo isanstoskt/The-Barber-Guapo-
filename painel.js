@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:3000/api/agendamentos";
+const API_URL = "/api/agendamentos";
 
 const listaAgendamentos = document.getElementById("listaAgendamentos");
 const filtroData = document.getElementById("filtroData");
