@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel Administrativo - Guapo The Barber</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="admin-body">
+
+  <header class="admin-header">
+    <div>
+      <h1>Guapo</h1>
+      <span>The Barber</span>
+    </div>
+
+    <a href="index.html" class="admin-voltar">Voltar para o site</a>
+  </header>
+
+  <main class="admin-container">
+
+    <section class="admin-intro">
+      <div>
+        <p class="admin-tag">Painel administrativo</p>
+        <h2>Agendamentos</h2>
+        <p>Gerencie os horários solicitados pelos clientes.</p>
+      </div>
+    </section>
+
+    <section class="admin-resumo">
+      <div class="admin-card-resumo">
+        <span>Total</span>
+        <strong id="totalAgendamentos">0</strong>
+      </div>
+
+      <div class="admin-card-resumo">
+        <span>Pendentes</span>
+        <strong id="totalPendentes">0</strong>
+      </div>
+
+      <div class="admin-card-resumo">
+        <span>Confirmados</span>
+        <strong id="totalConfirmados">0</strong>
+      </div>
+
+      <div class="admin-card-resumo">
+        <span>Cancelados</span>
+        <strong id="totalCancelados">0</strong>
+      </div>
+    </section>
+
+    <section class="admin-filtros">
+      <div class="admin-botoes-filtro">
+        <button id="btnHoje" type="button">Hoje</button>
+        <button id="btnSemana" type="button">Semana</button>
+        <button id="btnTodos" type="button">Todos</button>
+      </div>
+
+      <div class="admin-filtro-data">
+        <label for="filtroData">Filtrar por data</label>
+        <input type="date" id="filtroData" />
+      </div>
+    </section>
+
+    <section class="admin-lista">
+      <div class="admin-lista-topo">
+        <h2>Lista de agendamentos</h2>
+      </div>
+
+      <div id="listaAgendamentos">
+        <p class="painel-carregando">Carregando agendamentos...</p>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="painel.js"></script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login Administrativo - Guapo The Barber</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="admin-body">
+
+  <main class="login-admin-container">
+    <section class="login-admin-card">
+      <div class="login-admin-logo">
+        <h1>Guapo</h1>
+        <span>The Barber</span>
+      </div>
+
+      <p class="admin-tag">Área administrativa</p>
+      <h2>Acessar painel</h2>
+      <p class="login-admin-texto">Digite o usuário e senha para gerenciar os agendamentos.</p>
+
+      <form id="formLoginAdmin" class="login-admin-form">
+        <label for="usuario">Usuário</label>
+        <input type="text" id="usuario" placeholder="Digite o usuário" required />
+
+        <label for="senha">Senha</label>
+        <input type="password" id="senha" placeholder="Digite a senha" required />
+
+        <button type="submit">Entrar no painel</button>
+      </form>
+
+      <p id="mensagemLogin" class="mensagem-login"></p>
+
+      <a href="index.html" class="login-voltar">Voltar para o site</a>
+    </section>
+  </main>
+
+  <script>
+    const formLoginAdmin = document.getElementById("formLoginAdmin");
+    const mensagemLogin = document.getElementById("mensagemLogin");
+
+    formLoginAdmin.addEventListener("submit", async function (event) {
+      event.preventDefault();
+
+      const usuario = document.getElementById("usuario").value;
+      const senha = document.getElementById("senha").value;
+
+      try {
+        const resposta = await fetch("/api/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            usuario: usuario,
+            senha: senha
+          })
+        });
+
+        const retorno = await resposta.json();
+
+        if (!resposta.ok) {
+          mensagemLogin.textContent = retorno.erro || "Usuário ou senha inválidos.";
+          mensagemLogin.classList.add("erro");
+          return;
+        }
+
+        window.location.href = "/painel.html";
+
+      } catch (erro) {
+        mensagemLogin.textContent = "Erro ao conectar com o servidor.";
+        mensagemLogin.classList.add("erro");
+      }
+    });
+  </script>
+
+</body>
+</html>

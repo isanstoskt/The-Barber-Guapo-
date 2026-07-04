@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Guapo The Barber | Barbearia em São Caetano do Sul</title>
+
+  <meta
+    name="description"
+    content="Guapo The Barber. Cortes, fade, barba, acabamento e cortes especializados em curvaturas 2, 3 e 4."
+  />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+  <header class="topo">
+    <div class="container menu">
+      <a href="#inicio" class="logo">
+        Guapo<span>The Barber</span>
+      </a>
+
+      <button class="menu-mobile" id="botaoMenu">
+        ☰
+      </button>
+
+      <nav id="menuLinks">
+        <a href="#inicio">Início</a>
+        <a href="#servicos">Serviços</a>
+        <a href="#galeria">Galeria</a>
+        <a href="#sobre">Sobre</a>
+        <a href="#contato">Agendar</a>
+      </nav>
+    </div>
+  </header>
+
+  <section id="inicio" class="hero">
+    <div class="container hero-conteudo">
+
+      <div class="hero-texto">
+        <p class="subtitulo">ABC Barber • São Caetano do Sul</p>
+
+        <h1>Seu corte fala antes de você.</h1>
+
+        <p>
+          Cortes com técnica, identidade e acabamento no detalhe.
+          Uma experiência barber pensada para valorizar seu estilo, sua curvatura e sua presença.
+        </p>
+
+        <div class="botoes">
+          <a class="botao principal" href="agendamento.html">
+            Agendar online
+          </a>
+        </div>
+      </div>
+
+      <div class="hero-imagem carrossel">
+        <button class="seta anterior" onclick="mudarSlide(-1)">&#10094;</button>
+
+        <div class="slides">
+          <img src="perfil.png" alt="Guapo The Barber em atendimento">
+          <img src="Um bom corte merece um bom 📸at @barberblack.original 💈 (1).jpg" alt="Corte masculino finalizado">
+          <img src="Um bom corte merece um bom 📸at @barberblack.original 💈.jpg" alt="Fade masculino com acabamento">
+          <img src="Captura de tela 2026-07-01 173330.png" alt="Guapos">
+        </div>
+
+        <button class="seta proximo" onclick="mudarSlide(1)">&#10095;</button>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="frase-impacto">
+    <div class="container">
+      <p>Estilo começa no detalhe.</p>
+    </div>
+  </section>
+
+ <section id="servicos" class="secao servicos">
+  <div class="container">
+
+    <p class="etiqueta">O que você encontra aqui</p>
+    <h2>Serviços</h2>
+    <p class="descricao">
+      Escolha o serviço ideal para o seu estilo. Corte, barba, finalização e cuidados completos no detalhe.
+    </p>
+
+    <div class="servicos-carrossel">
+
+      <button class="servico-seta servico-anterior" id="servicoAnterior">
+        &#10094;
+      </button>
+
+      <div class="servicos-trilho" id="servicosTrilho">
+
+        <div class="servico-card">
+          <div>
+            <span>01</span>
+            <h3>Corte</h3>
+            <p>Corte feito na máquina e/ou tesoura, com acabamento preciso.</p>
+          </div>
+        </div>
+
+        <div class="servico-card">
+          <div>
+            <span>02</span>
+            <h3>Corte + sobrancelha</h3>
+            <p>Corte completo com design de sobrancelha para deixar o visual alinhado.</p>
+          </div>
+        </div>
+
+        <div class="servico-card">
+          <div>
+            <span>03</span>
+            <h3>Corte + barboterapia</h3>
+            <p>Corte, sobrancelha de cortesia e barba com toalha quente e vaporizador de ozônio.</p>
+          </div>
+        </div>
+
+        <div class="servico-card">
+          <div>
+            <span>04</span>
+            <h3>Corte + barba simples</h3>
+            <p>Corte na máquina e/ou tesoura com barba simples feita na máquina.</p>
+          </div>
+        </div>
+
+        <div class="servico-card">
+          <div>
+            <span>05</span>
+            <h3>Barboterapia</h3>
+            <p>Barba com toalha quente, cuidado no detalhe e vaporizador de ozônio.</p>
+          </div>
+        </div>
+
+        <div class="servico-card">
+          <div>
+            <span>06</span>
+            <h3>Barba simples</h3>
+            <p>Barba feita apenas na máquina, ideal para manutenção rápida do visual.</p>
+          </div>
+        </div>
+
+        <div class="servico-card">
+          <div>
+            <span>07</span>
+            <h3>Sobrancelha</h3>
+            <p>Sobrancelha feita na navalha, mantendo o desenho natural e alinhado.</p>
+          </div>
+        </div>
+
+        <div class="servico-card">
+          <div>
+            <span>08</span>
+            <h3>Hairline / pezinho</h3>
+            <p>Higienização e alinhamento do perfil para manter o corte sempre limpo.</p>
+          </div>
+        </div>
+
+        <div class="servico-card">
+          <div>
+            <span>09</span>
+            <h3>Coloração</h3>
+            <p>Luzes, cores e trabalhos artísticos como animal print e estilos personalizados.</p>
+          </div>
+        </div>
+
+        <div class="servico-card">
+          <div>
+            <span>10</span>
+            <h3>Descoloração</h3>
+            <p>Nevou, descoloração completa e transformação de locs com técnica e cuidado.</p>
+          </div>
+        </div>
+
+        <div class="servico-card">
+          <div>
+            <span>11</span>
+            <h3>Hidratação + finalização</h3>
+            <p>Tratamento para cabelos ondulados, cacheados e crespos com shampoo, máscara e finalização.</p>
+          </div>
+        </div>
+
+        <div class="servico-card">
+          <div>
+            <span>12</span>
+            <h3>Terapia capilar</h3>
+            <p>Indicado para caspa, dermatite ou fortalecimento capilar.</p>
+          </div>
+        </div>
+
+        <div class="servico-card">
+          <div>
+            <span>13</span>
+            <h3>Limpeza de pele</h3>
+            <p>Limpeza personalizada com toalha quente, massageador e vaporizador de ozônio.</p>
+          </div>
+        </div>
+
+      </div>
+
+      <button class="servico-seta servico-proximo" id="servicoProximo">
+        &#10095;
+      </button>
+
+    </div>
+
+  </div>
+</section>
+
+  <section id="galeria" class="secao galeria">
+    <div class="container">
+
+      <p class="etiqueta">Resultados reais</p>
+      <h2>Galeria</h2>
+      <p class="descricao">
+        Corte não é só cabelo. É presença, identidade e confiança.
+      </p>
+
+      <div class="grid-galeria">
+        <img src="corte 3.png" alt="Foto de corte Guapo The Barber">
+        <img src="Autenticidade em cada detalhe💫..Studio localizado em São Caetano do Sul, ABC Paulista📍Rua pan .jpg" alt="Corte masculino">
+        <img src="corte 5.png" alt="Fade masculino">
+        <img src="lop.jpg" alt="Barba e acabamento">
+      </div>
+
+    </div>
+  </section>
+
+  <section id="sobre" class="secao sobre">
+    <div class="container sobre-conteudo">
+
+      <div>
+        <p class="etiqueta">Sobre</p>
+        <h2>Guapo The Barber</h2>
+
+        <p>
+          O Guapo The Barber nasceu para entregar mais do que um corte.
+          A proposta é cuidar da identidade, da autoestima e da presença de cada cliente.
+        </p>
+
+        <p>
+          Cada atendimento é feito com atenção ao detalhe, respeitando o formato do rosto,
+          o estilo pessoal e a curvatura natural do cabelo.
+        </p>
+
+        <p>
+          Aqui, o objetivo é simples: você sair da cadeira com um corte limpo,
+          bem finalizado e com a confiança lá em cima.
+        </p>
+      </div>
+
+      <div class="caixa-destaque">
+        <h3>Por que agendar?</h3>
+
+        <ul>
+          <li>Especialista em curvaturas 2, 3 e 4</li>
+          <li>Fade com acabamento preciso</li>
+          <li>Atendimento personalizado</li>
+          <li>Experiência barber premium</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <section id="contato" class="secao contato">
+  <div class="container">
+
+    <p class="etiqueta">Agendamento</p>
+    <h2>Pronto para mudar o visual?</h2>
+    <p class="descricao">
+      Solicite seu horário pelo agendamento online e aguarde a confirmação.
+  </p>
+
+    <div class="contato-grid">
+
+  <div class="endereco-box">
+    <h3>Endereço:</h3>
+
+    <p>
+      Rua Pan, 37 - Nova Gerty<br>
+      São Caetano do Sul
+    </p>
+  </div>
+
+  <div class="telefone-box">
+    <h3>Telefone:</h3>
+
+    <p class="telefone-numero">
+      (11) 94116-2831
+    </p>
+
+    <button class="btn-opcoes-telefone" id="abrirModalTelefone" type="button">
+      📞 Ver opções
+    </button>
+  </div>
+
+  <div class="horario-box">
+    <h3>Horário de Atendimento</h3>
+
+    <div class="horario-linha" data-dia="2">
+      <span class="dia">Ter:</span>
+      <span class="hora">09:00 - 19:00</span>
+    </div>
+
+    <div class="horario-linha" data-dia="3">
+      <span class="dia">Qua:</span>
+      <span class="hora">09:00 - 19:00</span>
+    </div>
+
+    <div class="horario-linha" data-dia="4">
+      <span class="dia">Qui:</span>
+      <span class="hora">08:00 - 19:00</span>
+    </div>
+
+    <div class="horario-linha" data-dia="5">
+      <span class="dia">Sex:</span>
+      <span class="hora">08:00 - 19:00</span>
+    </div>
+
+    <div class="horario-linha" data-dia="6">
+      <span class="dia">Sáb:</span>
+      <span class="hora">08:00 - 15:30</span>
+    </div>
+  </div>
+
+</div>
+
+      <div class="redes-box">
+  <p>Seguir Guapo The Barber nas redes sociais</p>
+
+  <div class="redes-botoes">
+    <a 
+      href="https://www.instagram.com/guapothebarber/" 
+      target="_blank" 
+      class="rede instagram"
+    >
+      Instagram
+    </a>
+
+    <a 
+      href="https://www.tiktok.com/@guapothebarber" 
+      target="_blank" 
+      class="rede tiktok"
+    >
+      TikTok
+    </a>
+  </div>
+</div>
+
+      <a class="botao principal" href="agendamento.html">
+        Agendar online
+      </a>
+    </div>
+
+  </div>
+
+  <footer>
+    <div class="container rodape">
+      <p>© 2026 Guapo The Barber. Todos os direitos reservados.</p>
+      <p>Seu visual, sua identidade.</p>
+    </div>
+  </footer>
+
+  <button id="voltarTopo" class="voltar-topo">↑</button>
+    <button id="voltarTopo" class="voltar-topo">↑</button>
+
+  <div class="modal-telefone" id="modalTelefone">
+    <div class="modal-telefone-overlay" id="fecharModalOverlay"></div>
+
+    <div class="modal-telefone-conteudo">
+      <div class="modal-telefone-topo">
+        <h3 id="numeroModal">(11) 94116-2831</h3>
+        <button class="fechar-modal" id="fecharModalTelefone" type="button">×</button>
+      </div>
+
+      <div class="modal-telefone-acoes">
+        <a class="acao-telefone ligar" href="tel:+5511941162831">
+          📞 Ligar
+        </a>
+
+        <a class="acao-telefone whatsapp" href="https://wa.me/5511941162831" target="_blank">
+          💬 WhatsApp
+        </a>
+
+        <a class="acao-telefone mensagem" href="sms:+5511941162831">
+          ✉️ Mensagem
+        </a>
+
+        <button class="acao-copiar" id="copiarTelefone" type="button" data-numero="11941162831">
+          📋 Copiar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
+
+  <script src="script.js"></script>
+</body>
+</html>

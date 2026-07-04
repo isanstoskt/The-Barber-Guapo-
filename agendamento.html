@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Agendamento | Guapo The Barber</title>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body class="agenda-body">
+
+  <header class="agenda-topo">
+    <div class="agenda-container agenda-menu">
+      <div class="agenda-logo">
+        <img src="perfil.png" alt="Guapo The Barber">
+        <div>
+          <h1>Guapo The Barber</h1>
+          <p>Agendamento online</p>
+        </div>
+      </div>
+
+      <a href="index.html" class="agenda-voltar">Voltar ao site</a>
+    </div>
+
+    <div class="agenda-container">
+      <div class="agenda-passos">
+        <div class="passo ativo" data-passo="1">
+          <span>1</span>
+          <p>Serviços</p>
+        </div>
+
+        <div class="linha"></div>
+
+        <div class="passo" data-passo="2">
+          <span>2</span>
+          <p>Horário</p>
+        </div>
+
+        <div class="linha"></div>
+
+        <div class="passo" data-passo="3">
+          <span>3</span>
+          <p>Dados</p>
+        </div>
+
+        <div class="linha"></div>
+
+        <div class="passo" data-passo="4">
+          <span>4</span>
+          <p>Confirmar</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="agenda-main">
+
+    <!-- ETAPA 1 - SERVIÇOS -->
+    <section class="agenda-etapa ativa" id="etapaServicos">
+      <div class="agenda-container agenda-lista">
+
+        <h2>Selecione os serviços</h2>
+        <p class="agenda-subtexto">Escolha um ou mais serviços para continuar o agendamento.</p>
+
+        <div class="agenda-servico" data-nome="Corte" data-preco="45" data-tempo="00:30">
+          <div class="servico-img">
+            <img src="servico-01.jpg" alt="Corte" onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');">
+          </div>
+
+          <div class="servico-info">
+            <h3>01 - Corte</h3>
+            <p>Corte masculino feito na máquina e/ou tesoura, com acabamento preciso.</p>
+          </div>
+
+          <div class="servico-acao">
+            <strong>R$ 45,00</strong>
+            <small>00:30</small>
+            <button type="button">Selecionar</button>
+          </div>
+        </div>
+
+        <div class="agenda-servico" data-nome="Corte + sobrancelha" data-preco="55" data-tempo="00:30">
+          <div class="servico-img">
+            <img src="servico-02.jpg" alt="Corte + sobrancelha" onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');">
+          </div>
+
+          <div class="servico-info">
+            <h3>02 - Corte + sobrancelha</h3>
+            <p>Corte completo com sobrancelha para deixar o visual alinhado.</p>
+          </div>
+
+          <div class="servico-acao">
+            <strong>R$ 55,00</strong>
+            <small>00:30</small>
+            <button type="button">Selecionar</button>
+          </div>
+        </div>
+
+        <div class="agenda-servico" data-nome="Corte + barboterapia" data-preco="80" data-tempo="01:00">
+          <div class="servico-img">
+            <img src="servico-03.jpg" alt="Corte + barboterapia" onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');">
+          </div>
+
+          <div class="servico-info">
+            <h3>03 - Corte + barboterapia</h3>
+            <p>Corte, sobrancelha de cortesia e barba com toalha quente e vaporizador de ozônio.</p>
+          </div>
+
+          <div class="servico-acao">
+            <strong>R$ 80,00</strong>
+            <small>01:00</small>
+            <button type="button">Selecionar</button>
+          </div>
+        </div>
+
+        <div class="agenda-servico" data-nome="Corte + barba simples" data-preco="65" data-tempo="00:40">
+          <div class="servico-img">
+            <img src="servico-04.jpg" alt="Corte + barba simples" onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');">
+          </div>
+
+          <div class="servico-info">
+            <h3>04 - Corte + barba simples</h3>
+            <p>Corte na máquina e/ou tesoura com barba simples feita apenas na máquina.</p>
+          </div>
+
+          <div class="servico-acao">
+            <strong>R$ 65,00</strong>
+            <small>00:40</small>
+            <button type="button">Selecionar</button>
+          </div>
+        </div>
+
+        <div class="agenda-servico" data-nome="Barboterapia" data-preco="40" data-tempo="00:30">
+          <div class="servico-img">
+            <img src="servico-05.jpg" alt="Barboterapia" onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');">
+          </div>
+
+          <div class="servico-info">
+            <h3>05 - Barboterapia</h3>
+            <p>Barba com toalha quente, cuidado no detalhe e vaporizador de ozônio.</p>
+          </div>
+
+          <div class="servico-acao">
+            <strong>R$ 40,00</strong>
+            <small>00:30</small>
+            <button type="button">Selecionar</button>
+          </div>
+        </div>
+
+        <div class="agenda-servico" data-nome="Barba simples" data-preco="25" data-tempo="00:20">
+          <div class="servico-img">
+            <img src="servico-06.jpg" alt="Barba simples" onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');">
+          </div>
+
+          <div class="servico-info">
+            <h3>06 - Barba simples</h3>
+            <p>Barba feita apenas na máquina.</p>
+          </div>
+
+          <div class="servico-acao">
+            <strong>R$ 25,00</strong>
+            <small>00:20</small>
+            <button type="button">Selecionar</button>
+          </div>
+        </div>
+
+        <div class="agenda-servico" data-nome="Sobrancelha" data-preco="10" data-tempo="00:05">
+          <div class="servico-img">
+            <img src="servico-07.jpg" alt="Sobrancelha" onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');">
+          </div>
+
+          <div class="servico-info">
+            <h3>07 - Sobrancelha</h3>
+            <p>Feita na navalha, mantendo o desenho natural e alinhado.</p>
+          </div>
+
+          <div class="servico-acao">
+            <strong>R$ 10,00</strong>
+            <small>00:05</small>
+            <button type="button">Selecionar</button>
+          </div>
+        </div>
+
+        <div class="agenda-servico" data-nome="Hairline / pezinho" data-preco="20" data-tempo="00:15">
+          <div class="servico-img">
+            <img src="servico-08.jpg" alt="Hairline / pezinho" onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');">
+          </div>
+
+          <div class="servico-info">
+            <h3>08 - Hairline / pezinho</h3>
+            <p>Higienização e alinhamento do perfil.</p>
+          </div>
+
+          <div class="servico-acao">
+            <strong>R$ 20,00</strong>
+            <small>00:15</small>
+            <button type="button">Selecionar</button>
+          </div>
+        </div>
+
+        <div class="agenda-servico" data-nome="Coloração" data-preco="130" data-tempo="04:00" data-apartir="true">
+          <div class="servico-img">
+            <img src="servico-09.jpg" alt="Coloração" onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');">
+          </div>
+
+          <div class="servico-info">
+            <h3>09 - Coloração</h3>
+            <p>Luzes, cores e trabalhos artísticos como animal print e estilos personalizados.</p>
+          </div>
+
+          <div class="servico-acao">
+            <em>A partir de</em>
+            <strong>R$ 130,00</strong>
+            <small>04:00</small>
+            <button type="button">Selecionar</button>
+          </div>
+        </div>
+
+        <div class="agenda-servico" data-nome="Descoloração" data-preco="120" data-tempo="04:00" data-apartir="true">
+          <div class="servico-img">
+            <img src="servico-10.jpg" alt="Descoloração" onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');">
+          </div>
+
+          <div class="servico-info">
+            <h3>10 - Descoloração</h3>
+            <p>Nevou, descoloração completa e transformação de locs.</p>
+          </div>
+
+          <div class="servico-acao">
+            <em>A partir de</em>
+            <strong>R$ 120,00</strong>
+            <small>04:00</small>
+            <button type="button">Selecionar</button>
+          </div>
+        </div>
+
+        <div class="agenda-servico" data-nome="Hidratação + finalização" data-preco="45" data-tempo="00:30">
+          <div class="servico-img">
+            <img src="servico-11.jpg" alt="Hidratação + finalização" onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');">
+          </div>
+
+          <div class="servico-info">
+            <h3>11 - Hidratação + finalização</h3>
+            <p>Para cabelos ondulados, cacheados e crespos, com shampoo, máscara e finalização.</p>
+          </div>
+
+          <div class="servico-acao">
+            <strong>R$ 45,00</strong>
+            <small>00:30</small>
+            <button type="button">Selecionar</button>
+          </div>
+        </div>
+
+        <div class="agenda-servico" data-nome="Terapia capilar" data-preco="80" data-tempo="01:00" data-apartir="true">
+          <div class="servico-img">
+            <img src="servico-12.jpg" alt="Terapia capilar" onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');">
+          </div>
+
+          <div class="servico-info">
+            <h3>12 - Terapia capilar</h3>
+            <p>Para caspa, dermatite ou fortalecimento capilar.</p>
+          </div>
+
+          <div class="servico-acao">
+            <em>A partir de</em>
+            <strong>R$ 80,00</strong>
+            <small>01:00</small>
+            <button type="button">Selecionar</button>
+          </div>
+        </div>
+
+        <div class="agenda-servico" data-nome="Limpeza de pele" data-preco="80" data-tempo="01:00">
+          <div class="servico-img">
+            <img src="servico-13.jpg" alt="Limpeza de pele" onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');">
+          </div>
+
+          <div class="servico-info">
+            <h3>13 - Limpeza de pele</h3>
+            <p>Limpeza personalizada com toalha quente, massageador e vaporizador de ozônio.</p>
+          </div>
+
+          <div class="servico-acao">
+            <strong>R$ 80,00</strong>
+            <small>01:00</small>
+            <button type="button">Selecionar</button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ETAPA 2 - HORÁRIO -->
+    <section class="agenda-etapa" id="etapaHorario">
+      <div class="agenda-container agenda-card">
+        <h2>Selecione o horário</h2>
+        <p class="agenda-subtexto">Escolha a data e o melhor horário para atendimento.</p>
+
+        <div class="agenda-campo">
+          <label for="data">Data desejada</label>
+          <input type="date" id="data" required>
+        </div>
+
+        <div class="agenda-horarios">
+          <button type="button">09:00</button>
+          <button type="button">09:30</button>
+          <button type="button">10:00</button>
+          <button type="button">10:30</button>
+          <button type="button">11:00</button>
+          <button type="button">11:30</button>
+          <button type="button">13:00</button>
+          <button type="button">13:30</button>
+          <button type="button">14:00</button>
+          <button type="button">14:30</button>
+          <button type="button">15:00</button>
+          <button type="button">15:30</button>
+          <button type="button">16:00</button>
+          <button type="button">16:30</button>
+          <button type="button">17:00</button>
+          <button type="button">17:30</button>
+          <button type="button">18:00</button>
+          <button type="button">18:30</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ETAPA 3 - DADOS -->
+    <section class="agenda-etapa" id="etapaDados">
+      <div class="agenda-container agenda-card">
+        <h2>Seus dados</h2>
+        <p class="agenda-subtexto">Informe seus dados para o Guapo confirmar o agendamento.</p>
+
+        <div class="agenda-campo">
+          <label for="nome">Nome completo</label>
+          <input type="text" id="nome" placeholder="Digite seu nome">
+        </div>
+
+        <div class="agenda-campo">
+          <label for="telefone">Telefone para contato</label>
+          <input type="tel" id="telefone" placeholder="Ex: 11999999999">
+        </div>
+
+        <div class="agenda-campo">
+          <label for="emailCliente">E-mail, se tiver</label>
+          <input type="email" id="emailCliente" placeholder="seuemail@email.com">
+        </div>
+
+        <div class="agenda-campo">
+          <label for="observacao">Observação</label>
+          <textarea id="observacao" rows="4" placeholder="Ex: primeira vez, cabelo cacheado, quero corte e barba..."></textarea>
+        </div>
+      </div>
+    </section>
+
+    <!-- ETAPA 4 - CONFIRMAR -->
+    <section class="agenda-etapa" id="etapaConfirmar">
+      <div class="agenda-container agenda-card">
+        <h2>Confirmar solicitação</h2>
+        <p class="agenda-subtexto">Confira as informações antes de enviar.</p>
+
+        <div class="agenda-resumo-final" id="resumoFinal"></div>
+
+        <p id="mensagemStatus" class="mensagem-status"></p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="agenda-footer-fixo">
+    <div class="agenda-container agenda-footer-conteudo">
+      <div>
+        <strong id="resumoQuantidade">Nenhum serviço selecionado</strong>
+        <p id="resumoValor">Selecione um serviço para continuar</p>
+      </div>
+
+      <div class="agenda-botoes">
+        <button type="button" id="btnVoltar" class="btn-voltar">Voltar</button>
+        <button type="button" id="btnProximo" class="btn-proximo">Próximo</button>
+      </div>
+    </div>
+  </footer>
+
+  <script src="agendamento.js"></script>
+</body>
+</html>
