@@ -2606,32 +2606,6 @@ footer {
   color: #d4a852;
 }
 
-.destaque-link {
-  display: inline-block;
-  background: #d4a852;
-  color: #111;
-  padding: 10px 18px;
-  border-radius: 999px;
-  font-weight: 700;
-}
-
-.destaque-link:hover {
-  background: #e2b866;
-  color: #111;
-}
-.link-esqueceu-senha {
-  display: inline-block;
-  margin-top: -4px;
-  margin-bottom: 12px;
-  color: #d4a852;
-  font-size: 14px;
-  text-decoration: none;
-  text-align: right;
-}
-
-.link-esqueceu-senha:hover {
-  text-decoration: underline;
-}
 .login-links {
   margin-top: 22px;
   display: flex;
@@ -2645,6 +2619,9 @@ footer {
   text-decoration: none;
   font-size: 16px;
   transition: 0.3s ease;
+  background: none;
+  padding: 0;
+  border-radius: 0;
 }
 
 .login-voltar:hover {
@@ -2652,10 +2629,13 @@ footer {
 }
 
 .destaque-link {
-  color: #d4a852;
-  font-weight: 600;
+  color: #ffffff;
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  font-weight: 400;
 }
 
 .destaque-link:hover {
-  color: #ffffff;
+  color: #d4a852;
 }
