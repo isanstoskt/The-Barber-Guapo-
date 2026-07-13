@@ -19,53 +19,37 @@ const resumoFinal = document.getElementById("resumoFinal");
 const mensagemStatus = document.getElementById("mensagemStatus");
 
 const campoData = document.getElementById("data");
+const inputHorario = document.getElementById("horario");
+const datasCarrossel = document.getElementById("datasCarrossel");
+const horariosGrid = document.getElementById("horariosGrid");
 
-if (campoData) {
-  const hoje = new Date().toISOString().split("T")[0];
-  campoData.setAttribute("min", hoje);
-}
+const horariosBase = [
+  "09:00",
+  "09:30",
+  "10:00",
+  "10:30",
+  "11:00",
+  "11:30",
+  "13:00",
+  "13:30",
+  "14:00",
+  "14:30",
+  "15:00",
+  "15:30",
+  "16:00",
+  "16:30",
+  "17:00",
+  "17:30",
+  "18:00",
+  "18:30"
+];
 
-async function carregarHorariosOcupados() {
-  if (!campoData.value) {
-    return;
-  }
+const diasSemana = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
-  try {
-    const resposta = await fetch(`http://localhost:3000/api/horarios-ocupados?data=${campoData.value}`);
-    const dados = await resposta.json();
-
-    const horariosOcupados = dados.horariosOcupados || [];
-
-    document.querySelectorAll(".agenda-horarios button").forEach(function (botao) {
-      const horarioBotao = botao.textContent.trim();
-
-      botao.disabled = false;
-      botao.classList.remove("ocupado");
-
-      if (horariosOcupados.includes(horarioBotao)) {
-        botao.disabled = true;
-        botao.classList.add("ocupado");
-        botao.textContent = `${horarioBotao} - Ocupado`;
-      }
-    });
-
-  } catch (erro) {
-    console.error("Erro ao carregar horários ocupados:", erro);
-  }
-}
-
-if (campoData) {
-  campoData.addEventListener("change", function () {
-    horarioSelecionado = "";
-
-    document.querySelectorAll(".agenda-horarios button").forEach(function (botao) {
-      botao.classList.remove("selecionado");
-    });
-
-    carregarHorariosOcupados();
-    validarEtapa();
-  });
-}
+const meses = [
+  "jan", "fev", "mar", "abr", "mai", "jun",
+  "jul", "ago", "set", "out", "nov", "dez"
+];
 
 function formatarMoeda(valor) {
   return valor.toLocaleString("pt-BR", {
@@ -74,12 +58,161 @@ function formatarMoeda(valor) {
   });
 }
 
+function formatarDataISO(data) {
+  const ano = data.getFullYear();
+  const mes = String(data.getMonth() + 1).padStart(2, "0");
+  const dia = String(data.getDate()).padStart(2, "0");
+
+  return `${ano}-${mes}-${dia}`;
+}
+
+function formatarDataBR(dataISO) {
+  if (!dataISO) {
+    return "";
+  }
+
+  const partes = dataISO.split("-");
+  return `${partes[2]}/${partes[1]}/${partes[0]}`;
+}
+
+function criarDatasCarrossel() {
+  if (!datasCarrossel || !horariosGrid || !campoData) {
+    return;
+  }
+
+  datasCarrossel.innerHTML = "";
+
+  const hoje = new Date();
+
+  for (let i = 0; i < 21; i++) {
+    const data = new Date();
+    data.setDate(hoje.getDate() + i);
+
+    const dataISO = formatarDataISO(data);
+    const diaSemana = diasSemana[data.getDay()];
+    const dia = data.getDate();
+    const mes = meses[data.getMonth()];
+    const ano = String(data.getFullYear()).slice(2);
+
+    const botao = document.createElement("button");
+    botao.type = "button";
+    botao.classList.add("data-card");
+    botao.dataset.data = dataISO;
+
+    botao.innerHTML = `
+      <span>${diaSemana}</span>
+      <strong>${dia}</strong>
+      <small>${mes}/${ano}</small>
+    `;
+
+    botao.addEventListener("click", function () {
+      selecionarDataCarrossel(dataISO, botao);
+    });
+
+    datasCarrossel.appendChild(botao);
+  }
+
+  const primeiraData = datasCarrossel.querySelector(".data-card");
+
+  if (primeiraData) {
+    primeiraData.click();
+  }
+}
+
+async function selecionarDataCarrossel(dataISO, botaoSelecionado) {
+  campoData.value = dataISO;
+  horarioSelecionado = "";
+
+  if (inputHorario) {
+    inputHorario.value = "";
+  }
+
+  document.querySelectorAll(".data-card").forEach(function (botao) {
+    botao.classList.remove("ativo");
+  });
+
+  botaoSelecionado.classList.add("ativo");
+
+  await carregarHorariosDisponiveis(dataISO);
+  validarEtapa();
+}
+
+async function carregarHorariosDisponiveis(dataISO) {
+  if (!horariosGrid) {
+    return;
+  }
+
+  horariosGrid.innerHTML = "<p class='horarios-msg'>Carregando horários...</p>";
+
+  try {
+    const resposta = await fetch(`/api/horarios-ocupados?data=${dataISO}`);
+    const dados = await resposta.json();
+
+    const horariosOcupados = dados.horariosOcupados || [];
+
+    const horariosDisponiveis = horariosBase.filter(function (horario) {
+      return !horariosOcupados.includes(horario);
+    });
+
+    if (horariosDisponiveis.length === 0) {
+      horariosGrid.innerHTML = `
+        <p class="horarios-msg">
+          Nenhum horário disponível para este dia.
+        </p>
+      `;
+      return;
+    }
+
+    horariosGrid.innerHTML = "";
+
+    horariosDisponiveis.forEach(function (horario) {
+      const botao = document.createElement("button");
+      botao.type = "button";
+      botao.classList.add("horario-card");
+      botao.textContent = horario;
+
+      botao.addEventListener("click", function () {
+        selecionarHorarioCarrossel(horario, botao);
+      });
+
+      horariosGrid.appendChild(botao);
+    });
+
+  } catch (erro) {
+    console.error("Erro ao carregar horários:", erro);
+
+    horariosGrid.innerHTML = `
+      <p class="horarios-msg">
+        Erro ao carregar horários disponíveis.
+      </p>
+    `;
+  }
+}
+
+function selecionarHorarioCarrossel(horario, botaoSelecionado) {
+  horarioSelecionado = horario;
+
+  if (inputHorario) {
+    inputHorario.value = horario;
+  }
+
+  document.querySelectorAll(".horario-card").forEach(function (botao) {
+    botao.classList.remove("ativo");
+  });
+
+  botaoSelecionado.classList.add("ativo");
+
+  validarEtapa();
+}
+
 function atualizarPassos() {
   document.querySelectorAll(".agenda-etapa").forEach(function (etapa) {
     etapa.classList.remove("ativa");
   });
 
-  etapas[etapaAtual].classList.add("ativa");
+  if (etapas[etapaAtual]) {
+    etapas[etapaAtual].classList.add("ativa");
+  }
 
   document.querySelectorAll(".passo").forEach(function (passo) {
     const numeroPasso = Number(passo.dataset.passo);
@@ -166,10 +299,10 @@ document.querySelectorAll(".agenda-servico").forEach(function (card) {
       botao.textContent = "Selecionar";
     } else {
       servicosSelecionados.push({
-        nome,
-        preco,
-        tempo,
-        apartir
+        nome: nome,
+        preco: preco,
+        tempo: tempo,
+        apartir: apartir
       });
 
       card.classList.add("selecionado");
@@ -181,20 +314,7 @@ document.querySelectorAll(".agenda-servico").forEach(function (card) {
   });
 });
 
-document.querySelectorAll(".agenda-horarios button").forEach(function (botao) {
-  botao.addEventListener("click", function () {
-    document.querySelectorAll(".agenda-horarios button").forEach(function (item) {
-      item.classList.remove("selecionado");
-    });
-
-    botao.classList.add("selecionado");
-    horarioSelecionado = botao.textContent.trim();
-
-    validarEtapa();
-  });
-});
-
-["data", "nome", "telefone", "emailCliente", "observacao"].forEach(function (id) {
+["nome", "telefone", "emailCliente", "observacao"].forEach(function (id) {
   const campo = document.getElementById(id);
 
   if (campo) {
@@ -266,7 +386,7 @@ function montarResumoFinal() {
     <p><strong>Nome:</strong> ${nome}</p>
     <p><strong>Telefone:</strong> ${telefone}</p>
     <p><strong>E-mail:</strong> ${emailCliente || "Não informado"}</p>
-    <p><strong>Data:</strong> ${campoData.value}</p>
+    <p><strong>Data:</strong> ${formatarDataBR(campoData.value)}</p>
     <p><strong>Horário:</strong> ${horarioSelecionado}</p>
     <p><strong>Serviços:</strong></p>
     <ul>${listaServicos}</ul>
@@ -338,3 +458,7 @@ async function enviarAgendamento() {
     btnProximo.disabled = false;
   }
 }
+
+criarDatasCarrossel();
+atualizarResumo();
+atualizarPassos();

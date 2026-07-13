@@ -75,8 +75,8 @@
           </div>
 
           <div class="servico-acao">
-            <strong>R$ 45,00</strong>
-            <small>00:30</small>
+            <strong>R$ 50,00</strong>
+            <small>01:00</small>
             <button type="button">Selecionar</button>
           </div>
         </div>
@@ -92,8 +92,8 @@
           </div>
 
           <div class="servico-acao">
-            <strong>R$ 55,00</strong>
-            <small>00:30</small>
+            <strong>R$ 60,00</strong>
+            <small>01:00</small>
             <button type="button">Selecionar</button>
           </div>
         </div>
@@ -109,8 +109,8 @@
           </div>
 
           <div class="servico-acao">
-            <strong>R$ 80,00</strong>
-            <small>01:00</small>
+            <strong>R$ 85,00</strong>
+            <small>01:30</small>
             <button type="button">Selecionar</button>
           </div>
         </div>
@@ -126,8 +126,8 @@
           </div>
 
           <div class="servico-acao">
-            <strong>R$ 65,00</strong>
-            <small>00:40</small>
+            <strong>R$ 70,00</strong>
+            <small>01:00</small>
             <button type="button">Selecionar</button>
           </div>
         </div>
@@ -144,7 +144,7 @@
 
           <div class="servico-acao">
             <strong>R$ 40,00</strong>
-            <small>00:30</small>
+            <small>01:00</small>
             <button type="button">Selecionar</button>
           </div>
         </div>
@@ -282,48 +282,38 @@
           </div>
 
           <div class="servico-acao">
-            <strong>R$ 80,00</strong>
-            <small>01:00</small>
+            <strong>R$ 35,00</strong>
+            <small>00:30</small>
             <button type="button">Selecionar</button>
           </div>
         </div>
 
       </div>
     </section>
+    
+<!-- ETAPA 2 - HORÁRIO -->
+<section class="agenda-etapa" id="etapaHorario">
+  <div class="agenda-container agenda-card">
+    <h2>Selecione o horário</h2>
+    <p class="agenda-subtexto">Escolha a data e o melhor horário para atendimento.</p>
 
-    <!-- ETAPA 2 - HORÁRIO -->
-    <section class="agenda-etapa" id="etapaHorario">
-      <div class="agenda-container agenda-card">
-        <h2>Selecione o horário</h2>
-        <p class="agenda-subtexto">Escolha a data e o melhor horário para atendimento.</p>
+    <div class="agenda-bloco">
+      <label for="data">Escolha o dia</label>
 
-        <div class="agenda-campo">
-          <label for="data">Data desejada</label>
-          <input type="date" id="data" required>
-        </div>
+      <div class="datas-carrossel" id="datasCarrossel"></div>
 
-        <div class="agenda-horarios">
-          <button type="button">09:00</button>
-          <button type="button">09:30</button>
-          <button type="button">10:00</button>
-          <button type="button">10:30</button>
-          <button type="button">11:00</button>
-          <button type="button">11:30</button>
-          <button type="button">13:00</button>
-          <button type="button">13:30</button>
-          <button type="button">14:00</button>
-          <button type="button">14:30</button>
-          <button type="button">15:00</button>
-          <button type="button">15:30</button>
-          <button type="button">16:00</button>
-          <button type="button">16:30</button>
-          <button type="button">17:00</button>
-          <button type="button">17:30</button>
-          <button type="button">18:00</button>
-          <button type="button">18:30</button>
-        </div>
-      </div>
-    </section>
+      <input type="hidden" id="data" required>
+    </div>
+
+    <div class="agenda-bloco">
+      <label for="horario">Escolha o horário</label>
+
+      <div class="agenda-horarios horarios-grid" id="horariosGrid"></div>
+
+      <input type="hidden" id="horario" required>
+    </div>
+  </div>
+</section>
 
     <!-- ETAPA 3 - DADOS -->
     <section class="agenda-etapa" id="etapaDados">

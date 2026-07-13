@@ -2329,3 +2329,112 @@ footer {
 .login-voltar:hover {
   color: #d4af37;
 }
+
+/* ========================= */
+/* CARROSSEL DE DATAS E HORÁRIOS */
+/* ========================= */
+
+.agenda-bloco {
+  margin-top: 28px;
+}
+
+.agenda-bloco label {
+  display: block;
+  margin-bottom: 14px;
+  font-weight: 700;
+  color: #111111;
+}
+
+.datas-carrossel {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 4px 4px 14px;
+  scroll-snap-type: x mandatory;
+}
+
+.datas-carrossel::-webkit-scrollbar {
+  height: 6px;
+}
+
+.datas-carrossel::-webkit-scrollbar-thumb {
+  background: #d4af37;
+  border-radius: 999px;
+}
+
+.data-card {
+  min-width: 82px;
+  height: 96px;
+  border: 1px solid rgba(212, 175, 55, 0.65);
+  background: #ffffff;
+  color: #111111;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  scroll-snap-align: start;
+  transition: 0.25s;
+  font-family: inherit;
+}
+
+.data-card span {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.data-card strong {
+  font-size: 20px;
+  margin: 8px 0;
+}
+
+.data-card small {
+  font-size: 13px;
+  color: #777777;
+}
+
+.data-card:hover,
+.data-card.ativo {
+  background: #111111;
+  color: #d4af37;
+  border-color: #d4af37;
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.18);
+}
+
+.data-card.ativo small,
+.data-card:hover small {
+  color: #ffffff;
+}
+
+.horarios-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.horario-card {
+  border: 1px solid rgba(212, 175, 55, 0.65);
+  background: #111111;
+  color: #ffffff;
+  border-radius: 999px;
+  padding: 12px 18px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.25s;
+  font-family: inherit;
+}
+
+.horario-card:hover,
+.horario-card.ativo {
+  background: #d4af37;
+  color: #080808;
+}
+
+.horarios-msg {
+  color: #333333;
+  background: #f3f3f3;
+  padding: 16px;
+  border-radius: 12px;
+}
