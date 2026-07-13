@@ -27,13 +27,13 @@
       </button>
 
       <nav>
-  <a href="#inicio">Início</a>
-  <a href="#servicos">Serviços</a>
-  <a href="#galeria">Galeria</a>
-  <a href="#sobre">Sobre</a>
-  <a href="#" onclick="abrirAgendamento()">Agendar</a>
-  <a href="login.html" id="linkLogin">Login</a>
-</nav>
+        <a href="#inicio">Início</a>
+        <a href="#servicos">Serviços</a>
+        <a href="#galeria">Galeria</a>
+        <a href="#sobre">Sobre</a>
+        <a href="agendamento.html" id="linkAgendarMenu">Agendar</a>
+        <a href="login.html" id="linkLogin">Login</a>
+      </nav>
     </div>
   </header>
 
@@ -51,7 +51,7 @@
         </p>
 
         <div class="botoes">
-          <a class="botao principal" href="#" onclick="abrirAgendamento()">
+          <a class="botao principal link-agendamento" href="agendamento.html">
             Agendar online
           </a>
         </div>
@@ -352,7 +352,7 @@
   </div>
   
 <div class="botoes">
-  <a class="botao principal" href="#" onclick="abrirAgendamento()">
+  <a class="botao principal link-agendamento" href="agendamento.html">
     Agendar online
   </a>
 </div>
@@ -398,15 +398,51 @@
       </div>
     </div>
   </div>
-
   <script src="auth.js"></script>
+  <script src="script.js"></script>
 
   <script>
-    function abrirAgendamento() {
-      const usuarioLogado = pegarUsuarioLogado();
+    function obterUsuarioLogadoSeguro() {
+      if (typeof pegarUsuarioLogado !== "function") {
+        return null;
+      }
+
+      return pegarUsuarioLogado();
+    }
+
+    function abrirAgendamento(event) {
+      if (event) {
+        event.preventDefault();
+      }
+
+      const usuarioLogado = obterUsuarioLogadoSeguro();
 
       if (!usuarioLogado) {
         localStorage.setItem("guapo_redirect_apos_login", "agendamento.html");
+        window.location.href = "login.html";
+        return;
+      }
+
+      if (usuarioLogado.tipo === "barbeiro") {
+        localStorage.removeItem("guapo_redirect_apos_login");
+        window.location.href = "painel.html";
+        return;
+      }
+
+      localStorage.removeItem("guapo_redirect_apos_login");
+      window.location.href = "agendamento.html";
+    }
+
+    function irParaAreaDoUsuario(event) {
+      if (event) {
+        event.preventDefault();
+      }
+
+      localStorage.removeItem("guapo_redirect_apos_login");
+
+      const usuarioLogado = obterUsuarioLogadoSeguro();
+
+      if (!usuarioLogado) {
         window.location.href = "login.html";
         return;
       }
@@ -416,14 +452,16 @@
         return;
       }
 
-      window.location.href = "agendamento.html";
+      window.location.href = "cliente.html";
     }
 
     function atualizarLinkLogin() {
-      const usuarioLogado = pegarUsuarioLogado();
+      const usuarioLogado = obterUsuarioLogadoSeguro();
       const linkLogin = document.getElementById("linkLogin");
 
       if (!linkLogin) return;
+
+      linkLogin.onclick = irParaAreaDoUsuario;
 
       if (!usuarioLogado) {
         linkLogin.textContent = "Login";
@@ -434,15 +472,28 @@
       if (usuarioLogado.tipo === "barbeiro") {
         linkLogin.textContent = "Painel";
         linkLogin.href = "painel.html";
-      } else {
-        linkLogin.textContent = "Minha área";
-        linkLogin.href = "cliente.html";
+        return;
       }
+
+      linkLogin.textContent = "Minha área";
+      linkLogin.href = "cliente.html";
+    }
+
+    function configurarLinksDeAgendamento() {
+      const linkAgendarMenu = document.getElementById("linkAgendarMenu");
+      const botoesAgendamento = document.querySelectorAll(".link-agendamento");
+
+      if (linkAgendarMenu) {
+        linkAgendarMenu.addEventListener("click", abrirAgendamento);
+      }
+
+      botoesAgendamento.forEach(function (botao) {
+        botao.addEventListener("click", abrirAgendamento);
+      });
     }
 
     atualizarLinkLogin();
+    configurarLinksDeAgendamento();
   </script>
-
-  <script src="script.js"></script>
 </body>
 </html>
