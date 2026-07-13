@@ -455,45 +455,58 @@
       window.location.href = "cliente.html";
     }
 
-    function atualizarLinkLogin() {
-      const usuarioLogado = obterUsuarioLogadoSeguro();
-      const linkLogin = document.getElementById("linkLogin");
+    <script>
+  function abrirAgendamento() {
+    const usuarioLogado = pegarUsuarioLogado();
 
-      if (!linkLogin) return;
+    if (!usuarioLogado) {
+      localStorage.setItem("guapo_redirect_apos_login", "agendamento.html");
+      window.location.href = "login.html";
+      return;
+    }
 
-      linkLogin.onclick = irParaAreaDoUsuario;
+    if (usuarioLogado.tipo === "barbeiro") {
+      window.location.href = "painel.html";
+      return;
+    }
 
-      if (!usuarioLogado) {
-        linkLogin.textContent = "Login";
-        linkLogin.href = "login.html";
-        return;
-      }
+    window.location.href = "agendamento.html";
+  }
 
-      if (usuarioLogado.tipo === "barbeiro") {
-        linkLogin.textContent = "Painel";
-        linkLogin.href = "painel.html";
-        return;
-      }
+  function abrirLoginPainel(event) {
+    event.preventDefault();
 
+    localStorage.removeItem("guapo_usuario_logado");
+    localStorage.removeItem("guapo_redirect_apos_login");
+
+    window.location.href = "login.html";
+  }
+
+  function atualizarLinkLogin() {
+    const usuarioLogado = pegarUsuarioLogado();
+    const linkLogin = document.getElementById("linkLogin");
+
+    if (!linkLogin) return;
+
+    if (!usuarioLogado) {
+      linkLogin.textContent = "Login";
+      linkLogin.href = "login.html";
+      return;
+    }
+
+    if (usuarioLogado.tipo === "barbeiro") {
+      linkLogin.textContent = "Painel";
+      linkLogin.href = "login.html";
+      linkLogin.onclick = abrirLoginPainel;
+      return;
+    }
+
+    if (usuarioLogado.tipo === "cliente") {
       linkLogin.textContent = "Minha área";
       linkLogin.href = "cliente.html";
+      return;
     }
+  }
 
-    function configurarLinksDeAgendamento() {
-      const linkAgendarMenu = document.getElementById("linkAgendarMenu");
-      const botoesAgendamento = document.querySelectorAll(".link-agendamento");
-
-      if (linkAgendarMenu) {
-        linkAgendarMenu.addEventListener("click", abrirAgendamento);
-      }
-
-      botoesAgendamento.forEach(function (botao) {
-        botao.addEventListener("click", abrirAgendamento);
-      });
-    }
-
-    atualizarLinkLogin();
-    configurarLinksDeAgendamento();
-  </script>
-</body>
-</html>
+  atualizarLinkLogin();
+</script>
