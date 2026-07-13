@@ -1,0 +1,103 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Recuperar senha - Guapo The Barber</title>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="admin-body">
+
+  <main class="login-admin-container">
+    <section class="login-admin-card">
+      <div class="login-admin-logo">
+        <h1>Guapo</h1>
+        <span>The Barber</span>
+      </div>
+
+      <p class="admin-tag">Recuperar acesso</p>
+      <h2>Esqueci minha senha</h2>
+
+      <p class="login-admin-texto">
+        Informe o e-mail cadastrado e crie uma nova senha para acessar sua conta.
+      </p>
+
+      <form id="formRecuperarSenha" class="login-admin-form">
+        <label for="email">E-mail cadastrado</label>
+        <input 
+          type="email" 
+          id="email" 
+          placeholder="Digite seu e-mail" 
+          required 
+        />
+
+        <label for="novaSenha">Nova senha</label>
+        <input 
+          type="password" 
+          id="novaSenha" 
+          placeholder="Digite uma nova senha" 
+          required 
+        />
+
+        <label for="confirmarSenha">Confirmar nova senha</label>
+        <input 
+          type="password" 
+          id="confirmarSenha" 
+          placeholder="Confirme a nova senha" 
+          required 
+        />
+
+        <button type="submit">Redefinir senha</button>
+      </form>
+
+      <p id="mensagemRecuperar" class="mensagem-login"></p>
+
+      <div class="login-links">
+        <a href="login.html" class="login-voltar destaque-link">Voltar para o login</a>
+        <a href="index.html" class="login-voltar">Voltar para o site</a>
+      </div>
+    </section>
+  </main>
+
+  <script src="auth.js"></script>
+
+  <script>
+    const formRecuperarSenha = document.getElementById("formRecuperarSenha");
+    const mensagemRecuperar = document.getElementById("mensagemRecuperar");
+
+    formRecuperarSenha.addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      const email = document.getElementById("email").value.trim();
+      const novaSenha = document.getElementById("novaSenha").value.trim();
+      const confirmarSenha = document.getElementById("confirmarSenha").value.trim();
+
+      mensagemRecuperar.classList.remove("erro");
+
+      if (novaSenha !== confirmarSenha) {
+        mensagemRecuperar.textContent = "As senhas não conferem.";
+        mensagemRecuperar.classList.add("erro");
+        return;
+      }
+
+      const retorno = redefinirSenha(email, novaSenha);
+
+      if (!retorno.sucesso) {
+        mensagemRecuperar.textContent = retorno.mensagem;
+        mensagemRecuperar.classList.add("erro");
+        return;
+      }
+
+      mensagemRecuperar.textContent = "Senha redefinida com sucesso! Redirecionando para o login...";
+
+      setTimeout(function () {
+        window.location.href = "login.html";
+      }, 1800);
+    });
+  </script>
+
+</body>
+</html>

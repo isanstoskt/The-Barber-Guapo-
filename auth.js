@@ -94,3 +94,31 @@ function sair() {
 }
 
 criarUsuarioPadraoBarbeiro();
+
+function redefinirSenha(email, novaSenha) {
+  const usuarios = carregarUsuarios();
+
+  const usuarioIndex = usuarios.findIndex(usuario => usuario.email === email);
+
+  if (usuarioIndex === -1) {
+    return {
+      sucesso: false,
+      mensagem: "Nenhuma conta encontrada com este e-mail."
+    };
+  }
+
+  if (novaSenha.length < 6) {
+    return {
+      sucesso: false,
+      mensagem: "A nova senha precisa ter pelo menos 6 caracteres."
+    };
+  }
+
+  usuarios[usuarioIndex].senha = novaSenha;
+  salvarUsuarios(usuarios);
+
+  return {
+    sucesso: true,
+    mensagem: "Senha redefinida com sucesso!"
+  };
+}
