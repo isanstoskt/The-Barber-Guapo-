@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Área do Cliente - Guapo The Barber</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="admin-body">
+
+  <main class="cliente-container">
+    <section class="cliente-card">
+
+      <header class="cliente-header">
+        <div class="login-admin-logo">
+          <h1>Guapo</h1>
+          <span>The Barber</span>
+        </div>
+
+        <button class="btn-sair" onclick="sair()">Sair</button>
+      </header>
+
+      <div class="cliente-boas-vindas">
+        <p class="admin-tag">Área do cliente</p>
+        <h2 id="nomeCliente">Olá, cliente</h2>
+        <p>Acompanhe seu próximo corte, histórico e novos agendamentos.</p>
+      </div>
+
+      <section class="cliente-grid">
+
+        <div class="cliente-box destaque">
+          <h3>Próximo corte</h3>
+
+          <div id="proximoCorte">
+            <p class="cliente-vazio">Você ainda não possui corte agendado.</p>
+          </div>
+
+          <a href="agendamento.html" class="btn-cliente">Agendar novo corte</a>
+        </div>
+
+        <div class="cliente-box">
+          <h3>Meus dados</h3>
+
+          <p><strong>Nome:</strong> <span id="dadoNome"></span></p>
+          <p><strong>E-mail:</strong> <span id="dadoEmail"></span></p>
+          <p><strong>Telefone:</strong> <span id="dadoTelefone"></span></p>
+        </div>
+
+      </section>
+
+      <section class="cliente-box historico-box">
+        <h3>Histórico de cortes</h3>
+
+        <div id="historicoCortes">
+          <p class="cliente-vazio">Nenhum histórico encontrado até o momento.</p>
+        </div>
+      </section>
+
+      <a href="index.html" class="login-voltar">Voltar para o site</a>
+
+    </section>
+  </main>
+
+  <script src="auth.js"></script>
+
+  <script>
+    const usuarioLogado = pegarUsuarioLogado();
+
+    if (!usuarioLogado) {
+      window.location.href = "login.html";
+    }
+
+    if (usuarioLogado && usuarioLogado.tipo === "barbeiro") {
+      window.location.href = "painel.html";
+    }
+
+    const nomeCliente = document.getElementById("nomeCliente");
+    const dadoNome = document.getElementById("dadoNome");
+    const dadoEmail = document.getElementById("dadoEmail");
+    const dadoTelefone = document.getElementById("dadoTelefone");
+    const proximoCorte = document.getElementById("proximoCorte");
+    const historicoCortes = document.getElementById("historicoCortes");
+
+    nomeCliente.textContent = `Olá, ${usuarioLogado.nome}`;
+    dadoNome.textContent = usuarioLogado.nome;
+    dadoEmail.textContent = usuarioLogado.email;
+    dadoTelefone.textContent = usuarioLogado.telefone;
+
+    const AGENDAMENTOS_KEY = "guapo_agendamentos";
+
+    function carregarAgendamentos() {
+      const dados = localStorage.getItem(AGENDAMENTOS_KEY);
+      return dados ? JSON.parse(dados) : [];
+    }
+
+    function formatarData(data) {
+      if (!data) return "";
+
+      const partes = data.split("-");
+      if (partes.length !== 3) return data;
+
+      return `${partes[2]}/${partes[1]}/${partes[0]}`;
+    }
+
+    function carregarAreaCliente() {
+      const todosAgendamentos = carregarAgendamentos();
+
+      const agendamentosCliente = todosAgendamentos.filter(agendamento => {
+        return (
+          agendamento.clienteId === usuarioLogado.id ||
+          agendamento.email === usuarioLogado.email ||
+          agendamento.telefone === usuarioLogado.telefone
+        );
+      });
+
+      const hoje = new Date();
+      hoje.setHours(0, 0, 0, 0);
+
+      const futuros = agendamentosCliente
+        .filter(agendamento => {
+          if (!agendamento.data) return false;
+
+          const dataAgendamento = new Date(agendamento.data + "T00:00:00");
+          return dataAgendamento >= hoje && agendamento.status !== "cancelado";
+        })
+        .sort((a, b) => {
+          const dataA = new Date(`${a.data}T${a.horario || "00:00"}`);
+          const dataB = new Date(`${b.data}T${b.horario || "00:00"}`);
+          return dataA - dataB;
+        });
+
+      const historico = agendamentosCliente
+        .filter(agendamento => {
+          if (!agendamento.data) return false;
+
+          const dataAgendamento = new Date(agendamento.data + "T00:00:00");
+          return dataAgendamento < hoje || agendamento.status === "concluido" || agendamento.status === "cancelado";
+        })
+        .sort((a, b) => {
+          const dataA = new Date(`${a.data}T${a.horario || "00:00"}`);
+          const dataB = new Date(`${b.data}T${b.horario || "00:00"}`);
+          return dataB - dataA;
+        });
+
+      if (futuros.length > 0) {
+        const proximo = futuros[0];
+
+        proximoCorte.innerHTML = `
+          <div class="corte-card">
+            <p><strong>Serviço:</strong> ${proximo.servico || "Corte"}</p>
+            <p><strong>Data:</strong> ${formatarData(proximo.data)}</p>
+            <p><strong>Horário:</strong> ${proximo.horario || "Não informado"}</p>
+            <p><strong>Status:</strong> ${proximo.status || "pendente"}</p>
+          </div>
+        `;
+      }
+
+      if (historico.length > 0) {
+        historicoCortes.innerHTML = historico.map(agendamento => {
+          return `
+            <div class="historico-item">
+              <p><strong>${agendamento.servico || "Corte"}</strong></p>
+              <p>${formatarData(agendamento.data)} às ${agendamento.horario || "horário não informado"}</p>
+              <span>Status: ${agendamento.status || "pendente"}</span>
+            </div>
+          `;
+        }).join("");
+      }
+    }
+
+    carregarAreaCliente();
+  </script>
+
+</body>
+</html>

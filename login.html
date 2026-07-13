@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login Administrativo - Guapo The Barber</title>
+  <title>Login - Guapo The Barber</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body class="admin-body">
@@ -15,61 +15,68 @@
         <span>The Barber</span>
       </div>
 
-      <p class="admin-tag">Área administrativa</p>
-      <h2>Acessar painel</h2>
-      <p class="login-admin-texto">Digite o usuário e senha para gerenciar os agendamentos.</p>
+      <p class="admin-tag">Área de acesso</p>
+      <h2>Entrar na conta</h2>
+      <p class="login-admin-texto">
+        Acesse sua conta para agendar, acompanhar seus cortes ou gerenciar os horários.
+      </p>
 
-      <form id="formLoginAdmin" class="login-admin-form">
-        <label for="usuario">Usuário</label>
-        <input type="text" id="usuario" placeholder="Digite o usuário" required />
+      <form id="formLogin" class="login-admin-form">
+        <label for="email">E-mail</label>
+        <input 
+          type="email" 
+          id="email" 
+          placeholder="Digite seu e-mail" 
+          required 
+        />
 
         <label for="senha">Senha</label>
-        <input type="password" id="senha" placeholder="Digite a senha" required />
+        <input 
+          type="password" 
+          id="senha" 
+          placeholder="Digite sua senha" 
+          required 
+        />
 
-        <button type="submit">Entrar no painel</button>
+        <button type="submit">Entrar</button>
       </form>
 
       <p id="mensagemLogin" class="mensagem-login"></p>
 
+      <a href="cadastro.html" class="login-voltar">Criar conta</a>
       <a href="index.html" class="login-voltar">Voltar para o site</a>
     </section>
   </main>
 
+  <script src="auth.js"></script>
+
   <script>
-    const formLoginAdmin = document.getElementById("formLoginAdmin");
+    const formLogin = document.getElementById("formLogin");
     const mensagemLogin = document.getElementById("mensagemLogin");
 
-    formLoginAdmin.addEventListener("submit", async function (event) {
+    formLogin.addEventListener("submit", function (event) {
       event.preventDefault();
 
-      const usuario = document.getElementById("usuario").value;
-      const senha = document.getElementById("senha").value;
+      const email = document.getElementById("email").value.trim();
+      const senha = document.getElementById("senha").value.trim();
 
-      try {
-        const resposta = await fetch("/api/login", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            usuario: usuario,
-            senha: senha
-          })
-        });
+      const retorno = fazerLogin(email, senha);
 
-        const retorno = await resposta.json();
-
-        if (!resposta.ok) {
-          mensagemLogin.textContent = retorno.erro || "Usuário ou senha inválidos.";
-          mensagemLogin.classList.add("erro");
-          return;
-        }
-
-        window.location.href = "/painel.html";
-
-      } catch (erro) {
-        mensagemLogin.textContent = "Erro ao conectar com o servidor.";
+      if (!retorno.sucesso) {
+        mensagemLogin.textContent = retorno.mensagem;
         mensagemLogin.classList.add("erro");
+        return;
+      }
+
+      mensagemLogin.textContent = "";
+      mensagemLogin.classList.remove("erro");
+
+      const usuario = retorno.usuario;
+
+      if (usuario.tipo === "barbeiro") {
+        window.location.href = "painel.html";
+      } else {
+        window.location.href = "cliente.html";
       }
     });
   </script>

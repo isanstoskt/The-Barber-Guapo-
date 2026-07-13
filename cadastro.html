@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cadastro - Guapo The Barber</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="admin-body">
+
+  <main class="login-admin-container">
+    <section class="login-admin-card">
+      <div class="login-admin-logo">
+        <h1>Guapo</h1>
+        <span>The Barber</span>
+      </div>
+
+      <p class="admin-tag">Cadastro de cliente</p>
+      <h2>Criar minha conta</h2>
+      <p class="login-admin-texto">
+        Crie sua conta para agendar horários e acompanhar seu histórico de cortes.
+      </p>
+
+      <form id="formCadastro" class="login-admin-form">
+        <label for="nome">Nome completo</label>
+        <input 
+          type="text" 
+          id="nome" 
+          placeholder="Digite seu nome" 
+          required 
+        />
+
+        <label for="email">E-mail</label>
+        <input 
+          type="email" 
+          id="email" 
+          placeholder="Digite seu e-mail" 
+          required 
+        />
+
+        <label for="telefone">Telefone</label>
+        <input 
+          type="tel" 
+          id="telefone" 
+          placeholder="Digite seu telefone" 
+          required 
+        />
+
+        <label for="senha">Senha</label>
+        <input 
+          type="password" 
+          id="senha" 
+          placeholder="Crie uma senha" 
+          required 
+        />
+
+        <button type="submit">Criar conta</button>
+      </form>
+
+      <p id="mensagemCadastro" class="mensagem-login"></p>
+
+      <a href="login.html" class="login-voltar">Já tenho conta</a>
+      <a href="index.html" class="login-voltar">Voltar para o site</a>
+    </section>
+  </main>
+
+  <script src="auth.js"></script>
+
+  <script>
+    const formCadastro = document.getElementById("formCadastro");
+    const mensagemCadastro = document.getElementById("mensagemCadastro");
+
+    formCadastro.addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      const nome = document.getElementById("nome").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const telefone = document.getElementById("telefone").value.trim();
+      const senha = document.getElementById("senha").value.trim();
+
+      const retorno = cadastrarCliente(nome, email, telefone, senha);
+
+      if (!retorno.sucesso) {
+        mensagemCadastro.textContent = retorno.mensagem;
+        mensagemCadastro.classList.add("erro");
+        return;
+      }
+
+      mensagemCadastro.textContent = "Conta criada com sucesso! Redirecionando...";
+      mensagemCadastro.classList.remove("erro");
+
+      setTimeout(function () {
+        window.location.href = "login.html";
+      }, 1500);
+    });
+  </script>
+
+</body>
+</html>

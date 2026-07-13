@@ -26,13 +26,14 @@
         ☰
       </button>
 
-      <nav id="menuLinks">
-        <a href="#inicio">Início</a>
-        <a href="#servicos">Serviços</a>
-        <a href="#galeria">Galeria</a>
-        <a href="#sobre">Sobre</a>
-        <a href="#contato">Agendar</a>
-      </nav>
+      <nav>
+  <a href="#inicio">Início</a>
+  <a href="#servicos">Serviços</a>
+  <a href="#galeria">Galeria</a>
+  <a href="#sobre">Sobre</a>
+  <a href="#" onclick="abrirAgendamento()">Agendar</a>
+  <a href="login.html" id="linkLogin">Login</a>
+</nav>
     </div>
   </header>
 
@@ -50,7 +51,7 @@
         </p>
 
         <div class="botoes">
-          <a class="botao principal" href="agendamento.html">
+          <a class="botao principal" href="#" onclick="abrirAgendamento()">
             Agendar online
           </a>
         </div>
@@ -349,14 +350,16 @@
       TikTok
     </a>
   </div>
+  
+<div class="botoes">
+  <a class="botao principal" href="#" onclick="abrirAgendamento()">
+    Agendar online
+  </a>
 </div>
 
-      <a class="botao principal" href="agendamento.html">
-        Agendar online
-      </a>
-    </div>
-
   </div>
+  </div>
+  </section>
 
   <footer>
     <div class="container rodape">
@@ -366,7 +369,6 @@
   </footer>
 
   <button id="voltarTopo" class="voltar-topo">↑</button>
-    <button id="voltarTopo" class="voltar-topo">↑</button>
 
   <div class="modal-telefone" id="modalTelefone">
     <div class="modal-telefone-overlay" id="fecharModalOverlay"></div>
@@ -397,9 +399,49 @@
     </div>
   </div>
 
-  <script src="script.js"></script>
-</body>
-</html>
+  <script src="auth.js"></script>
+
+  <script>
+    function abrirAgendamento() {
+      const usuarioLogado = pegarUsuarioLogado();
+
+      if (!usuarioLogado) {
+        localStorage.setItem("guapo_redirect_apos_login", "agendamento.html");
+        window.location.href = "login.html";
+        return;
+      }
+
+      if (usuarioLogado.tipo === "barbeiro") {
+        window.location.href = "painel.html";
+        return;
+      }
+
+      window.location.href = "agendamento.html";
+    }
+
+    function atualizarLinkLogin() {
+      const usuarioLogado = pegarUsuarioLogado();
+      const linkLogin = document.getElementById("linkLogin");
+
+      if (!linkLogin) return;
+
+      if (!usuarioLogado) {
+        linkLogin.textContent = "Login";
+        linkLogin.href = "login.html";
+        return;
+      }
+
+      if (usuarioLogado.tipo === "barbeiro") {
+        linkLogin.textContent = "Painel";
+        linkLogin.href = "painel.html";
+      } else {
+        linkLogin.textContent = "Minha área";
+        linkLogin.href = "cliente.html";
+      }
+    }
+
+    atualizarLinkLogin();
+  </script>
 
   <script src="script.js"></script>
 </body>
