@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Chat - Guapo The Barber</title>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="admin-body">
+
+  <main class="chat-container">
+    <section class="chat-card">
+
+      <header class="chat-header">
+        <div class="login-admin-logo">
+          <h1>Guapo</h1>
+          <span>The Barber</span>
+        </div>
+
+        <a href="cliente.html" class="chat-voltar">Voltar</a>
+      </header>
+
+      <div class="chat-info">
+        <p class="admin-tag">Atendimento</p>
+        <h2>Conversar com o barbeiro</h2>
+        <p>Envie sua dúvida, pedido de ajuste ou mensagem sobre seu agendamento.</p>
+      </div>
+
+      <div class="chat-mensagens" id="chatMensagens">
+        <!-- mensagens aparecem aqui -->
+      </div>
+
+      <form id="formChat" class="chat-form">
+        <input 
+          type="text" 
+          id="mensagemTexto" 
+          placeholder="Digite sua mensagem..." 
+          required
+        />
+
+        <button type="submit">Enviar</button>
+      </form>
+
+    </section>
+  </main>
+
+  <script src="auth.js"></script>
+
+  <script>
+    const usuarioLogado = pegarUsuarioLogado();
+
+    if (!usuarioLogado) {
+      window.location.href = "login.html";
+    }
+
+    if (usuarioLogado && usuarioLogado.tipo === "barbeiro") {
+      window.location.href = "painel.html";
+    }
+
+    const MENSAGENS_KEY = "guapo_mensagens";
+
+    const chatMensagens = document.getElementById("chatMensagens");
+    const formChat = document.getElementById("formChat");
+    const mensagemTexto = document.getElementById("mensagemTexto");
+
+    function carregarMensagens() {
+      const dados = localStorage.getItem(MENSAGENS_KEY);
+      return dados ? JSON.parse(dados) : [];
+    }
+
+    function salvarMensagens(mensagens) {
+      localStorage.setItem(MENSAGENS_KEY, JSON.stringify(mensagens));
+    }
+
+    function formatarHora(dataISO) {
+      const data = new Date(dataISO);
+
+      return data.toLocaleString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+    }
+
+    function renderizarMensagens() {
+      const mensagens = carregarMensagens();
+
+      const mensagensDoCliente = mensagens.filter(mensagem => {
+        return mensagem.clienteId === usuarioLogado.id;
+      });
+
+      if (mensagensDoCliente.length === 0) {
+        chatMensagens.innerHTML = `
+          <div class="chat-vazio">
+            <p>Nenhuma mensagem ainda.</p>
+            <span>Envie uma mensagem para iniciar a conversa.</span>
+          </div>
+        `;
+        return;
+      }
+
+      chatMensagens.innerHTML = mensagensDoCliente.map(mensagem => {
+        const classeAutor = mensagem.autor === "cliente" ? "mensagem-cliente" : "mensagem-barbeiro";
+        const nomeAutor = mensagem.autor === "cliente" ? "Você" : "Guapo";
+
+        return `
+          <div class="mensagem-chat ${classeAutor}">
+            <div class="mensagem-balao">
+              <strong>${nomeAutor}</strong>
+              <p>${mensagem.texto}</p>
+              <span>${formatarHora(mensagem.dataHora)}</span>
+            </div>
+          </div>
+        `;
+      }).join("");
+
+      chatMensagens.scrollTop = chatMensagens.scrollHeight;
+    }
+
+    formChat.addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      const texto = mensagemTexto.value.trim();
+
+      if (!texto) return;
+
+      const mensagens = carregarMensagens();
+
+      const novaMensagem = {
+        id: Date.now(),
+        clienteId: usuarioLogado.id,
+        clienteNome: usuarioLogado.nome,
+        clienteEmail: usuarioLogado.email,
+        clienteTelefone: usuarioLogado.telefone,
+        autor: "cliente",
+        texto: texto,
+        dataHora: new Date().toISOString(),
+        lida: false
+      };
+
+      mensagens.push(novaMensagem);
+      salvarMensagens(mensagens);
+
+      mensagemTexto.value = "";
+      renderizarMensagens();
+    });
+
+    renderizarMensagens();
+  </script>
+
+</body>
+</html>
