@@ -2639,3 +2639,22 @@ footer {
 .destaque-link:hover {
   color: #d4a852;
 }
+.link-esqueceu-senha {
+  display: inline-block;
+  margin-top: 4px;
+  margin-bottom: 14px;
+  color: #ffffff;
+  font-size: 14px;
+  text-decoration: none;
+  background: none;
+  padding: 0;
+}
+
+.link-esqueceu-senha:visited {
+  color: #ffffff;
+}
+
+.link-esqueceu-senha:hover {
+  color: #d4a852;
+  text-decoration: none;
+}
