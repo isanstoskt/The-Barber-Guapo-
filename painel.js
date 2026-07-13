@@ -1,4 +1,4 @@
-const API_URL = "/api/agendamentos";
+const API_URL = "https://the-barber-guapo.onrender.com/api/agendamentos";
 
 const listaAgendamentos = document.getElementById("listaAgendamentos");
 const filtroData = document.getElementById("filtroData");
@@ -12,7 +12,14 @@ const totalConfirmados = document.getElementById("totalConfirmados");
 const totalCancelados = document.getElementById("totalCancelados");
 
 function formatarData(data) {
+  if (!data) return "Data não informada";
+
   const partes = data.split("-");
+
+  if (partes.length !== 3) {
+    return data;
+  }
+
   return `${partes[2]}/${partes[1]}/${partes[0]}`;
 }
 
@@ -37,6 +44,26 @@ function obterSemanaAtual() {
   };
 }
 
+async function buscarJSON(url, opcoes = {}) {
+  const resposta = await fetch(url, opcoes);
+
+  const texto = await resposta.text();
+
+  let dados = null;
+
+  try {
+    dados = texto ? JSON.parse(texto) : null;
+  } catch (erro) {
+    throw new Error("A API não retornou um JSON válido.");
+  }
+
+  if (!resposta.ok) {
+    throw new Error(dados?.erro || "Erro na requisição.");
+  }
+
+  return dados;
+}
+
 async function carregarAgendamentos(filtro = {}) {
   listaAgendamentos.innerHTML = `<p class="painel-carregando">Carregando agendamentos...</p>`;
 
@@ -51,8 +78,7 @@ async function carregarAgendamentos(filtro = {}) {
       url = `${API_URL}?inicio=${filtro.inicio}&fim=${filtro.fim}`;
     }
 
-    const resposta = await fetch(url);
-    const agendamentos = await resposta.json();
+    const agendamentos = await buscarJSON(url);
 
     renderizarResumo(agendamentos);
     renderizarAgendamentos(agendamentos);
@@ -63,9 +89,14 @@ async function carregarAgendamentos(filtro = {}) {
     listaAgendamentos.innerHTML = `
       <div class="painel-vazio">
         <h3>Erro ao conectar com a API</h3>
-        <p>Verifique se o servidor está ligado com <strong>npm start</strong>.</p>
+        <p>
+          Verifique se a API do Render está ativa:
+          <strong>https://the-barber-guapo.onrender.com</strong>
+        </p>
       </div>
     `;
+
+    renderizarResumo([]);
   }
 }
 
@@ -89,7 +120,7 @@ function renderizarResumo(agendamentos) {
 }
 
 function renderizarAgendamentos(agendamentos) {
-  if (agendamentos.length === 0) {
+  if (!agendamentos || agendamentos.length === 0) {
     listaAgendamentos.innerHTML = `
       <div class="painel-vazio">
         <h3>Nenhum agendamento encontrado</h3>
@@ -104,21 +135,21 @@ function renderizarAgendamentos(agendamentos) {
       <article class="agendamento-admin-card">
         <div class="agendamento-admin-topo">
           <div>
-            <h3>${agendamento.nome}</h3>
-            <p>${formatarData(agendamento.data)} às ${agendamento.horario}</p>
+            <h3>${agendamento.nome || "Cliente sem nome"}</h3>
+            <p>${formatarData(agendamento.data)} às ${agendamento.horario || "horário não informado"}</p>
           </div>
 
           <span class="status-agendamento ${classeStatus(agendamento.status)}">
-            ${agendamento.status}
+            ${agendamento.status || "Aguardando confirmação"}
           </span>
         </div>
 
         <div class="agendamento-admin-info">
-          <p><strong>Telefone:</strong> ${agendamento.telefone}</p>
-          <p><strong>E-mail:</strong> ${agendamento.email}</p>
-          <p><strong>Serviços:</strong> ${agendamento.servicos}</p>
-          <p><strong>Total:</strong> ${agendamento.totalEstimado}</p>
-          <p><strong>Observação:</strong> ${agendamento.observacao}</p>
+          <p><strong>Telefone:</strong> ${agendamento.telefone || "Não informado"}</p>
+          <p><strong>E-mail:</strong> ${agendamento.email || "Não informado"}</p>
+          <p><strong>Serviços:</strong> ${agendamento.servicos || agendamento.servico || "Não informado"}</p>
+          <p><strong>Total:</strong> ${agendamento.totalEstimado || "Não informado"}</p>
+          <p><strong>Observação:</strong> ${agendamento.observacao || "Sem observação"}</p>
         </div>
 
         <div class="agendamento-admin-botoes">
@@ -173,20 +204,13 @@ function classeStatus(status) {
 
 async function alterarStatus(id, status) {
   try {
-    const resposta = await fetch(`${API_URL}/${id}/status`, {
+    await buscarJSON(`${API_URL}/${id}/status`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({ status: status })
     });
-
-    const retorno = await resposta.json();
-
-    if (!resposta.ok) {
-      alert(retorno.erro || "Erro ao atualizar status.");
-      return;
-    }
 
     if (filtroData.value) {
       carregarAgendamentos({ data: filtroData.value });
@@ -196,7 +220,7 @@ async function alterarStatus(id, status) {
 
   } catch (erro) {
     console.error("Erro ao alterar status:", erro);
-    alert("Erro ao conectar com a API.");
+    alert("Erro ao atualizar status do agendamento.");
   }
 }
 
@@ -208,16 +232,9 @@ async function excluirAgendamento(id) {
   }
 
   try {
-    const resposta = await fetch(`${API_URL}/${id}`, {
+    await buscarJSON(`${API_URL}/${id}`, {
       method: "DELETE"
     });
-
-    const retorno = await resposta.json();
-
-    if (!resposta.ok) {
-      alert(retorno.erro || "Erro ao excluir agendamento.");
-      return;
-    }
 
     if (filtroData.value) {
       carregarAgendamentos({ data: filtroData.value });
@@ -227,7 +244,7 @@ async function excluirAgendamento(id) {
 
   } catch (erro) {
     console.error("Erro ao excluir:", erro);
-    alert("Erro ao conectar com a API.");
+    alert("Erro ao excluir agendamento.");
   }
 }
 
@@ -238,6 +255,7 @@ btnHoje.addEventListener("click", function () {
 
 btnSemana.addEventListener("click", function () {
   filtroData.value = "";
+
   const semana = obterSemanaAtual();
 
   carregarAgendamentos({
@@ -252,7 +270,11 @@ btnTodos.addEventListener("click", function () {
 });
 
 filtroData.addEventListener("change", function () {
-  carregarAgendamentos({ data: filtroData.value });
+  if (filtroData.value) {
+    carregarAgendamentos({ data: filtroData.value });
+  } else {
+    carregarAgendamentos();
+  }
 });
 
 carregarAgendamentos();
