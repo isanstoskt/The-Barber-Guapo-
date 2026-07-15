@@ -2586,6 +2586,17 @@ footer {
   .cliente-boas-vindas h2 {
     font-size: 24px;
   }
+
+  .btn-cliente {
+    display: block;
+    width: 100%;
+    text-align: center;
+    box-sizing: border-box;
+  }
+
+  .btn-chat-cliente {
+    margin-left: 0;
+  }
 }
 .login-links {
   margin-top: 18px;
@@ -2837,6 +2848,7 @@ footer {
 }
 
 .btn-chat-cliente {
+  position: relative;
   margin-left: 8px;
   background: transparent;
   color: #fff;
@@ -2846,4 +2858,553 @@ footer {
 .btn-chat-cliente:hover {
   background: #fff;
   color: #111;
+}
+
+.badge-mensagem-nova {
+  display: none;
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #ff3b30;
+  border: 2px solid #181818;
+}
+.redes-box-novo {
+  max-width: 760px;
+  margin: 36px auto 0;
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  text-align: center;
+}
+
+.redes-box-novo p {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  max-width: 420px;
+}
+
+.redes-box-novo .redes-botoes {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.agendar-contato-box {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 28px;
+}
+
+.agendar-contato-box .botao {
+  min-width: 190px;
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+  .redes-box-novo {
+    padding: 24px 18px;
+  }
+
+  .redes-box-novo .redes-botoes {
+    width: 100%;
+  }
+
+  .redes-box-novo .rede {
+    flex: 1;
+    text-align: center;
+  }
+
+  .agendar-contato-box .botao {
+    width: 100%;
+    max-width: 260px;
+  }
+}
+.admin-header-acoes {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-sair-admin {
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 16px;
+}
+
+.admin-mensagens {
+  background: #111111;
+  border-radius: 24px;
+  padding: 26px;
+  margin-bottom: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.mensagens-topo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 22px;
+}
+
+.mensagens-topo h2 {
+  margin: 0 0 6px;
+  font-size: 28px;
+}
+
+.mensagens-topo p {
+  margin: 0;
+  color: #cccccc;
+}
+
+.btn-atualizar-mensagens {
+  border: none;
+  border-radius: 999px;
+  padding: 12px 18px;
+  background: #d4af37;
+  color: #080808;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-atualizar-mensagens:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+}
+
+.lista-mensagens-clientes {
+  display: grid;
+  gap: 18px;
+}
+
+.mensagens-tiras {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.tira-cliente {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  background: #181818;
+  color: #ffffff;
+  padding: 10px 16px;
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.tira-cliente:hover {
+  border-color: rgba(212, 175, 55, 0.5);
+}
+
+.tira-cliente-ativa {
+  background: #d4af37;
+  color: #111111;
+  border-color: #d4af37;
+  font-weight: bold;
+}
+
+.tira-cliente-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #ff3b30;
+  flex-shrink: 0;
+}
+
+.conversa-admin-card {
+  background: #181818;
+  border: 1px solid rgba(212, 175, 55, 0.18);
+  border-radius: 22px;
+  padding: 22px;
+}
+
+.conversa-admin-topo {
+  margin-bottom: 18px;
+}
+
+.conversa-admin-topo h3 {
+  margin: 0 0 6px;
+  font-size: 22px;
+  color: #ffffff;
+}
+
+.conversa-admin-topo p {
+  margin: 3px 0;
+  color: #cccccc;
+  font-size: 14px;
+}
+
+.conversa-admin-mensagens {
+  background: #101010;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.msg-admin {
+  max-width: 78%;
+  padding: 12px 14px;
+  border-radius: 16px;
+  margin-bottom: 12px;
+}
+
+.msg-admin strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+.msg-admin p {
+  margin: 0;
+  line-height: 1.4;
+}
+
+.msg-admin span {
+  display: block;
+  margin-top: 6px;
+  font-size: 11px;
+  opacity: 0.75;
+}
+
+.msg-admin-cliente {
+  background: #2a2a2a;
+  color: #ffffff;
+  border-bottom-left-radius: 4px;
+}
+
+.msg-admin-barbeiro {
+  background: #d4af37;
+  color: #111111;
+  margin-left: auto;
+  border-bottom-right-radius: 4px;
+}
+
+.form-resposta-admin {
+  display: flex;
+  gap: 10px;
+}
+
+.form-resposta-admin input {
+  flex: 1;
+  border: none;
+  outline: none;
+  border-radius: 999px;
+  padding: 13px 16px;
+  background: #202020;
+  color: #ffffff;
+}
+
+.form-resposta-admin input::placeholder {
+  color: #888888;
+}
+
+.form-resposta-admin button {
+  border: none;
+  border-radius: 999px;
+  padding: 13px 18px;
+  background: #d4af37;
+  color: #080808;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.form-resposta-admin button:hover {
+  opacity: 0.9;
+}
+
+@media (max-width: 700px) {
+  .admin-header-acoes {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-header-acoes .admin-voltar {
+    text-align: center;
+  }
+
+  .mensagens-topo {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .btn-atualizar-mensagens {
+    width: 100%;
+  }
+
+  .msg-admin {
+    max-width: 95%;
+  }
+
+  .form-resposta-admin {
+    flex-direction: column;
+  }
+
+  .form-resposta-admin button {
+    width: 100%;
+  }
+
+  .tira-cliente {
+    flex: 1 1 100%;
+    justify-content: space-between;
+  }
+}
+/* ========================= */
+/* BOTÕES PADRÃO OUTLINE DOURADO */
+/* Notebook + Celular */
+/* ========================= */
+
+.botao-outline-dourado {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 340px;
+  min-height: 52px;
+  padding: 14px 22px;
+  border: 1px solid #d4a852;
+  border-radius: 999px;
+  background: transparent;
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 600;
+  transition: 0.3s ease;
+  text-align: center;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.botao-outline-dourado:hover {
+  background: #d4a852;
+  color: #111111;
+  transform: translateY(-2px);
+}
+
+/* LINKS DE LOGIN / CADASTRO */
+
+.login-links {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: center;
+}
+
+/* ÁREA DO CLIENTE */
+
+.acoes-cliente {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+
+.acoes-cliente .btn-cliente {
+  flex: 1;
+  min-width: 220px;
+  text-align: center;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.cliente-acoes-finais {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: center;
+}
+
+.cliente-acoes-finais .botao-outline-dourado {
+  border: 1px solid #d4a852;
+}
+
+.btn-chat-com-alerta {
+  position: relative;
+}
+
+.badge-notificacao {
+  display: none;
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 14px;
+  height: 14px;
+  background: #dc3545;
+  border-radius: 50%;
+  box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.18);
+}
+
+.badge-notificacao.ativo {
+  display: block;
+}
+
+/* GALERIA - DESKTOP */
+
+.grid-galeria.galeria-carrossel-mobile {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+
+.grid-galeria.galeria-carrossel-mobile img {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 18px;
+  border: 1px solid rgba(201, 160, 84, 0.18);
+  transition: 0.3s;
+}
+
+.grid-galeria.galeria-carrossel-mobile img:hover {
+  transform: scale(1.04);
+  border-color: rgba(201, 160, 84, 0.55);
+}
+
+/* CELULAR */
+
+@media (max-width: 768px) {
+  .cliente-card {
+    padding: 22px;
+  }
+
+  .cliente-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .acoes-cliente {
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .acoes-cliente .btn-cliente {
+    width: 100%;
+    min-width: 100%;
+  }
+
+  .cliente-acoes-finais .botao-outline-dourado,
+  .login-links .botao-outline-dourado {
+    max-width: 100%;
+  }
+
+  .grid-galeria.galeria-carrossel-mobile {
+    display: flex;
+    gap: 14px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding: 4px 2px 14px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .grid-galeria.galeria-carrossel-mobile::-webkit-scrollbar {
+    display: none;
+  }
+
+  .grid-galeria.galeria-carrossel-mobile img {
+    min-width: 86%;
+    max-width: 86%;
+    height: 420px;
+    scroll-snap-align: center;
+    border-radius: 18px;
+  }
+}
+
+@media (max-width: 430px) {
+  .grid-galeria.galeria-carrossel-mobile img {
+    min-width: 88%;
+    max-width: 88%;
+    height: 360px;
+  }
+}
+.btn-chat-com-alerta {
+  position: relative;
+}
+
+.badge-notificacao {
+  display: none;
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 14px;
+  height: 14px;
+  background: #dc3545;
+  border-radius: 50%;
+  box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.20);
+  z-index: 5;
+}
+
+.badge-notificacao.ativo {
+  display: block;
+}
+.chat-mensagens {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mensagem-chat {
+  width: 100%;
+  display: flex;
+}
+
+.mensagem-cliente {
+  justify-content: flex-end;
+}
+
+.mensagem-barbeiro {
+  justify-content: flex-start;
+}
+
+.mensagem-balao {
+  max-width: 78%;
+  padding: 12px 14px;
+  border-radius: 16px;
+  word-break: break-word;
+}
+
+.mensagem-cliente .mensagem-balao {
+  background: #d4a852;
+  color: #111;
+  border-bottom-right-radius: 4px;
+}
+
+.mensagem-barbeiro .mensagem-balao {
+  background: #2a2a2a;
+  color: #fff;
+  border-bottom-left-radius: 4px;
+}
+
+@media (max-width: 600px) {
+  .mensagem-balao {
+    max-width: 86%;
+  }
+
+  .chat-card {
+    padding: 20px;
+  }
+
+  .chat-mensagens {
+    max-height: 430px;
+    overflow-y: auto;
+  }
 }

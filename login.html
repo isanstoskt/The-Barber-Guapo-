@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>Login - Guapo The Barber</title>
+
   <link rel="stylesheet" href="style.css" />
 </head>
 <body class="admin-body">
@@ -16,7 +18,9 @@
       </div>
 
       <p class="admin-tag">Área de acesso</p>
+
       <h2>Entrar na conta</h2>
+
       <p class="login-admin-texto">
         Acesse sua conta para agendar, acompanhar seus cortes ou gerenciar os horários.
       </p>
@@ -37,9 +41,9 @@
           placeholder="Digite sua senha" 
           required 
         />
-        
+
         <a href="recuperar-senha.html" class="link-esqueceu-senha">
-  Esqueci minha senha
+          Esqueci minha senha
         </a>
 
         <button type="submit">Entrar</button>
@@ -48,8 +52,13 @@
       <p id="mensagemLogin" class="mensagem-login"></p>
 
       <div class="login-links">
-        <a href="cadastro.html" class="login-voltar">Criar conta</a>
-        <a href="index.html" class="login-voltar">Voltar para o site</a>
+        <a href="cadastro.html" class="botao-outline-dourado">
+          Criar conta
+        </a>
+
+        <a href="index.html" class="botao-outline-dourado">
+          Voltar para o site
+        </a>
       </div>
     </section>
   </main>
@@ -80,7 +89,16 @@
       const usuario = retorno.usuario;
 
       if (usuario.tipo === "barbeiro") {
+        localStorage.removeItem("guapo_redirect_apos_login");
         window.location.href = "painel.html";
+        return;
+      }
+
+      const redirect = localStorage.getItem("guapo_redirect_apos_login");
+
+      if (redirect) {
+        localStorage.removeItem("guapo_redirect_apos_login");
+        window.location.href = redirect;
       } else {
         window.location.href = "cliente.html";
       }

@@ -31,7 +31,7 @@
         <a href="#servicos">Serviços</a>
         <a href="#galeria">Galeria</a>
         <a href="#sobre">Sobre</a>
-        <a href="agendamento.html" id="linkAgendarMenu">Agendar</a>
+        <a href="login.html" id="linkAgendarMenu" onclick="abrirAgendamento(event)">Agendar</a>
         <a href="login.html" id="linkLogin">Login</a>
       </nav>
     </div>
@@ -51,7 +51,7 @@
         </p>
 
         <div class="botoes">
-          <a class="botao principal link-agendamento" href="agendamento.html">
+          <a class="botao principal link-agendamento" href="login.html" onclick="abrirAgendamento(event)">
             Agendar online
           </a>
         </div>
@@ -211,24 +211,24 @@
   </div>
 </section>
 
-  <section id="galeria" class="secao galeria">
-    <div class="container">
+<section id="galeria" class="secao galeria">
+  <div class="container">
 
-      <p class="etiqueta">Resultados reais</p>
-      <h2>Galeria</h2>
-      <p class="descricao">
-        Corte não é só cabelo. É presença, identidade e confiança.
-      </p>
+    <p class="etiqueta">Resultados reais</p>
+    <h2>Galeria</h2>
+    <p class="descricao">
+      Corte não é só cabelo. É presença, identidade e confiança.
+    </p>
 
-      <div class="grid-galeria">
-        <img src="corte 3.png" alt="Foto de corte Guapo The Barber">
-        <img src="Autenticidade em cada detalhe💫..Studio localizado em São Caetano do Sul, ABC Paulista📍Rua pan .jpg" alt="Corte masculino">
-        <img src="corte 5.png" alt="Fade masculino">
-        <img src="lop.jpg" alt="Barba e acabamento">
-      </div>
-
+    <div class="grid-galeria galeria-carrossel-mobile">
+      <img src="corte 3.png" alt="Foto de corte Guapo The Barber">
+      <img src="Autenticidade em cada detalhe💫..Studio localizado em São Caetano do Sul, ABC Paulista📍Rua pan .jpg" alt="Corte masculino">
+      <img src="corte 5.png" alt="Fade masculino">
+      <img src="lop.jpg" alt="Barba e acabamento">
     </div>
-  </section>
+
+  </div>
+</section>
 
   <section id="sobre" class="secao sobre">
     <div class="container sobre-conteudo">
@@ -330,32 +330,37 @@
 
 </div>
 
-      <div class="redes-box">
-  <p>Seguir Guapo The Barber nas redes sociais</p>
+      <div class="redes-box redes-box-novo">
+        <p>Seguir Guapo The Barber nas redes sociais</p>
 
-  <div class="redes-botoes">
-    <a 
-      href="https://www.instagram.com/guapothebarber/" 
-      target="_blank" 
-      class="rede instagram"
-    >
-      Instagram
-    </a>
+        <div class="redes-botoes">
+          <a 
+            href="https://www.instagram.com/guapothebarber/" 
+            target="_blank" 
+            class="rede instagram"
+          >
+            Instagram
+          </a>
 
-    <a 
-      href="https://www.tiktok.com/@guapothebarber" 
-      target="_blank" 
-      class="rede tiktok"
-    >
-      TikTok
-    </a>
-  </div>
-  
-<div class="botoes">
-  <a class="botao principal link-agendamento" href="agendamento.html">
-    Agendar online
-  </a>
-</div>
+          <a 
+            href="https://www.tiktok.com/@guapothebarber" 
+            target="_blank" 
+            class="rede tiktok"
+          >
+            TikTok
+          </a>
+        </div>
+      </div>
+
+      <div class="agendar-contato-box">
+        <a 
+          class="botao principal link-agendamento" 
+          href="login.html" 
+          onclick="abrirAgendamento(event)"
+        >
+          Agendar online
+        </a>
+      </div>
 
   </div>
   </div>
@@ -402,111 +407,69 @@
   <script src="script.js"></script>
 
   <script>
-    function obterUsuarioLogadoSeguro() {
-      if (typeof pegarUsuarioLogado !== "function") {
-        return null;
-      }
-
-      return pegarUsuarioLogado();
-    }
-
     function abrirAgendamento(event) {
       if (event) {
         event.preventDefault();
       }
 
-      const usuarioLogado = obterUsuarioLogadoSeguro();
-
-      if (!usuarioLogado) {
-        localStorage.setItem("guapo_redirect_apos_login", "agendamento.html");
-        window.location.href = "login.html";
-        return;
-      }
-
-      if (usuarioLogado.tipo === "barbeiro") {
-        localStorage.removeItem("guapo_redirect_apos_login");
-        window.location.href = "painel.html";
-        return;
-      }
-
-      localStorage.removeItem("guapo_redirect_apos_login");
-      window.location.href = "agendamento.html";
+      // Fluxo obrigatório: Agendar → Login → Agendar
+      localStorage.setItem("guapo_redirect_apos_login", "agendamento.html");
+      window.location.href = "login.html";
     }
 
-    function irParaAreaDoUsuario(event) {
+    function abrirLoginPainel(event) {
       if (event) {
         event.preventDefault();
       }
 
+      // Quando clicar em Painel, força passar pelo login novamente
+      localStorage.removeItem("guapo_usuario_logado");
       localStorage.removeItem("guapo_redirect_apos_login");
+      window.location.href = "login.html";
+    }
 
-      const usuarioLogado = obterUsuarioLogadoSeguro();
+    function atualizarLinkLogin() {
+      const usuarioLogado = typeof pegarUsuarioLogado === "function" ? pegarUsuarioLogado() : null;
+      const linkLogin = document.getElementById("linkLogin");
+      const linkAgendarMenu = document.getElementById("linkAgendarMenu");
+      const linksAgendamento = document.querySelectorAll(".link-agendamento");
+
+      // Garante que todos os botões de agendamento passem pelo login
+      if (linkAgendarMenu) {
+        linkAgendarMenu.textContent = "Agendar";
+        linkAgendarMenu.href = "login.html";
+        linkAgendarMenu.onclick = abrirAgendamento;
+      }
+
+      linksAgendamento.forEach(function (link) {
+        link.href = "login.html";
+        link.onclick = abrirAgendamento;
+      });
+
+      if (!linkLogin) return;
 
       if (!usuarioLogado) {
-        window.location.href = "login.html";
+        linkLogin.textContent = "Login";
+        linkLogin.href = "login.html";
+        linkLogin.onclick = null;
         return;
       }
 
       if (usuarioLogado.tipo === "barbeiro") {
-        window.location.href = "painel.html";
+        linkLogin.textContent = "Painel";
+        linkLogin.href = "login.html";
+        linkLogin.onclick = abrirLoginPainel;
         return;
       }
 
-      window.location.href = "cliente.html";
+      if (usuarioLogado.tipo === "cliente") {
+        linkLogin.textContent = "Minha área";
+        linkLogin.href = "cliente.html";
+        linkLogin.onclick = null;
+      }
     }
 
-    <script>
-  function abrirAgendamento() {
-    const usuarioLogado = pegarUsuarioLogado();
-
-    if (!usuarioLogado) {
-      localStorage.setItem("guapo_redirect_apos_login", "agendamento.html");
-      window.location.href = "login.html";
-      return;
-    }
-
-    if (usuarioLogado.tipo === "barbeiro") {
-      window.location.href = "painel.html";
-      return;
-    }
-
-    window.location.href = "agendamento.html";
-  }
-
-  function abrirLoginPainel(event) {
-    event.preventDefault();
-
-    localStorage.removeItem("guapo_usuario_logado");
-    localStorage.removeItem("guapo_redirect_apos_login");
-
-    window.location.href = "login.html";
-  }
-
-  function atualizarLinkLogin() {
-    const usuarioLogado = pegarUsuarioLogado();
-    const linkLogin = document.getElementById("linkLogin");
-
-    if (!linkLogin) return;
-
-    if (!usuarioLogado) {
-      linkLogin.textContent = "Login";
-      linkLogin.href = "login.html";
-      return;
-    }
-
-    if (usuarioLogado.tipo === "barbeiro") {
-      linkLogin.textContent = "Painel";
-      linkLogin.href = "login.html";
-      linkLogin.onclick = abrirLoginPainel;
-      return;
-    }
-
-    if (usuarioLogado.tipo === "cliente") {
-      linkLogin.textContent = "Minha área";
-      linkLogin.href = "cliente.html";
-      return;
-    }
-  }
-
-  atualizarLinkLogin();
-</script>
+    atualizarLinkLogin();
+  </script>
+</body>
+</html>

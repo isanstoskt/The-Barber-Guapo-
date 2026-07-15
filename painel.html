@@ -14,7 +14,12 @@
       <span>The Barber</span>
     </div>
 
-    <a href="index.html" class="admin-voltar">Voltar para o site</a>
+    <div class="admin-header-acoes">
+      <a href="index.html" class="admin-voltar">Voltar para o site</a>
+      <button type="button" class="admin-voltar btn-sair-admin" onclick="sairAdmin()">
+        Sair
+      </button>
+    </div>
   </header>
 
   <main class="admin-container">
@@ -62,6 +67,23 @@
       </div>
     </section>
 
+    <section class="admin-mensagens">
+      <div class="admin-lista-topo mensagens-topo">
+        <div>
+          <h2>Mensagens dos clientes</h2>
+          <p>Veja e responda as mensagens enviadas pelos clientes.</p>
+        </div>
+
+        <button type="button" id="btnAtualizarMensagens" class="btn-atualizar-mensagens">
+          Atualizar mensagens
+        </button>
+      </div>
+
+      <div id="listaMensagensClientes" class="lista-mensagens-clientes">
+        <p class="painel-carregando">Carregando mensagens...</p>
+      </div>
+    </section>
+
     <section class="admin-lista">
       <div class="admin-lista-topo">
         <h2>Lista de agendamentos</h2>
@@ -74,6 +96,22 @@
 
   </main>
 
-  <script src="painel.js"></script>
+  <script src="auth.js"></script>
+
+  <script>
+    const usuarioLogadoPainel = pegarUsuarioLogado();
+
+    if (!usuarioLogadoPainel || usuarioLogadoPainel.tipo !== "barbeiro") {
+      window.location.href = "login.html";
+    }
+
+    function sairAdmin() {
+      localStorage.removeItem("guapo_usuario_logado");
+      localStorage.removeItem("guapo_redirect_apos_login");
+      window.location.href = "login.html";
+    }
+  </script>
+
+  <script src="painel.js?v=4"></script>
 </body>
 </html>

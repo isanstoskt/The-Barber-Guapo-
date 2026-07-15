@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>Área do Cliente - Guapo The Barber</title>
+
   <link rel="stylesheet" href="style.css" />
 </head>
 <body class="admin-body">
@@ -16,8 +18,6 @@
           <h1>Guapo</h1>
           <span>The Barber</span>
         </div>
-
-        <button class="btn-sair" onclick="sair()">Sair</button>
       </header>
 
       <div class="cliente-boas-vindas">
@@ -35,8 +35,16 @@
             <p class="cliente-vazio">Você ainda não possui corte agendado.</p>
           </div>
 
-          <a href="agendamento.html" class="btn-cliente">Agendar novo corte</a>
-          <a href="chat.html" class="btn-cliente btn-chat-cliente"> Conversar com o barbeiro </a>
+          <div class="acoes-cliente">
+            <a href="agendamento.html" class="btn-cliente">
+              Agendar novo corte
+            </a>
+
+            <a href="chat.html" id="btnChatCliente" class="btn-cliente btn-chat-cliente btn-chat-com-alerta">
+              Conversar com o barbeiro
+              <span id="badgeChatCliente" class="badge-notificacao"></span>
+            </a>
+          </div>
         </div>
 
         <div class="cliente-box">
@@ -57,7 +65,15 @@
         </div>
       </section>
 
-      <a href="index.html" class="login-voltar">Voltar para o site</a>
+      <div class="cliente-acoes-finais">
+        <a href="index.html" class="botao-outline-dourado">
+          Voltar para o site
+        </a>
+
+        <button type="button" class="botao-outline-dourado" onclick="sair()">
+          Sair
+        </button>
+      </div>
 
     </section>
   </main>
@@ -69,10 +85,12 @@
 
     if (!usuarioLogado) {
       window.location.href = "login.html";
+      throw new Error("Usuário não logado.");
     }
 
-    if (usuarioLogado && usuarioLogado.tipo === "barbeiro") {
+    if (usuarioLogado.tipo === "barbeiro") {
       window.location.href = "painel.html";
+      throw new Error("Barbeiro redirecionado para o painel.");
     }
 
     const nomeCliente = document.getElementById("nomeCliente");
@@ -148,7 +166,7 @@
 
         proximoCorte.innerHTML = `
           <div class="corte-card">
-            <p><strong>Serviço:</strong> ${proximo.servico || "Corte"}</p>
+            <p><strong>Serviço:</strong> ${proximo.servico || proximo.servicos || "Corte"}</p>
             <p><strong>Data:</strong> ${formatarData(proximo.data)}</p>
             <p><strong>Horário:</strong> ${proximo.horario || "Não informado"}</p>
             <p><strong>Status:</strong> ${proximo.status || "pendente"}</p>
@@ -160,7 +178,7 @@
         historicoCortes.innerHTML = historico.map(agendamento => {
           return `
             <div class="historico-item">
-              <p><strong>${agendamento.servico || "Corte"}</strong></p>
+              <p><strong>${agendamento.servico || agendamento.servicos || "Corte"}</strong></p>
               <p>${formatarData(agendamento.data)} às ${agendamento.horario || "horário não informado"}</p>
               <span>Status: ${agendamento.status || "pendente"}</span>
             </div>
@@ -169,7 +187,40 @@
       }
     }
 
+    function atualizarNotificacaoChatCliente() {
+      const badgeChatCliente = document.getElementById("badgeChatCliente");
+
+      if (!badgeChatCliente || !usuarioLogado) return;
+
+      const dados = localStorage.getItem("guapo_mensagens");
+      const mensagens = dados ? JSON.parse(dados) : [];
+
+      const temMensagemNova = mensagens.some(function (mensagem) {
+        return (
+          String(mensagem.clienteId) === String(usuarioLogado.id) &&
+          mensagem.autor === "barbeiro" &&
+          mensagem.lidaCliente !== true
+        );
+      });
+
+      if (temMensagemNova) {
+        badgeChatCliente.classList.add("ativo");
+      } else {
+        badgeChatCliente.classList.remove("ativo");
+      }
+    }
+
+    const btnChatCliente = document.getElementById("btnChatCliente");
+
+    if (btnChatCliente) {
+      btnChatCliente.addEventListener("click", function (event) {
+        event.preventDefault();
+        window.location.href = "chat.html";
+      });
+    }
+
     carregarAreaCliente();
+    atualizarNotificacaoChatCliente();
   </script>
 
 </body>

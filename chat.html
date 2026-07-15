@@ -74,6 +74,12 @@
       localStorage.setItem(MENSAGENS_KEY, JSON.stringify(mensagens));
     }
 
+    function escaparHTML(texto) {
+      const div = document.createElement("div");
+      div.textContent = texto || "";
+      return div.innerHTML;
+    }
+
     function formatarHora(dataISO) {
       const data = new Date(dataISO);
 
@@ -85,11 +91,32 @@
       });
     }
 
+    function marcarMensagensDoBarbeiroComoLidas() {
+      const mensagens = carregarMensagens();
+
+      const mensagensAtualizadas = mensagens.map(function (mensagem) {
+        if (
+          String(mensagem.clienteId) === String(usuarioLogado.id) &&
+          mensagem.autor === "barbeiro"
+        ) {
+          return {
+            ...mensagem,
+            lida: true,
+            lidaCliente: true
+          };
+        }
+
+        return mensagem;
+      });
+
+      salvarMensagens(mensagensAtualizadas);
+    }
+
     function renderizarMensagens() {
       const mensagens = carregarMensagens();
 
-      const mensagensDoCliente = mensagens.filter(mensagem => {
-        return mensagem.clienteId === usuarioLogado.id;
+      const mensagensDoCliente = mensagens.filter(function (mensagem) {
+        return String(mensagem.clienteId) === String(usuarioLogado.id);
       });
 
       if (mensagensDoCliente.length === 0) {
@@ -102,15 +129,15 @@
         return;
       }
 
-      chatMensagens.innerHTML = mensagensDoCliente.map(mensagem => {
+      chatMensagens.innerHTML = mensagensDoCliente.map(function (mensagem) {
         const classeAutor = mensagem.autor === "cliente" ? "mensagem-cliente" : "mensagem-barbeiro";
         const nomeAutor = mensagem.autor === "cliente" ? "Você" : "Guapo";
 
         return `
           <div class="mensagem-chat ${classeAutor}">
             <div class="mensagem-balao">
-              <strong>${nomeAutor}</strong>
-              <p>${mensagem.texto}</p>
+              <strong>${escaparHTML(nomeAutor)}</strong>
+              <p>${escaparHTML(mensagem.texto)}</p>
               <span>${formatarHora(mensagem.dataHora)}</span>
             </div>
           </div>
@@ -138,7 +165,8 @@
         autor: "cliente",
         texto: texto,
         dataHora: new Date().toISOString(),
-        lida: false
+        lida: false,
+        lidaBarbeiro: false
       };
 
       mensagens.push(novaMensagem);
@@ -148,6 +176,7 @@
       renderizarMensagens();
     });
 
+    marcarMensagensDoBarbeiroComoLidas();
     renderizarMensagens();
   </script>
 

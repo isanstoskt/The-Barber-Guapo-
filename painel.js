@@ -278,3 +278,242 @@ filtroData.addEventListener("change", function () {
 });
 
 carregarAgendamentos();
+
+const MENSAGENS_KEY = "guapo_mensagens";
+const listaMensagensClientes = document.getElementById("listaMensagensClientes");
+const btnAtualizarMensagens = document.getElementById("btnAtualizarMensagens");
+
+function carregarMensagensChat() {
+  const dados = localStorage.getItem(MENSAGENS_KEY);
+  return dados ? JSON.parse(dados) : [];
+}
+
+function salvarMensagensChat(mensagens) {
+  localStorage.setItem(MENSAGENS_KEY, JSON.stringify(mensagens));
+}
+
+function escaparHTML(texto) {
+  const div = document.createElement("div");
+  div.textContent = texto || "";
+  return div.innerHTML;
+}
+
+function formatarDataHoraMensagem(dataISO) {
+  if (!dataISO) return "";
+
+  const data = new Date(dataISO);
+
+  return data.toLocaleString("pt-BR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+}
+
+function agruparMensagensPorCliente(mensagens) {
+  const conversas = {};
+
+  mensagens.forEach(function (mensagem) {
+    const clienteId = mensagem.clienteId;
+
+    if (!conversas[clienteId]) {
+      conversas[clienteId] = {
+        clienteId: clienteId,
+        clienteNome: mensagem.clienteNome || "Cliente",
+        clienteEmail: mensagem.clienteEmail || "",
+        clienteTelefone: mensagem.clienteTelefone || "",
+        mensagens: []
+      };
+    }
+
+    conversas[clienteId].mensagens.push(mensagem);
+  });
+
+  return Object.values(conversas);
+}
+
+let clienteAdminAtivo = null;
+
+function temMensagemNaoLida(conversa) {
+  return conversa.mensagens.some(function (mensagem) {
+    return mensagem.autor === "cliente" && !mensagem.lida;
+  });
+}
+
+function ultimaDataHora(conversa) {
+  const ultima = conversa.mensagens[conversa.mensagens.length - 1];
+  return ultima ? new Date(ultima.dataHora).getTime() : 0;
+}
+
+function marcarConversaComoLida(conversa) {
+  const mensagens = carregarMensagensChat();
+  let houveAlteracao = false;
+
+  mensagens.forEach(function (mensagem) {
+    if (String(mensagem.clienteId) === String(conversa.clienteId) && mensagem.autor === "cliente" && !mensagem.lida) {
+      mensagem.lida = true;
+      houveAlteracao = true;
+    }
+  });
+
+  if (houveAlteracao) {
+    salvarMensagensChat(mensagens);
+  }
+}
+
+function selecionarConversaAdmin(clienteId) {
+  clienteAdminAtivo = String(clienteAdminAtivo) === String(clienteId) ? null : clienteId;
+  renderizarMensagensAdmin();
+}
+
+function renderizarMensagensAdmin() {
+  if (!listaMensagensClientes) return;
+
+  const mensagens = carregarMensagensChat();
+
+  if (mensagens.length === 0) {
+    listaMensagensClientes.innerHTML = `
+      <div class="painel-vazio">
+        <h3>Nenhuma mensagem encontrada</h3>
+        <p>Quando um cliente enviar mensagem pelo chat, ela aparecerá aqui.</p>
+      </div>
+    `;
+    return;
+  }
+
+  const conversas = agruparMensagensPorCliente(mensagens).sort(function (a, b) {
+    return ultimaDataHora(b) - ultimaDataHora(a);
+  });
+
+  const existeAtiva = conversas.some(function (conversa) {
+    return String(conversa.clienteId) === String(clienteAdminAtivo);
+  });
+
+  if (!existeAtiva) {
+    clienteAdminAtivo = null;
+  }
+
+  const tirasHTML = conversas.map(function (conversa) {
+    const ativa = String(conversa.clienteId) === String(clienteAdminAtivo);
+    const naoLida = temMensagemNaoLida(conversa);
+
+    return `
+      <button
+        type="button"
+        class="tira-cliente ${ativa ? "tira-cliente-ativa" : ""}"
+        onclick="selecionarConversaAdmin('${conversa.clienteId}')"
+      >
+        <span class="tira-cliente-nome">${escaparHTML(conversa.clienteNome)}</span>
+        ${naoLida ? '<span class="tira-cliente-dot"></span>' : ""}
+      </button>
+    `;
+  }).join("");
+
+  const conversaAtiva = conversas.find(function (conversa) {
+    return String(conversa.clienteId) === String(clienteAdminAtivo);
+  });
+
+  let conversaHTML = "";
+
+  if (conversaAtiva) {
+    marcarConversaComoLida(conversaAtiva);
+
+    const mensagensHTML = conversaAtiva.mensagens.map(function (mensagem) {
+      const classe = mensagem.autor === "cliente" ? "msg-admin-cliente" : "msg-admin-barbeiro";
+      const autor = mensagem.autor === "cliente" ? conversaAtiva.clienteNome : "Guapo";
+
+      return `
+        <div class="msg-admin ${classe}">
+          <strong>${escaparHTML(autor)}</strong>
+          <p>${escaparHTML(mensagem.texto)}</p>
+          <span>${formatarDataHoraMensagem(mensagem.dataHora)}</span>
+        </div>
+      `;
+    }).join("");
+
+    conversaHTML = `
+      <article class="conversa-admin-card">
+        <div class="conversa-admin-topo">
+          <div>
+            <h3>${escaparHTML(conversaAtiva.clienteNome)}</h3>
+            <p>${escaparHTML(conversaAtiva.clienteEmail)}</p>
+            <p>${escaparHTML(conversaAtiva.clienteTelefone)}</p>
+          </div>
+        </div>
+
+        <div class="conversa-admin-mensagens">
+          ${mensagensHTML}
+        </div>
+
+        <form class="form-resposta-admin" onsubmit="responderCliente(event, '${conversaAtiva.clienteId}')">
+          <input
+            type="text"
+            id="respostaCliente-${conversaAtiva.clienteId}"
+            placeholder="Responder cliente..."
+            required
+          />
+
+          <button type="submit">
+            Responder
+          </button>
+        </form>
+      </article>
+    `;
+  }
+
+  listaMensagensClientes.innerHTML = `
+    <div class="mensagens-tiras">
+      ${tirasHTML}
+    </div>
+
+    ${conversaHTML}
+  `;
+}
+
+function responderCliente(event, clienteId) {
+  event.preventDefault();
+
+  const inputResposta = document.getElementById(`respostaCliente-${clienteId}`);
+
+  if (!inputResposta) return;
+
+  const texto = inputResposta.value.trim();
+
+  if (!texto) return;
+
+  const mensagens = carregarMensagensChat();
+
+  const mensagensDoCliente = mensagens.filter(function (mensagem) {
+    return String(mensagem.clienteId) === String(clienteId);
+  });
+
+  if (mensagensDoCliente.length === 0) return;
+
+  const ultimaMensagem = mensagensDoCliente[mensagensDoCliente.length - 1];
+
+  const novaResposta = {
+    id: Date.now(),
+    clienteId: ultimaMensagem.clienteId,
+    clienteNome: ultimaMensagem.clienteNome,
+    clienteEmail: ultimaMensagem.clienteEmail,
+    clienteTelefone: ultimaMensagem.clienteTelefone,
+    autor: "barbeiro",
+    texto: texto,
+    dataHora: new Date().toISOString(),
+    lida: false
+  };
+
+  mensagens.push(novaResposta);
+  salvarMensagensChat(mensagens);
+
+  inputResposta.value = "";
+  renderizarMensagensAdmin();
+}
+
+if (btnAtualizarMensagens) {
+  btnAtualizarMensagens.addEventListener("click", renderizarMensagensAdmin);
+}
+
+renderizarMensagensAdmin();

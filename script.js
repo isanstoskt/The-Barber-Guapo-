@@ -1,24 +1,33 @@
+// =========================
 // MENU MOBILE
+// =========================
 
-const botaoMenu = document.getElementById("botaoMenu");
-const menuLinks = document.getElementById("menuLinks");
+document.addEventListener("DOMContentLoaded", function () {
+  const botaoMenu = document.getElementById("botaoMenu");
 
-if (botaoMenu && menuLinks) {
-  botaoMenu.addEventListener("click", function () {
-    menuLinks.classList.toggle("ativo");
-  });
+  // Tenta pegar primeiro o menu com id="menuLinks".
+  // Se não existir, pega o primeiro <nav> da página.
+  const menuLinks = document.getElementById("menuLinks") || document.querySelector("nav");
 
-  const linksMenu = document.querySelectorAll("#menuLinks a");
-
-  linksMenu.forEach(function (link) {
-    link.addEventListener("click", function () {
-      menuLinks.classList.remove("ativo");
+  if (botaoMenu && menuLinks) {
+    botaoMenu.addEventListener("click", function () {
+      menuLinks.classList.toggle("ativo");
     });
-  });
-}
+
+    const linksMenu = menuLinks.querySelectorAll("a");
+
+    linksMenu.forEach(function (link) {
+      link.addEventListener("click", function () {
+        menuLinks.classList.remove("ativo");
+      });
+    });
+  }
+});
 
 
+// =========================
 // CARROSSEL PRINCIPAL
+// =========================
 
 let slideAtual = 0;
 
@@ -50,9 +59,6 @@ if (areaSlides && imagensSlides.length > 0) {
     window.mudarSlide(1);
   }, 4000);
 
-
-  // PAUSAR CARROSSEL PRINCIPAL QUANDO PASSAR O MOUSE
-
   const carrossel = document.querySelector(".carrossel");
 
   if (carrossel) {
@@ -68,7 +74,10 @@ if (areaSlides && imagensSlides.length > 0) {
   }
 }
 
+
+// =========================
 // CARROSSEL DE SERVIÇOS
+// =========================
 
 const servicosTrilho = document.getElementById("servicosTrilho");
 const servicoAnterior = document.getElementById("servicoAnterior");
@@ -91,7 +100,9 @@ if (servicosTrilho && servicoAnterior && servicoProximo) {
 }
 
 
+// =========================
 // BOTÃO VOLTAR AO TOPO
+// =========================
 
 const botaoTopo = document.getElementById("voltarTopo");
 
@@ -112,7 +123,10 @@ if (botaoTopo) {
   });
 }
 
-// DESTACAR DIA ATUAL NO HORÁRIO DE ATENDIMENTO
+
+// =========================
+// DESTACAR DIA ATUAL NO HORÁRIO
+// =========================
 
 const linhasHorario = document.querySelectorAll(".horario-linha");
 
@@ -128,7 +142,10 @@ if (linhasHorario.length > 0) {
   });
 }
 
+
+// =========================
 // MODAL DE TELEFONE
+// =========================
 
 const abrirModalTelefone = document.getElementById("abrirModalTelefone");
 const modalTelefone = document.getElementById("modalTelefone");
@@ -161,13 +178,13 @@ if (copiarTelefone) {
     try {
       await navigator.clipboard.writeText(numero);
       copiarTelefone.textContent = "✅ Copiado!";
-      
+
       setTimeout(function () {
         copiarTelefone.textContent = "📋 Copiar";
       }, 2000);
     } catch (erro) {
       copiarTelefone.textContent = "❌ Não foi possível copiar";
-      
+
       setTimeout(function () {
         copiarTelefone.textContent = "📋 Copiar";
       }, 2000);
