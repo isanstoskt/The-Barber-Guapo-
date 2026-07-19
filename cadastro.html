@@ -58,7 +58,7 @@
           required 
         />
 
-        <button type="submit">Criar conta</button>
+        <button type="submit" id="btnCadastrar">Criar conta</button>
       </form>
 
       <p id="mensagemCadastro" class="mensagem-login"></p>
@@ -80,8 +80,9 @@
   <script>
     const formCadastro = document.getElementById("formCadastro");
     const mensagemCadastro = document.getElementById("mensagemCadastro");
+    const btnCadastrar = document.getElementById("btnCadastrar");
 
-    formCadastro.addEventListener("submit", function (event) {
+    formCadastro.addEventListener("submit", async function (event) {
       event.preventDefault();
 
       const nome = document.getElementById("nome").value.trim();
@@ -89,11 +90,18 @@
       const telefone = document.getElementById("telefone").value.trim();
       const senha = document.getElementById("senha").value.trim();
 
-      const retorno = cadastrarCliente(nome, email, telefone, senha);
+      mensagemCadastro.textContent = "Criando conta...";
+      mensagemCadastro.classList.remove("erro");
+      btnCadastrar.disabled = true;
+      btnCadastrar.textContent = "Criando...";
+
+      const retorno = await cadastrarCliente(nome, email, telefone, senha);
 
       if (!retorno.sucesso) {
         mensagemCadastro.textContent = retorno.mensagem;
         mensagemCadastro.classList.add("erro");
+        btnCadastrar.disabled = false;
+        btnCadastrar.textContent = "Criar conta";
         return;
       }
 

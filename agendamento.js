@@ -1,4 +1,17 @@
-const emailGuapo = "sisabelli566@gmail.com";
+const GUAPO_API_URL = "http://localhost:3000";
+
+const usuarioLogado = pegarUsuarioLogado();
+
+if (!usuarioLogado) {
+  localStorage.setItem("guapo_redirect_apos_login", "agendamento.html");
+  window.location.href = "login.html";
+  throw new Error("Cliente precisa estar logado para agendar.");
+}
+
+if (usuarioLogado.tipo === "barbeiro") {
+  window.location.href = "painel.html";
+  throw new Error("Barbeiro não agenda como cliente.");
+}
 
 let etapaAtual = 1;
 let servicosSelecionados = [];
@@ -7,8 +20,7 @@ let horarioSelecionado = "";
 const etapas = {
   1: document.getElementById("etapaServicos"),
   2: document.getElementById("etapaHorario"),
-  3: document.getElementById("etapaDados"),
-  4: document.getElementById("etapaConfirmar")
+  3: document.getElementById("etapaConfirmar")
 };
 
 const btnProximo = document.getElementById("btnProximo");
@@ -22,6 +34,10 @@ const campoData = document.getElementById("data");
 const inputHorario = document.getElementById("horario");
 const datasCarrossel = document.getElementById("datasCarrossel");
 const horariosGrid = document.getElementById("horariosGrid");
+
+const confirmarNome = document.getElementById("confirmarNome");
+const confirmarEmail = document.getElementById("confirmarEmail");
+const confirmarTelefone = document.getElementById("confirmarTelefone");
 
 const horariosBase = [
   "09:00",
@@ -145,10 +161,17 @@ async function carregarHorariosDisponiveis(dataISO) {
   horariosGrid.innerHTML = "<p class='horarios-msg'>Carregando horários...</p>";
 
   try {
-    const resposta = await fetch(`/api/horarios-ocupados?data=${dataISO}`);
-    const dados = await resposta.json();
+    const resposta = await fetch(`${GUAPO_API_URL}/api/agendamentos?data=${dataISO}`);
+    const agendamentos = await resposta.json();
 
-    const horariosOcupados = dados.horariosOcupados || [];
+    const horariosOcupados = agendamentos
+      .filter(function (agendamento) {
+        const status = String(agendamento.status || "").toLowerCase();
+        return !status.includes("cancel");
+      })
+      .map(function (agendamento) {
+        return agendamento.horario;
+      });
 
     const horariosDisponiveis = horariosBase.filter(function (horario) {
       return !horariosOcupados.includes(horario);
@@ -183,7 +206,7 @@ async function carregarHorariosDisponiveis(dataISO) {
 
     horariosGrid.innerHTML = `
       <p class="horarios-msg">
-        Erro ao carregar horários disponíveis.
+        Erro ao carregar horários disponíveis. Verifique se a API está ligada.
       </p>
     `;
   }
@@ -226,7 +249,7 @@ function atualizarPassos() {
 
   btnVoltar.style.display = etapaAtual === 1 ? "none" : "inline-block";
 
-  if (etapaAtual === 4) {
+  if (etapaAtual === 3) {
     btnProximo.textContent = "Enviar solicitação";
   } else {
     btnProximo.textContent = "Próximo";
@@ -267,10 +290,7 @@ function validarEtapa() {
   }
 
   if (etapaAtual === 3) {
-    const nome = document.getElementById("nome").value.trim();
-    const telefone = document.getElementById("telefone").value.trim();
-
-    btnProximo.disabled = !nome || !telefone;
+    btnProximo.disabled = false;
     return;
   }
 
@@ -314,14 +334,12 @@ document.querySelectorAll(".agenda-servico").forEach(function (card) {
   });
 });
 
-["nome", "telefone", "emailCliente", "observacao"].forEach(function (id) {
-  const campo = document.getElementById(id);
+const campoObservacao = document.getElementById("observacao");
 
-  if (campo) {
-    campo.addEventListener("input", validarEtapa);
-    campo.addEventListener("change", validarEtapa);
-  }
-});
+if (campoObservacao) {
+  campoObservacao.addEventListener("input", montarResumoFinal);
+  campoObservacao.addEventListener("change", montarResumoFinal);
+}
 
 btnVoltar.addEventListener("click", function () {
   if (etapaAtual > 1) {
@@ -331,42 +349,38 @@ btnVoltar.addEventListener("click", function () {
 });
 
 btnProximo.addEventListener("click", async function () {
-  if (etapaAtual === 1 && servicosSelecionados.length === 0) {
-    alert("Selecione pelo menos um serviço.");
-    return;
-  }
-
-  if (etapaAtual === 2 && (!campoData.value || !horarioSelecionado)) {
-    alert("Selecione a data e o horário.");
-    return;
-  }
-
-  if (etapaAtual === 3) {
-    const nome = document.getElementById("nome").value.trim();
-    const telefone = document.getElementById("telefone").value.trim();
-
-    if (!nome || !telefone) {
-      alert("Preencha nome e telefone.");
+  if (etapaAtual === 1) {
+    if (servicosSelecionados.length === 0) {
+      alert("Selecione pelo menos um serviço.");
       return;
     }
 
-    montarResumoFinal();
-  }
-
-  if (etapaAtual < 4) {
-    etapaAtual++;
+    etapaAtual = 2;
     atualizarPassos();
     return;
   }
 
-  await enviarAgendamento();
+  if (etapaAtual === 2) {
+    if (!campoData.value || !horarioSelecionado) {
+      alert("Selecione a data e o horário.");
+      return;
+    }
+
+    montarResumoFinal();
+    etapaAtual = 3;
+    atualizarPassos();
+    return;
+  }
+
+  if (etapaAtual === 3) {
+    await enviarAgendamento();
+  }
 });
 
 function montarResumoFinal() {
-  const nome = document.getElementById("nome").value.trim();
-  const telefone = document.getElementById("telefone").value.trim();
-  const emailCliente = document.getElementById("emailCliente").value.trim();
-  const observacao = document.getElementById("observacao").value.trim();
+  const observacao = document.getElementById("observacao")
+    ? document.getElementById("observacao").value.trim()
+    : "";
 
   const total = servicosSelecionados.reduce(function (soma, servico) {
     return soma + servico.preco;
@@ -382,10 +396,11 @@ function montarResumoFinal() {
     })
     .join("");
 
+  if (confirmarNome) confirmarNome.textContent = usuarioLogado.nome || "Cliente";
+  if (confirmarEmail) confirmarEmail.textContent = usuarioLogado.email || "Não informado";
+  if (confirmarTelefone) confirmarTelefone.textContent = usuarioLogado.telefone || "Não informado";
+
   resumoFinal.innerHTML = `
-    <p><strong>Nome:</strong> ${nome}</p>
-    <p><strong>Telefone:</strong> ${telefone}</p>
-    <p><strong>E-mail:</strong> ${emailCliente || "Não informado"}</p>
     <p><strong>Data:</strong> ${formatarDataBR(campoData.value)}</p>
     <p><strong>Horário:</strong> ${horarioSelecionado}</p>
     <p><strong>Serviços:</strong></p>
@@ -396,10 +411,9 @@ function montarResumoFinal() {
 }
 
 async function enviarAgendamento() {
-  const nome = document.getElementById("nome").value.trim();
-  const telefone = document.getElementById("telefone").value.trim();
-  const emailCliente = document.getElementById("emailCliente").value.trim();
-  const observacao = document.getElementById("observacao").value.trim();
+  const observacao = document.getElementById("observacao")
+    ? document.getElementById("observacao").value.trim()
+    : "";
 
   const total = servicosSelecionados.reduce(function (soma, servico) {
     return soma + servico.preco;
@@ -416,9 +430,10 @@ async function enviarAgendamento() {
     .join(" | ");
 
   const dadosAgendamento = {
-    nome: nome,
-    telefone: telefone,
-    email: emailCliente || "Não informado",
+    clienteId: usuarioLogado.id,
+    nome: usuarioLogado.nome,
+    telefone: usuarioLogado.telefone || "",
+    email: usuarioLogado.email || "",
     data: campoData.value,
     horario: horarioSelecionado,
     servicos: servicosTexto,
@@ -430,7 +445,7 @@ async function enviarAgendamento() {
   btnProximo.disabled = true;
 
   try {
-    const resposta = await fetch("/api/agendamentos", {
+    const resposta = await fetch(`${GUAPO_API_URL}/api/agendamentos`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -447,9 +462,13 @@ async function enviarAgendamento() {
       btnVoltar.style.display = "none";
 
       resumoQuantidade.textContent = "Agendamento enviado";
-      resumoValor.textContent = "O agendamento foi salvo na API.";
+      resumoValor.textContent = "O agendamento foi salvo no banco de dados.";
+
+      setTimeout(function () {
+        window.location.href = "cliente.html";
+      }, 2500);
     } else {
-      mensagemStatus.textContent = retorno.erro || "Não foi possível enviar. Tente novamente.";
+      mensagemStatus.textContent = retorno.mensagem || retorno.erro || "Não foi possível enviar. Tente novamente.";
       btnProximo.disabled = false;
     }
   } catch (erro) {

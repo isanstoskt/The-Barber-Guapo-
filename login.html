@@ -46,7 +46,7 @@
           Esqueci minha senha
         </a>
 
-        <button type="submit">Entrar</button>
+        <button type="submit" id="btnEntrar">Entrar</button>
       </form>
 
       <p id="mensagemLogin" class="mensagem-login"></p>
@@ -68,18 +68,26 @@
   <script>
     const formLogin = document.getElementById("formLogin");
     const mensagemLogin = document.getElementById("mensagemLogin");
+    const btnEntrar = document.getElementById("btnEntrar");
 
-    formLogin.addEventListener("submit", function (event) {
+    formLogin.addEventListener("submit", async function (event) {
       event.preventDefault();
 
       const email = document.getElementById("email").value.trim();
       const senha = document.getElementById("senha").value.trim();
 
-      const retorno = fazerLogin(email, senha);
+      mensagemLogin.textContent = "Entrando...";
+      mensagemLogin.classList.remove("erro");
+      btnEntrar.disabled = true;
+      btnEntrar.textContent = "Entrando...";
+
+      const retorno = await fazerLogin(email, senha);
 
       if (!retorno.sucesso) {
         mensagemLogin.textContent = retorno.mensagem;
         mensagemLogin.classList.add("erro");
+        btnEntrar.disabled = false;
+        btnEntrar.textContent = "Entrar";
         return;
       }
 

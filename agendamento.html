@@ -42,13 +42,6 @@
 
         <div class="passo" data-passo="3">
           <span>3</span>
-          <p>Dados</p>
-        </div>
-
-        <div class="linha"></div>
-
-        <div class="passo" data-passo="4">
-          <span>4</span>
           <p>Confirmar</p>
         </div>
       </div>
@@ -290,64 +283,55 @@
 
       </div>
     </section>
-    
-<!-- ETAPA 2 - HORÁRIO -->
-<section class="agenda-etapa" id="etapaHorario">
-  <div class="agenda-container agenda-card">
-    <h2>Selecione o horário</h2>
-    <p class="agenda-subtexto">Escolha a data e o melhor horário para atendimento.</p>
 
-    <div class="agenda-bloco">
-      <label for="data">Escolha o dia</label>
-
-      <div class="datas-carrossel" id="datasCarrossel"></div>
-
-      <input type="hidden" id="data" required>
-    </div>
-
-    <div class="agenda-bloco">
-      <label for="horario">Escolha o horário</label>
-
-      <div class="agenda-horarios horarios-grid" id="horariosGrid"></div>
-
-      <input type="hidden" id="horario" required>
-    </div>
-  </div>
-</section>
-
-    <!-- ETAPA 3 - DADOS -->
-    <section class="agenda-etapa" id="etapaDados">
+    <!-- ETAPA 2 - HORÁRIO -->
+    <section class="agenda-etapa" id="etapaHorario">
       <div class="agenda-container agenda-card">
-        <h2>Seus dados</h2>
-        <p class="agenda-subtexto">Informe seus dados para o Guapo confirmar o agendamento.</p>
+        <h2>Selecione o horário</h2>
+        <p class="agenda-subtexto">Escolha a data e o melhor horário para atendimento.</p>
 
-        <div class="agenda-campo">
-          <label for="nome">Nome completo</label>
-          <input type="text" id="nome" placeholder="Digite seu nome">
+        <div class="agenda-bloco">
+          <label for="data">Escolha o dia</label>
+
+          <div class="datas-carrossel" id="datasCarrossel"></div>
+
+          <input type="hidden" id="data" required>
         </div>
 
-        <div class="agenda-campo">
-          <label for="telefone">Telefone para contato</label>
-          <input type="tel" id="telefone" placeholder="Ex: 11999999999">
-        </div>
+        <div class="agenda-bloco">
+          <label for="horario">Escolha o horário</label>
 
-        <div class="agenda-campo">
-          <label for="emailCliente">E-mail, se tiver</label>
-          <input type="email" id="emailCliente" placeholder="seuemail@email.com">
-        </div>
+          <div class="agenda-horarios horarios-grid" id="horariosGrid"></div>
 
-        <div class="agenda-campo">
-          <label for="observacao">Observação</label>
-          <textarea id="observacao" rows="4" placeholder="Ex: primeira vez, cabelo cacheado, quero corte e barba..."></textarea>
+          <input type="hidden" id="horario" required>
         </div>
       </div>
     </section>
 
-    <!-- ETAPA 4 - CONFIRMAR -->
+    <!-- ETAPA 3 - CONFIRMAR -->
     <section class="agenda-etapa" id="etapaConfirmar">
       <div class="agenda-container agenda-card">
         <h2>Confirmar solicitação</h2>
-        <p class="agenda-subtexto">Confira as informações antes de enviar.</p>
+        <p class="agenda-subtexto">
+          Confira as informações antes de enviar. Seus dados serão usados a partir do seu login.
+        </p>
+
+        <div class="agenda-dados-login">
+          <h3>Cliente</h3>
+
+          <p><strong>Nome:</strong> <span id="confirmarNome">Cliente</span></p>
+          <p><strong>E-mail:</strong> <span id="confirmarEmail">-</span></p>
+          <p><strong>Telefone:</strong> <span id="confirmarTelefone">-</span></p>
+        </div>
+
+        <div class="agenda-campo">
+          <label for="observacao">Observação, se tiver</label>
+          <textarea 
+            id="observacao" 
+            rows="4" 
+            placeholder="Ex: primeira vez, cabelo cacheado, quero corte e barba..."
+          ></textarea>
+        </div>
 
         <div class="agenda-resumo-final" id="resumoFinal"></div>
 
@@ -371,6 +355,7 @@
     </div>
   </footer>
 
+  <script src="auth.js"></script>
   <script src="agendamento.js"></script>
 </body>
 </html>

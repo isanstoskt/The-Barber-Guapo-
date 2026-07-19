@@ -1,286 +1,505 @@
+require("dotenv").config();
+
 const express = require("express");
 const cors = require("cors");
-const fs = require("fs");
-const path = require("path");
+const conexao = require("./db");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
 
-const arquivoAgendamentos = path.join(__dirname, "agendamentos.json");
+const PORT = process.env.PORT || 3000;
 
-const USUARIO_ADMIN = "admin";
-const SENHA_ADMIN = "guapo123";
-const TOKEN_ADMIN = "guapo-admin-logado";
-
-function pegarCookie(req, nome) {
-  const cookies = req.headers.cookie || "";
-  const listaCookies = cookies.split(";");
-
-  for (const cookie of listaCookies) {
-    const partes = cookie.trim().split("=");
-
-    if (partes[0] === nome) {
-      return partes[1];
-    }
-  }
-
-  return null;
-}
-
-function verificarLogin(req, res, next) {
-  const token = pegarCookie(req, "guapo_admin");
-
-  if (token === TOKEN_ADMIN) {
-    return next();
-  }
-
-  return res.redirect("/login");
-} 
-
-function lerAgendamentos() {
-  try {
-    const dados = fs.readFileSync(arquivoAgendamentos, "utf8");
-    return JSON.parse(dados);
-  } catch (erro) {
-    return [];
-  }
-}
-
-function salvarAgendamentos(agendamentos) {
-  fs.writeFileSync(
-    arquivoAgendamentos,
-    JSON.stringify(agendamentos, null, 2),
-    "utf8"
-  );
-}
+// =========================
+// ROTA DE TESTE
+// =========================
 
 app.get("/", function (req, res) {
-  res.sendFile(path.join(__dirname, "..", "index.html"));
-});
-
-app.get("/login", function (req, res) {
-  res.sendFile(path.join(__dirname, "..", "login.html"));
-});
-
-app.post("/api/login", function (req, res) {
-  const { usuario, senha } = req.body;
-
-  if (usuario === USUARIO_ADMIN && senha === SENHA_ADMIN) {
-    res.setHeader(
-      "Set-Cookie",
-      `guapo_admin=${TOKEN_ADMIN}; HttpOnly; Path=/; Max-Age=7200; SameSite=Lax`
-    );
-
-    return res.json({
-      mensagem: "Login realizado com sucesso."
-    });
-  }
-
-  return res.status(401).json({
-    erro: "Usuário ou senha inválidos."
+  res.json({
+    mensagem: "API Guapo The Barber funcionando com MySQL!"
   });
 });
 
-app.get("/painel", verificarLogin, function (req, res) {
-  res.sendFile(path.join(__dirname, "..", "painel.html"));
-});
+// =========================
+// LOGIN
+// =========================
 
-app.get("/painel.html", verificarLogin, function (req, res) {
-  res.sendFile(path.join(__dirname, "..", "painel.html"));
-});
+app.post("/api/auth/login", async function (req, res) {
+  try {
+    const { email, senha } = req.body;
 
-app.get("/painel.js", verificarLogin, function (req, res) {
-  res.sendFile(path.join(__dirname, "..", "painel.js"));
-});
-
-
-app.get("/api/agendamentos", function (req, res) {
-  const data = req.query.data;
-  const inicio = req.query.inicio;
-  const fim = req.query.fim;
-
-  let agendamentos = lerAgendamentos();
-
-  if (data) {
-    agendamentos = agendamentos.filter(function (agendamento) {
-      return agendamento.data === data;
-    });
-  }
-
-  if (inicio && fim) {
-    agendamentos = agendamentos.filter(function (agendamento) {
-      return agendamento.data >= inicio && agendamento.data <= fim;
-    });
-  }
-
-  agendamentos.sort(function (a, b) {
-    if (a.data === b.data) {
-      return a.horario.localeCompare(b.horario);
+    if (!email || !senha) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "E-mail e senha são obrigatórios."
+      });
     }
 
-    return a.data.localeCompare(b.data);
-  });
-
-  res.json(agendamentos);
-});
-
-app.get("/api/horarios-ocupados", function (req, res) {
-  const data = req.query.data;
-
-  if (!data) {
-    return res.status(400).json({
-      erro: "Informe a data."
-    });
-  }
-
-  const agendamentos = lerAgendamentos();
-
-  const horariosOcupados = agendamentos
-    .filter(function (agendamento) {
-      return agendamento.data === data && agendamento.status !== "Cancelado";
-    })
-    .map(function (agendamento) {
-      return agendamento.horario;
-    });
-
-  res.json({
-    data: data,
-    horariosOcupados: horariosOcupados
-  });
-});
-
-app.post("/api/agendamentos", function (req, res) {
-  const {
-    nome,
-    telefone,
-    email,
-    data,
-    horario,
-    servicos,
-    totalEstimado,
-    observacao
-  } = req.body;
-
-  if (!nome || !telefone || !data || !horario || !servicos) {
-    return res.status(400).json({
-      erro: "Preencha todos os campos obrigatórios."
-    });
-  }
-
-  const agendamentos = lerAgendamentos();
-
-  const horarioJaExiste = agendamentos.find(function (agendamento) {
-    return (
-      agendamento.data === data &&
-      agendamento.horario === horario &&
-      agendamento.status !== "Cancelado"
+    const [usuarios] = await conexao.query(
+      "SELECT id, nome, email, telefone, tipo FROM usuarios WHERE email = ? AND senha = ? LIMIT 1",
+      [email, senha]
     );
-  });
 
-  if (horarioJaExiste) {
-    return res.status(409).json({
-      erro: "Esse horário já está ocupado. Escolha outro horário."
+    if (usuarios.length === 0) {
+      return res.status(401).json({
+        sucesso: false,
+        mensagem: "E-mail ou senha inválidos."
+      });
+    }
+
+    return res.json({
+      sucesso: true,
+      usuario: usuarios[0]
+    });
+
+  } catch (erro) {
+    console.error("Erro no login:", erro);
+
+    return res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro interno no login."
     });
   }
-
-  const novoAgendamento = {
-    id: Date.now(),
-    nome: nome,
-    telefone: telefone,
-    email: email || "Não informado",
-    data: data,
-    horario: horario,
-    servicos: servicos,
-    totalEstimado: totalEstimado,
-    observacao: observacao || "Sem observação",
-    status: "Aguardando confirmação",
-    criadoEm: new Date().toISOString()
-  };
-
-  agendamentos.push(novoAgendamento);
-  salvarAgendamentos(agendamentos);
-
-  res.status(201).json({
-    mensagem: "Agendamento criado com sucesso.",
-    agendamento: novoAgendamento
-  });
 });
 
-app.patch("/api/agendamentos/:id/status", function (req, res) {
-  const id = Number(req.params.id);
-  const { status } = req.body;
+// =========================
+// CADASTRO DE CLIENTE
+// =========================
 
-  const statusPermitidos = [
-    "Aguardando confirmação",
-    "Confirmado",
-    "Cancelado"
-  ];
+app.post("/api/auth/cadastro", async function (req, res) {
+  try {
+    const { nome, email, telefone, senha } = req.body;
 
-  if (!statusPermitidos.includes(status)) {
-    return res.status(400).json({
-      erro: "Status inválido."
+    if (!nome || !email || !senha) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "Nome, e-mail e senha são obrigatórios."
+      });
+    }
+
+    const [usuarioExistente] = await conexao.query(
+      "SELECT id FROM usuarios WHERE email = ? LIMIT 1",
+      [email]
+    );
+
+    if (usuarioExistente.length > 0) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "Já existe uma conta com esse e-mail."
+      });
+    }
+
+    const [resultado] = await conexao.query(
+      `INSERT INTO usuarios (nome, email, telefone, senha, tipo)
+       VALUES (?, ?, ?, ?, 'cliente')`,
+      [nome, email, telefone || "", senha]
+    );
+
+    return res.status(201).json({
+      sucesso: true,
+      mensagem: "Cliente cadastrado com sucesso.",
+      usuario: {
+        id: resultado.insertId,
+        nome,
+        email,
+        telefone,
+        tipo: "cliente"
+      }
+    });
+
+  } catch (erro) {
+    console.error("Erro no cadastro:", erro);
+
+    return res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro interno no cadastro."
     });
   }
-
-  const agendamentos = lerAgendamentos();
-
-  const agendamento = agendamentos.find(function (item) {
-    return item.id === id;
-  });
-
-  if (!agendamento) {
-    return res.status(404).json({
-      erro: "Agendamento não encontrado."
-    });
-  }
-
-  agendamento.status = status;
-  agendamento.atualizadoEm = new Date().toISOString();
-
-  salvarAgendamentos(agendamentos);
-
-  res.json({
-    mensagem: "Status atualizado com sucesso.",
-    agendamento: agendamento
-  });
 });
 
-app.delete("/api/agendamentos/:id", function (req, res) {
-  const id = Number(req.params.id);
+// =========================
+// LISTAR AGENDAMENTOS
+// =========================
 
-  const agendamentos = lerAgendamentos();
+app.get("/api/agendamentos", async function (req, res) {
+  try {
+    const { data, inicio, fim } = req.query;
 
-  const novosAgendamentos = agendamentos.filter(function (item) {
-    return item.id !== id;
-  });
+    let sql = `
+      SELECT 
+        id,
+        usuario_id AS clienteId,
+        nome,
+        email,
+        telefone,
+        servicos,
+        data,
+        horario,
+        total_estimado AS totalEstimado,
+        observacao,
+        status,
+        criado_em AS criadoEm
+      FROM agendamentos
+      WHERE 1 = 1
+    `;
 
-  if (novosAgendamentos.length === agendamentos.length) {
-    return res.status(404).json({
-      erro: "Agendamento não encontrado."
+    const parametros = [];
+
+    if (data) {
+      sql += " AND data = ?";
+      parametros.push(data);
+    }
+
+    if (inicio && fim) {
+      sql += " AND data BETWEEN ? AND ?";
+      parametros.push(inicio, fim);
+    }
+
+    sql += " ORDER BY data ASC, horario ASC";
+
+    const [agendamentos] = await conexao.query(sql, parametros);
+
+    res.json(agendamentos);
+
+  } catch (erro) {
+    console.error("Erro ao listar agendamentos:", erro);
+
+    res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro ao listar agendamentos."
     });
   }
-
-  salvarAgendamentos(novosAgendamentos);
-
-  res.json({
-    mensagem: "Agendamento excluído com sucesso."
-  });
 });
-app.use(function (req, res, next) {
-  if (req.path.startsWith("/api/")) {
-    return res.status(404).json({
-      erro: "Rota não encontrada."
+
+// =========================
+// CRIAR AGENDAMENTO
+// =========================
+
+app.post("/api/agendamentos", async function (req, res) {
+  try {
+    const {
+      clienteId,
+      usuario_id,
+      nome,
+      email,
+      telefone,
+      servicos,
+      servico,
+      data,
+      horario,
+      totalEstimado,
+      total_estimado,
+      observacao
+    } = req.body;
+
+    if (!nome || !data || !horario) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "Nome, data e horário são obrigatórios."
+      });
+    }
+
+    const idCliente = clienteId || usuario_id || null;
+    const servicosTexto = servicos || servico || "";
+    const totalTexto = totalEstimado || total_estimado || "";
+
+    const [resultado] = await conexao.query(
+      `INSERT INTO agendamentos 
+      (usuario_id, nome, email, telefone, servicos, data, horario, total_estimado, observacao, status)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        idCliente,
+        nome,
+        email || "",
+        telefone || "",
+        servicosTexto,
+        data,
+        horario,
+        totalTexto,
+        observacao || "",
+        "Aguardando confirmação"
+      ]
+    );
+
+    res.status(201).json({
+      sucesso: true,
+      mensagem: "Agendamento criado com sucesso.",
+      agendamento: {
+        id: resultado.insertId,
+        clienteId: idCliente,
+        nome,
+        email,
+        telefone,
+        servicos: servicosTexto,
+        data,
+        horario,
+        totalEstimado: totalTexto,
+        observacao,
+        status: "Aguardando confirmação"
+      }
+    });
+
+  } catch (erro) {
+    console.error("Erro ao criar agendamento:", erro);
+
+    res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro ao criar agendamento."
     });
   }
-
-  next();
 });
 
-app.use(express.static(path.join(__dirname, "..")));
+// =========================
+// ALTERAR STATUS DO AGENDAMENTO
+// =========================
+
+app.patch("/api/agendamentos/:id/status", async function (req, res) {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!status) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "Status é obrigatório."
+      });
+    }
+
+    await conexao.query(
+      "UPDATE agendamentos SET status = ? WHERE id = ?",
+      [status, id]
+    );
+
+    res.json({
+      sucesso: true,
+      mensagem: "Status atualizado com sucesso."
+    });
+
+  } catch (erro) {
+    console.error("Erro ao alterar status:", erro);
+
+    res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro ao alterar status."
+    });
+  }
+});
+
+// =========================
+// EXCLUIR AGENDAMENTO
+// =========================
+
+app.delete("/api/agendamentos/:id", async function (req, res) {
+  try {
+    const { id } = req.params;
+
+    await conexao.query(
+      "DELETE FROM agendamentos WHERE id = ?",
+      [id]
+    );
+
+    res.json({
+      sucesso: true,
+      mensagem: "Agendamento excluído com sucesso."
+    });
+
+  } catch (erro) {
+    console.error("Erro ao excluir agendamento:", erro);
+
+    res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro ao excluir agendamento."
+    });
+  }
+});
+
+// =========================
+// LISTAR TODAS AS CONVERSAS DO PAINEL
+// =========================
+
+app.get("/api/mensagens", async function (req, res) {
+  try {
+    const [mensagens] = await conexao.query(`
+      SELECT 
+        mensagens.id,
+        mensagens.cliente_id AS clienteId,
+        usuarios.nome AS clienteNome,
+        usuarios.email AS clienteEmail,
+        usuarios.telefone AS clienteTelefone,
+        mensagens.autor,
+        mensagens.texto,
+        mensagens.lida_cliente AS lidaCliente,
+        mensagens.lida_barbeiro AS lidaBarbeiro,
+        mensagens.criada_em AS dataHora
+      FROM mensagens
+      INNER JOIN usuarios ON usuarios.id = mensagens.cliente_id
+      ORDER BY mensagens.criada_em ASC
+    `);
+
+    res.json(mensagens);
+
+  } catch (erro) {
+    console.error("Erro ao listar mensagens:", erro);
+
+    res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro ao listar mensagens."
+    });
+  }
+});
+
+// =========================
+// LISTAR MENSAGENS DE UM CLIENTE
+// =========================
+
+app.get("/api/mensagens/:clienteId", async function (req, res) {
+  try {
+    const { clienteId } = req.params;
+
+    const [mensagens] = await conexao.query(`
+      SELECT 
+        mensagens.id,
+        mensagens.cliente_id AS clienteId,
+        usuarios.nome AS clienteNome,
+        usuarios.email AS clienteEmail,
+        usuarios.telefone AS clienteTelefone,
+        mensagens.autor,
+        mensagens.texto,
+        mensagens.lida_cliente AS lidaCliente,
+        mensagens.lida_barbeiro AS lidaBarbeiro,
+        mensagens.criada_em AS dataHora
+      FROM mensagens
+      INNER JOIN usuarios ON usuarios.id = mensagens.cliente_id
+      WHERE mensagens.cliente_id = ?
+      ORDER BY mensagens.criada_em ASC
+    `, [clienteId]);
+
+    res.json(mensagens);
+
+  } catch (erro) {
+    console.error("Erro ao listar mensagens do cliente:", erro);
+
+    res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro ao listar mensagens do cliente."
+    });
+  }
+});
+
+// =========================
+// ENVIAR MENSAGEM
+// =========================
+
+app.post("/api/mensagens", async function (req, res) {
+  try {
+    const { clienteId, autor, texto } = req.body;
+
+    if (!clienteId || !autor || !texto) {
+      return res.status(400).json({
+        sucesso: false,
+        mensagem: "Cliente, autor e texto são obrigatórios."
+      });
+    }
+
+    const lidaCliente = autor === "cliente" ? true : false;
+    const lidaBarbeiro = autor === "barbeiro" ? true : false;
+
+    const [resultado] = await conexao.query(
+      `INSERT INTO mensagens 
+      (cliente_id, autor, texto, lida_cliente, lida_barbeiro)
+      VALUES (?, ?, ?, ?, ?)`,
+      [clienteId, autor, texto, lidaCliente, lidaBarbeiro]
+    );
+
+    res.status(201).json({
+      sucesso: true,
+      mensagem: "Mensagem enviada com sucesso.",
+      novaMensagem: {
+        id: resultado.insertId,
+        clienteId,
+        autor,
+        texto,
+        lidaCliente,
+        lidaBarbeiro,
+        dataHora: new Date().toISOString()
+      }
+    });
+
+  } catch (erro) {
+    console.error("Erro ao enviar mensagem:", erro);
+
+    res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro ao enviar mensagem."
+    });
+  }
+});
+
+// =========================
+// MARCAR MENSAGENS COMO LIDAS PELO CLIENTE
+// =========================
+
+app.patch("/api/mensagens/:clienteId/lidas-cliente", async function (req, res) {
+  try {
+    const { clienteId } = req.params;
+
+    await conexao.query(
+      `UPDATE mensagens 
+       SET lida_cliente = true 
+       WHERE cliente_id = ? AND autor = 'barbeiro'`,
+      [clienteId]
+    );
+
+    res.json({
+      sucesso: true,
+      mensagem: "Mensagens marcadas como lidas pelo cliente."
+    });
+
+  } catch (erro) {
+    console.error("Erro ao marcar lidas pelo cliente:", erro);
+
+    res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro ao marcar mensagens como lidas pelo cliente."
+    });
+  }
+});
+
+// =========================
+// MARCAR MENSAGENS COMO LIDAS PELO BARBEIRO
+// =========================
+
+app.patch("/api/mensagens/:clienteId/lidas-barbeiro", async function (req, res) {
+  try {
+    const { clienteId } = req.params;
+
+    await conexao.query(
+      `UPDATE mensagens 
+       SET lida_barbeiro = true 
+       WHERE cliente_id = ? AND autor = 'cliente'`,
+      [clienteId]
+    );
+
+    res.json({
+      sucesso: true,
+      mensagem: "Mensagens marcadas como lidas pelo barbeiro."
+    });
+
+  } catch (erro) {
+    console.error("Erro ao marcar lidas pelo barbeiro:", erro);
+
+    res.status(500).json({
+      sucesso: false,
+      mensagem: "Erro ao marcar mensagens como lidas pelo barbeiro."
+    });
+  }
+});
+
+// =========================
+// INICIAR SERVIDOR
+// =========================
 
 app.listen(PORT, function () {
-  console.log(`API rodando em http://localhost:${PORT}`);
+  console.log(`API rodando na porta ${PORT}`);
 });

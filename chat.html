@@ -29,7 +29,9 @@
       </div>
 
       <div class="chat-mensagens" id="chatMensagens">
-        <!-- mensagens aparecem aqui -->
+        <div class="chat-vazio">
+          <p>Carregando mensagens...</p>
+        </div>
       </div>
 
       <form id="formChat" class="chat-form">
@@ -40,7 +42,7 @@
           required
         />
 
-        <button type="submit">Enviar</button>
+        <button type="submit" id="btnEnviarMensagem">Enviar</button>
       </form>
 
     </section>
@@ -49,30 +51,24 @@
   <script src="auth.js"></script>
 
   <script>
+    const API_CHAT_URL = "http://localhost:3000";
+
     const usuarioLogado = pegarUsuarioLogado();
 
     if (!usuarioLogado) {
       window.location.href = "login.html";
+      throw new Error("Usuário não logado.");
     }
 
-    if (usuarioLogado && usuarioLogado.tipo === "barbeiro") {
+    if (usuarioLogado.tipo === "barbeiro") {
       window.location.href = "painel.html";
+      throw new Error("Barbeiro redirecionado para o painel.");
     }
-
-    const MENSAGENS_KEY = "guapo_mensagens";
 
     const chatMensagens = document.getElementById("chatMensagens");
     const formChat = document.getElementById("formChat");
     const mensagemTexto = document.getElementById("mensagemTexto");
-
-    function carregarMensagens() {
-      const dados = localStorage.getItem(MENSAGENS_KEY);
-      return dados ? JSON.parse(dados) : [];
-    }
-
-    function salvarMensagens(mensagens) {
-      localStorage.setItem(MENSAGENS_KEY, JSON.stringify(mensagens));
-    }
+    const btnEnviarMensagem = document.getElementById("btnEnviarMensagem");
 
     function escaparHTML(texto) {
       const div = document.createElement("div");
@@ -81,6 +77,8 @@
     }
 
     function formatarHora(dataISO) {
+      if (!dataISO) return "";
+
       const data = new Date(dataISO);
 
       return data.toLocaleString("pt-BR", {
@@ -91,35 +89,39 @@
       });
     }
 
-    function marcarMensagensDoBarbeiroComoLidas() {
-      const mensagens = carregarMensagens();
-
-      const mensagensAtualizadas = mensagens.map(function (mensagem) {
-        if (
-          String(mensagem.clienteId) === String(usuarioLogado.id) &&
-          mensagem.autor === "barbeiro"
-        ) {
-          return {
-            ...mensagem,
-            lida: true,
-            lidaCliente: true
-          };
-        }
-
-        return mensagem;
-      });
-
-      salvarMensagens(mensagensAtualizadas);
+    async function marcarMensagensDoBarbeiroComoLidas() {
+      try {
+        await fetch(`${API_CHAT_URL}/api/mensagens/${usuarioLogado.id}/lidas-cliente`, {
+          method: "PATCH"
+        });
+      } catch (erro) {
+        console.error("Erro ao marcar mensagens como lidas:", erro);
+      }
     }
 
-    function renderizarMensagens() {
-      const mensagens = carregarMensagens();
+    async function carregarMensagens() {
+      try {
+        const resposta = await fetch(`${API_CHAT_URL}/api/mensagens/${usuarioLogado.id}`);
+        const mensagens = await resposta.json();
 
-      const mensagensDoCliente = mensagens.filter(function (mensagem) {
-        return String(mensagem.clienteId) === String(usuarioLogado.id);
-      });
+        renderizarMensagens(mensagens);
 
-      if (mensagensDoCliente.length === 0) {
+        await marcarMensagensDoBarbeiroComoLidas();
+
+      } catch (erro) {
+        console.error("Erro ao carregar mensagens:", erro);
+
+        chatMensagens.innerHTML = `
+          <div class="chat-vazio">
+            <p>Erro ao carregar mensagens.</p>
+            <span>Verifique se a API está ligada.</span>
+          </div>
+        `;
+      }
+    }
+
+    function renderizarMensagens(mensagens) {
+      if (!mensagens || mensagens.length === 0) {
         chatMensagens.innerHTML = `
           <div class="chat-vazio">
             <p>Nenhuma mensagem ainda.</p>
@@ -129,7 +131,7 @@
         return;
       }
 
-      chatMensagens.innerHTML = mensagensDoCliente.map(function (mensagem) {
+      chatMensagens.innerHTML = mensagens.map(function (mensagem) {
         const classeAutor = mensagem.autor === "cliente" ? "mensagem-cliente" : "mensagem-barbeiro";
         const nomeAutor = mensagem.autor === "cliente" ? "Você" : "Guapo";
 
@@ -147,37 +149,53 @@
       chatMensagens.scrollTop = chatMensagens.scrollHeight;
     }
 
-    formChat.addEventListener("submit", function (event) {
+    formChat.addEventListener("submit", async function (event) {
       event.preventDefault();
 
       const texto = mensagemTexto.value.trim();
 
       if (!texto) return;
 
-      const mensagens = carregarMensagens();
+      btnEnviarMensagem.disabled = true;
+      btnEnviarMensagem.textContent = "Enviando...";
 
-      const novaMensagem = {
-        id: Date.now(),
-        clienteId: usuarioLogado.id,
-        clienteNome: usuarioLogado.nome,
-        clienteEmail: usuarioLogado.email,
-        clienteTelefone: usuarioLogado.telefone,
-        autor: "cliente",
-        texto: texto,
-        dataHora: new Date().toISOString(),
-        lida: false,
-        lidaBarbeiro: false
-      };
+      try {
+        const resposta = await fetch(`${API_CHAT_URL}/api/mensagens`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            clienteId: usuarioLogado.id,
+            autor: "cliente",
+            texto: texto
+          })
+        });
 
-      mensagens.push(novaMensagem);
-      salvarMensagens(mensagens);
+        const retorno = await resposta.json();
 
-      mensagemTexto.value = "";
-      renderizarMensagens();
+        if (!resposta.ok || !retorno.sucesso) {
+          alert(retorno.mensagem || "Erro ao enviar mensagem.");
+          return;
+        }
+
+        mensagemTexto.value = "";
+        await carregarMensagens();
+
+      } catch (erro) {
+        console.error("Erro ao enviar mensagem:", erro);
+        alert("Erro ao conectar com a API. Verifique se o servidor está ligado.");
+      } finally {
+        btnEnviarMensagem.disabled = false;
+        btnEnviarMensagem.textContent = "Enviar";
+      }
     });
 
-    marcarMensagensDoBarbeiroComoLidas();
-    renderizarMensagens();
+    carregarMensagens();
+
+    setInterval(function () {
+      carregarMensagens();
+    }, 5000);
   </script>
 
 </body>

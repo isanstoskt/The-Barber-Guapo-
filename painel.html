@@ -98,20 +98,20 @@
 
   <script src="auth.js"></script>
 
-  <script>
-    const usuarioLogadoPainel = pegarUsuarioLogado();
+<script>
+  const usuarioLogadoPainel = pegarUsuarioLogado();
 
-    if (!usuarioLogadoPainel || usuarioLogadoPainel.tipo !== "barbeiro") {
-      window.location.href = "login.html";
-    }
+  if (!usuarioLogadoPainel || usuarioLogadoPainel.tipo !== "barbeiro") {
+    window.location.href = "login.html";
+  }
 
-    function sairAdmin() {
-      localStorage.removeItem("guapo_usuario_logado");
-      localStorage.removeItem("guapo_redirect_apos_login");
-      window.location.href = "login.html";
-    }
-  </script>
+  function sairAdmin() {
+    localStorage.removeItem("guapo_usuario_logado");
+    localStorage.removeItem("guapo_redirect_apos_login");
+    window.location.href = "login.html";
+  }
+</script>
 
-  <script src="painel.js?v=4"></script>
+<script src="painel.js?v=10"></script>
 </body>
 </html>
