@@ -8,6 +8,7 @@
 
   <link rel="stylesheet" href="style.css" />
 </head>
+
 <body class="admin-body">
 
   <main class="cliente-container">
@@ -22,8 +23,14 @@
 
       <div class="cliente-boas-vindas">
         <p class="admin-tag">Área do cliente</p>
-        <h2 id="nomeCliente">Olá, cliente</h2>
-        <p>Acompanhe seu próximo corte, histórico e novos agendamentos.</p>
+
+        <h2 id="nomeCliente">
+          Olá, cliente
+        </h2>
+
+        <p>
+          Acompanhe seu próximo corte, histórico e novos agendamentos.
+        </p>
       </div>
 
       <section class="cliente-grid">
@@ -32,7 +39,9 @@
           <h3>Próximo corte</h3>
 
           <div id="proximoCorte">
-            <p class="cliente-vazio">Você ainda não possui corte agendado.</p>
+            <p class="cliente-vazio">
+              Carregando seu próximo corte...
+            </p>
           </div>
 
           <div class="acoes-cliente">
@@ -40,9 +49,17 @@
               Agendar novo corte
             </a>
 
-            <a href="chat.html" id="btnChatCliente" class="btn-cliente btn-chat-cliente btn-chat-com-alerta">
+            <a
+              href="chat.html"
+              id="btnChatCliente"
+              class="btn-cliente btn-chat-cliente btn-chat-com-alerta"
+            >
               Conversar com o barbeiro
-              <span id="badgeChatCliente" class="badge-notificacao"></span>
+
+              <span
+                id="badgeChatCliente"
+                class="badge-notificacao"
+              ></span>
             </a>
           </div>
         </div>
@@ -50,9 +67,20 @@
         <div class="cliente-box">
           <h3>Meus dados</h3>
 
-          <p><strong>Nome:</strong> <span id="dadoNome"></span></p>
-          <p><strong>E-mail:</strong> <span id="dadoEmail"></span></p>
-          <p><strong>Telefone:</strong> <span id="dadoTelefone"></span></p>
+          <p>
+            <strong>Nome:</strong>
+            <span id="dadoNome"></span>
+          </p>
+
+          <p>
+            <strong>E-mail:</strong>
+            <span id="dadoEmail"></span>
+          </p>
+
+          <p>
+            <strong>Telefone:</strong>
+            <span id="dadoTelefone"></span>
+          </p>
         </div>
 
       </section>
@@ -61,7 +89,9 @@
         <h3>Histórico de cortes</h3>
 
         <div id="historicoCortes">
-          <p class="cliente-vazio">Nenhum histórico encontrado até o momento.</p>
+          <p class="cliente-vazio">
+            Carregando histórico...
+          </p>
         </div>
       </section>
 
@@ -70,7 +100,11 @@
           Voltar para o site
         </a>
 
-        <button type="button" class="botao-outline-dourado" onclick="sair()">
+        <button
+          type="button"
+          class="botao-outline-dourado"
+          onclick="sair()"
+        >
           Sair
         </button>
       </div>
@@ -81,146 +115,415 @@
   <script src="auth.js"></script>
 
   <script>
+    const CLIENTE_API_BASE_URL = "http://localhost:3000";
+
     const usuarioLogado = pegarUsuarioLogado();
 
     if (!usuarioLogado) {
       window.location.href = "login.html";
-      throw new Error("Usuário não logado.");
-    }
-
-    if (usuarioLogado.tipo === "barbeiro") {
+    } else if (usuarioLogado.tipo === "barbeiro") {
       window.location.href = "painel.html";
-      throw new Error("Barbeiro redirecionado para o painel.");
     }
 
-    const nomeCliente = document.getElementById("nomeCliente");
-    const dadoNome = document.getElementById("dadoNome");
-    const dadoEmail = document.getElementById("dadoEmail");
-    const dadoTelefone = document.getElementById("dadoTelefone");
-    const proximoCorte = document.getElementById("proximoCorte");
-    const historicoCortes = document.getElementById("historicoCortes");
+    const nomeCliente =
+      document.getElementById("nomeCliente");
 
-    nomeCliente.textContent = `Olá, ${usuarioLogado.nome}`;
-    dadoNome.textContent = usuarioLogado.nome;
-    dadoEmail.textContent = usuarioLogado.email;
-    dadoTelefone.textContent = usuarioLogado.telefone;
+    const dadoNome =
+      document.getElementById("dadoNome");
 
-    const AGENDAMENTOS_KEY = "guapo_agendamentos";
+    const dadoEmail =
+      document.getElementById("dadoEmail");
 
-    function carregarAgendamentos() {
-      const dados = localStorage.getItem(AGENDAMENTOS_KEY);
-      return dados ? JSON.parse(dados) : [];
+    const dadoTelefone =
+      document.getElementById("dadoTelefone");
+
+    const proximoCorte =
+      document.getElementById("proximoCorte");
+
+    const historicoCortes =
+      document.getElementById("historicoCortes");
+
+    const badgeChatCliente =
+      document.getElementById("badgeChatCliente");
+
+
+    // =========================
+    // FUNÇÕES GERAIS
+    // =========================
+
+    function escaparHTML(texto) {
+      const div = document.createElement("div");
+      div.textContent = texto || "";
+      return div.innerHTML;
     }
 
-    function formatarData(data) {
-      if (!data) return "";
+    function obterDataISO(dataBanco) {
+      if (!dataBanco) {
+        return "";
+      }
 
-      const partes = data.split("-");
-      if (partes.length !== 3) return data;
+      return String(dataBanco).split("T")[0];
+    }
+
+    function formatarData(dataBanco) {
+      const dataISO = obterDataISO(dataBanco);
+
+      if (!dataISO) {
+        return "Data não informada";
+      }
+
+      const partes = dataISO.split("-");
+
+      if (partes.length !== 3) {
+        return dataISO;
+      }
 
       return `${partes[2]}/${partes[1]}/${partes[0]}`;
     }
 
-    function carregarAreaCliente() {
-      const todosAgendamentos = carregarAgendamentos();
-
-      const agendamentosCliente = todosAgendamentos.filter(agendamento => {
-        return (
-          agendamento.clienteId === usuarioLogado.id ||
-          agendamento.email === usuarioLogado.email ||
-          agendamento.telefone === usuarioLogado.telefone
-        );
-      });
-
+    function dataHojeISO() {
       const hoje = new Date();
-      hoje.setHours(0, 0, 0, 0);
 
-      const futuros = agendamentosCliente
-        .filter(agendamento => {
-          if (!agendamento.data) return false;
+      const ano = hoje.getFullYear();
+      const mes = String(
+        hoje.getMonth() + 1
+      ).padStart(2, "0");
 
-          const dataAgendamento = new Date(agendamento.data + "T00:00:00");
-          return dataAgendamento >= hoje && agendamento.status !== "cancelado";
-        })
-        .sort((a, b) => {
-          const dataA = new Date(`${a.data}T${a.horario || "00:00"}`);
-          const dataB = new Date(`${b.data}T${b.horario || "00:00"}`);
-          return dataA - dataB;
-        });
+      const dia = String(
+        hoje.getDate()
+      ).padStart(2, "0");
 
-      const historico = agendamentosCliente
-        .filter(agendamento => {
-          if (!agendamento.data) return false;
+      return `${ano}-${mes}-${dia}`;
+    }
 
-          const dataAgendamento = new Date(agendamento.data + "T00:00:00");
-          return dataAgendamento < hoje || agendamento.status === "concluido" || agendamento.status === "cancelado";
-        })
-        .sort((a, b) => {
-          const dataA = new Date(`${a.data}T${a.horario || "00:00"}`);
-          const dataB = new Date(`${b.data}T${b.horario || "00:00"}`);
-          return dataB - dataA;
-        });
+    function statusNormalizado(status) {
+      return String(status || "")
+        .trim()
+        .toLowerCase();
+    }
 
-      if (futuros.length > 0) {
-        const proximo = futuros[0];
+    function statusEhCancelado(status) {
+      return statusNormalizado(status)
+        .includes("cancel");
+    }
 
-        proximoCorte.innerHTML = `
-          <div class="corte-card">
-            <p><strong>Serviço:</strong> ${proximo.servico || proximo.servicos || "Corte"}</p>
-            <p><strong>Data:</strong> ${formatarData(proximo.data)}</p>
-            <p><strong>Horário:</strong> ${proximo.horario || "Não informado"}</p>
-            <p><strong>Status:</strong> ${proximo.status || "pendente"}</p>
-          </div>
-        `;
+    function statusEhConcluido(status) {
+      return statusNormalizado(status)
+        .includes("conclu");
+    }
+
+    function mensagemLidaPeloCliente(mensagem) {
+      return (
+        mensagem.lidaCliente === true ||
+        mensagem.lidaCliente === 1 ||
+        mensagem.lidaCliente === "1"
+      );
+    }
+
+    async function buscarJSON(url, opcoes = {}) {
+      const resposta = await fetch(url, opcoes);
+      const texto = await resposta.text();
+
+      let dados = null;
+
+      try {
+        dados = texto ? JSON.parse(texto) : null;
+      } catch (erro) {
+        throw new Error(
+          "A API não retornou dados válidos."
+        );
       }
 
-      if (historico.length > 0) {
-        historicoCortes.innerHTML = historico.map(agendamento => {
-          return `
-            <div class="historico-item">
-              <p><strong>${agendamento.servico || agendamento.servicos || "Corte"}</strong></p>
-              <p>${formatarData(agendamento.data)} às ${agendamento.horario || "horário não informado"}</p>
-              <span>Status: ${agendamento.status || "pendente"}</span>
-            </div>
-          `;
-        }).join("");
+      if (!resposta.ok) {
+        throw new Error(
+          dados?.mensagem ||
+          dados?.erro ||
+          "Erro ao consultar a API."
+        );
+      }
+
+      return dados;
+    }
+
+
+    // =========================
+    // DADOS DO CLIENTE
+    // =========================
+
+    function preencherDadosCliente() {
+      if (!usuarioLogado) {
+        return;
+      }
+
+      nomeCliente.textContent =
+        `Olá, ${usuarioLogado.nome || "cliente"}`;
+
+      dadoNome.textContent =
+        usuarioLogado.nome || "Não informado";
+
+      dadoEmail.textContent =
+        usuarioLogado.email || "Não informado";
+
+      dadoTelefone.textContent =
+        usuarioLogado.telefone || "Não informado";
+    }
+
+
+    // =========================
+    // AGENDAMENTOS DO MYSQL
+    // =========================
+
+    async function carregarAreaCliente() {
+      try {
+        const url =
+          `${CLIENTE_API_BASE_URL}/api/agendamentos` +
+          `?clienteId=${encodeURIComponent(usuarioLogado.id)}`;
+
+        const agendamentos =
+          await buscarJSON(url);
+
+        renderizarAgendamentosCliente(
+          Array.isArray(agendamentos)
+            ? agendamentos
+            : []
+        );
+
+      } catch (erro) {
+        console.error(
+          "Erro ao carregar área do cliente:",
+          erro
+        );
+
+        proximoCorte.innerHTML = `
+          <p class="cliente-vazio">
+            Não foi possível carregar seu próximo corte.
+            Verifique se a API está ligada.
+          </p>
+        `;
+
+        historicoCortes.innerHTML = `
+          <p class="cliente-vazio">
+            Não foi possível carregar seu histórico.
+          </p>
+        `;
       }
     }
 
-    function atualizarNotificacaoChatCliente() {
-      const badgeChatCliente = document.getElementById("badgeChatCliente");
+    function renderizarAgendamentosCliente(
+      agendamentos
+    ) {
+      const hoje = dataHojeISO();
 
-      if (!badgeChatCliente || !usuarioLogado) return;
+      const futuros = agendamentos
+        .filter(function (agendamento) {
+          const data =
+            obterDataISO(agendamento.data);
 
-      const dados = localStorage.getItem("guapo_mensagens");
-      const mensagens = dados ? JSON.parse(dados) : [];
+          return (
+            data >= hoje &&
+            !statusEhCancelado(agendamento.status) &&
+            !statusEhConcluido(agendamento.status)
+          );
+        })
+        .sort(function (a, b) {
+          const dataA = new Date(
+            `${obterDataISO(a.data)}T${a.horario || "00:00"}`
+          );
 
-      const temMensagemNova = mensagens.some(function (mensagem) {
-        return (
-          String(mensagem.clienteId) === String(usuarioLogado.id) &&
-          mensagem.autor === "barbeiro" &&
-          mensagem.lidaCliente !== true
+          const dataB = new Date(
+            `${obterDataISO(b.data)}T${b.horario || "00:00"}`
+          );
+
+          return dataA - dataB;
+        });
+
+      const historico = agendamentos
+        .filter(function (agendamento) {
+          const data =
+            obterDataISO(agendamento.data);
+
+          return (
+            data < hoje ||
+            statusEhCancelado(agendamento.status) ||
+            statusEhConcluido(agendamento.status)
+          );
+        })
+        .sort(function (a, b) {
+          const dataA = new Date(
+            `${obterDataISO(a.data)}T${a.horario || "00:00"}`
+          );
+
+          const dataB = new Date(
+            `${obterDataISO(b.data)}T${b.horario || "00:00"}`
+          );
+
+          return dataB - dataA;
+        });
+
+      renderizarProximoCorte(futuros);
+      renderizarHistorico(historico);
+    }
+
+    function renderizarProximoCorte(futuros) {
+      if (futuros.length === 0) {
+        proximoCorte.innerHTML = `
+          <p class="cliente-vazio">
+            Você ainda não possui corte agendado.
+          </p>
+        `;
+
+        return;
+      }
+
+      const proximo = futuros[0];
+
+      proximoCorte.innerHTML = `
+        <div class="corte-card">
+          <p>
+            <strong>Serviço:</strong>
+            ${escaparHTML(
+              proximo.servicos ||
+              proximo.servico ||
+              "Corte"
+            )}
+          </p>
+
+          <p>
+            <strong>Data:</strong>
+            ${formatarData(proximo.data)}
+          </p>
+
+          <p>
+            <strong>Horário:</strong>
+            ${escaparHTML(
+              proximo.horario ||
+              "Não informado"
+            )}
+          </p>
+
+          <p>
+            <strong>Status:</strong>
+            ${escaparHTML(
+              proximo.status ||
+              "Aguardando confirmação"
+            )}
+          </p>
+
+          <p>
+            <strong>Total:</strong>
+            ${escaparHTML(
+              proximo.totalEstimado ||
+              "Não informado"
+            )}
+          </p>
+        </div>
+      `;
+    }
+
+    function renderizarHistorico(historico) {
+      if (historico.length === 0) {
+        historicoCortes.innerHTML = `
+          <p class="cliente-vazio">
+            Nenhum histórico encontrado até o momento.
+          </p>
+        `;
+
+        return;
+      }
+
+      historicoCortes.innerHTML =
+        historico.map(function (agendamento) {
+          return `
+            <div class="historico-item">
+              <p>
+                <strong>
+                  ${escaparHTML(
+                    agendamento.servicos ||
+                    agendamento.servico ||
+                    "Corte"
+                  )}
+                </strong>
+              </p>
+
+              <p>
+                ${formatarData(agendamento.data)}
+                às
+                ${escaparHTML(
+                  agendamento.horario ||
+                  "horário não informado"
+                )}
+              </p>
+
+              <span>
+                Status:
+                ${escaparHTML(
+                  agendamento.status ||
+                  "Aguardando confirmação"
+                )}
+              </span>
+            </div>
+          `;
+        }).join("");
+    }
+
+
+    // =========================
+    // NOTIFICAÇÃO DO CHAT
+    // =========================
+
+    async function atualizarNotificacaoChatCliente() {
+      if (!badgeChatCliente || !usuarioLogado) {
+        return;
+      }
+
+      try {
+        const mensagens = await buscarJSON(
+          `${CLIENTE_API_BASE_URL}/api/mensagens/${usuarioLogado.id}`
         );
-      });
 
-      if (temMensagemNova) {
-        badgeChatCliente.classList.add("ativo");
-      } else {
+        const temMensagemNova =
+          Array.isArray(mensagens) &&
+          mensagens.some(function (mensagem) {
+            return (
+              mensagem.autor === "barbeiro" &&
+              !mensagemLidaPeloCliente(mensagem)
+            );
+          });
+
+        if (temMensagemNova) {
+          badgeChatCliente.classList.add("ativo");
+        } else {
+          badgeChatCliente.classList.remove("ativo");
+        }
+
+      } catch (erro) {
+        console.error(
+          "Erro ao consultar notificações:",
+          erro
+        );
+
         badgeChatCliente.classList.remove("ativo");
       }
     }
 
-    const btnChatCliente = document.getElementById("btnChatCliente");
 
-    if (btnChatCliente) {
-      btnChatCliente.addEventListener("click", function (event) {
-        event.preventDefault();
-        window.location.href = "chat.html";
-      });
+    // =========================
+    // INICIAR
+    // =========================
+
+    if (
+      usuarioLogado &&
+      usuarioLogado.tipo === "cliente"
+    ) {
+      preencherDadosCliente();
+      carregarAreaCliente();
+      atualizarNotificacaoChatCliente();
+
+      setInterval(function () {
+        carregarAreaCliente();
+        atualizarNotificacaoChatCliente();
+      }, 5000);
     }
-
-    carregarAreaCliente();
-    atualizarNotificacaoChatCliente();
   </script>
 
 </body>

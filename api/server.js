@@ -124,7 +124,7 @@ app.post("/api/auth/cadastro", async function (req, res) {
 
 app.get("/api/agendamentos", async function (req, res) {
   try {
-    const { data, inicio, fim } = req.query;
+    const { data, inicio, fim, clienteId } = req.query;
 
     let sql = `
       SELECT 
@@ -156,6 +156,11 @@ app.get("/api/agendamentos", async function (req, res) {
       parametros.push(inicio, fim);
     }
 
+    if (clienteId) {
+      sql += " AND usuario_id = ?";
+      parametros.push(clienteId);
+   }
+   
     sql += " ORDER BY data ASC, horario ASC";
 
     const [agendamentos] = await conexao.query(sql, parametros);
