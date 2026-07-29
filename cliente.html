@@ -2,11 +2,149 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>Área do Cliente - Guapo The Barber</title>
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
 
-  <link rel="stylesheet" href="style.css" />
+  <title>
+    Área do Cliente - Guapo The Barber
+  </title>
+
+  <link
+    rel="stylesheet"
+    href="style.css"
+  />
+
+  <style>
+    .notificacoes-box {
+      margin-top: 24px;
+    }
+
+    .notificacoes-topo {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .notificacoes-titulo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0;
+    }
+
+    .notificacoes-contador {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      min-width: 24px;
+      height: 24px;
+      padding: 0 7px;
+      border-radius: 999px;
+      background: #c62828;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .notificacoes-contador.ativo {
+      display: inline-flex;
+    }
+
+    .btn-marcar-notificacoes {
+      border: 1px solid #c8a45d;
+      border-radius: 999px;
+      padding: 9px 14px;
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
+      font: inherit;
+    }
+
+    .btn-marcar-notificacoes:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .lista-notificacoes-cliente {
+      display: grid;
+      gap: 12px;
+    }
+
+    .notificacao-cliente-item {
+      width: 100%;
+      border: 1px solid rgba(200, 164, 93, 0.35);
+      border-radius: 14px;
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.03);
+      color: inherit;
+      text-align: left;
+      cursor: pointer;
+      transition:
+        transform 0.2s ease,
+        border-color 0.2s ease,
+        background 0.2s ease;
+    }
+
+    .notificacao-cliente-item:hover {
+      transform: translateY(-1px);
+      border-color: #c8a45d;
+    }
+
+    .notificacao-cliente-item.nao-lida {
+      border-left: 4px solid #c62828;
+      background: rgba(198, 40, 40, 0.08);
+    }
+
+    .notificacao-cliente-cabecalho {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .notificacao-cliente-cabecalho strong {
+      line-height: 1.35;
+    }
+
+    .notificacao-cliente-nova {
+      flex-shrink: 0;
+      border-radius: 999px;
+      padding: 4px 8px;
+      background: #c62828;
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .notificacao-cliente-item p {
+      margin: 0 0 8px;
+      line-height: 1.5;
+    }
+
+    .notificacao-cliente-item time {
+      display: block;
+      opacity: 0.65;
+      font-size: 12px;
+    }
+
+    @media (max-width: 700px) {
+      .notificacoes-topo {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .btn-marcar-notificacoes {
+        width: 100%;
+      }
+    }
+  </style>
 </head>
 
 <body class="admin-body">
@@ -22,14 +160,17 @@
       </header>
 
       <div class="cliente-boas-vindas">
-        <p class="admin-tag">Área do cliente</p>
+        <p class="admin-tag">
+          Área do cliente
+        </p>
 
         <h2 id="nomeCliente">
           Olá, cliente
         </h2>
 
         <p>
-          Acompanhe seu próximo corte, histórico e novos agendamentos.
+          Acompanhe seu próximo corte,
+          histórico, mensagens e notificações.
         </p>
       </div>
 
@@ -45,7 +186,10 @@
           </div>
 
           <div class="acoes-cliente">
-            <a href="agendamento.html" class="btn-cliente">
+            <a
+              href="agendamento.html"
+              class="btn-cliente"
+            >
               Agendar novo corte
             </a>
 
@@ -85,7 +229,45 @@
 
       </section>
 
-      <section class="cliente-box historico-box">
+      <section
+        class="cliente-box notificacoes-box"
+      >
+        <div class="notificacoes-topo">
+          <h3 class="notificacoes-titulo">
+            Notificações
+
+            <span
+              id="badgeNotificacoesCliente"
+              class="notificacoes-contador"
+            >
+              0
+            </span>
+          </h3>
+
+          <button
+            type="button"
+            id="btnMarcarTodasLidas"
+            class="btn-marcar-notificacoes"
+            disabled
+          >
+            Marcar todas como lidas
+          </button>
+        </div>
+
+        <div
+          id="listaNotificacoesCliente"
+          class="lista-notificacoes-cliente"
+          aria-live="polite"
+        >
+          <p class="cliente-vazio">
+            Carregando notificações...
+          </p>
+        </div>
+      </section>
+
+      <section
+        class="cliente-box historico-box"
+      >
         <h3>Histórico de cortes</h3>
 
         <div id="historicoCortes">
@@ -96,7 +278,10 @@
       </section>
 
       <div class="cliente-acoes-finais">
-        <a href="index.html" class="botao-outline-dourado">
+        <a
+          href="index.html"
+          class="botao-outline-dourado"
+        >
           Voltar para o site
         </a>
 
@@ -115,45 +300,96 @@
   <script src="auth.js"></script>
 
   <script>
-    const CLIENTE_API_BASE_URL = "http://localhost:3000";
+    const CLIENTE_API_BASE_URL =
+      "http://localhost:3000";
 
-    const usuarioLogado = pegarUsuarioLogado();
+    const usuarioClienteLogado =
+      pegarUsuarioLogado();
 
-    if (!usuarioLogado) {
-      window.location.href = "login.html";
-    } else if (usuarioLogado.tipo === "barbeiro") {
-      window.location.href = "painel.html";
+    if (!usuarioClienteLogado) {
+      window.location.replace(
+        "login.html"
+      );
+
+      throw new Error(
+        "Cliente não está logado."
+      );
+    }
+
+    if (
+      usuarioClienteLogado.tipo ===
+      "barbeiro"
+    ) {
+      window.location.replace(
+        "painel.html"
+      );
+
+      throw new Error(
+        "Esta área é exclusiva para clientes."
+      );
     }
 
     const nomeCliente =
-      document.getElementById("nomeCliente");
+      document.getElementById(
+        "nomeCliente"
+      );
 
     const dadoNome =
-      document.getElementById("dadoNome");
+      document.getElementById(
+        "dadoNome"
+      );
 
     const dadoEmail =
-      document.getElementById("dadoEmail");
+      document.getElementById(
+        "dadoEmail"
+      );
 
     const dadoTelefone =
-      document.getElementById("dadoTelefone");
+      document.getElementById(
+        "dadoTelefone"
+      );
 
     const proximoCorte =
-      document.getElementById("proximoCorte");
+      document.getElementById(
+        "proximoCorte"
+      );
 
     const historicoCortes =
-      document.getElementById("historicoCortes");
+      document.getElementById(
+        "historicoCortes"
+      );
 
     const badgeChatCliente =
-      document.getElementById("badgeChatCliente");
+      document.getElementById(
+        "badgeChatCliente"
+      );
 
+    const listaNotificacoesCliente =
+      document.getElementById(
+        "listaNotificacoesCliente"
+      );
+
+    const badgeNotificacoesCliente =
+      document.getElementById(
+        "badgeNotificacoesCliente"
+      );
+
+    const btnMarcarTodasLidas =
+      document.getElementById(
+        "btnMarcarTodasLidas"
+      );
 
     // =========================
     // FUNÇÕES GERAIS
     // =========================
 
     function escaparHTML(texto) {
-      const div = document.createElement("div");
-      div.textContent = texto || "";
+      const div =
+        document.createElement("div");
+
+      div.textContent =
+        texto || "";
+
       return div.innerHTML;
     }
 
@@ -162,36 +398,78 @@
         return "";
       }
 
-      return String(dataBanco).split("T")[0];
+      return String(dataBanco)
+        .split("T")[0];
     }
 
     function formatarData(dataBanco) {
-      const dataISO = obterDataISO(dataBanco);
+      const dataISO =
+        obterDataISO(dataBanco);
 
       if (!dataISO) {
         return "Data não informada";
       }
 
-      const partes = dataISO.split("-");
+      const partes =
+        dataISO.split("-");
 
       if (partes.length !== 3) {
         return dataISO;
       }
 
-      return `${partes[2]}/${partes[1]}/${partes[0]}`;
+      return (
+        `${partes[2]}/` +
+        `${partes[1]}/` +
+        `${partes[0]}`
+      );
+    }
+
+    function formatarDataHora(
+      dataBanco
+    ) {
+      if (!dataBanco) {
+        return "";
+      }
+
+      const data =
+        new Date(dataBanco);
+
+      if (
+        Number.isNaN(
+          data.getTime()
+        )
+      ) {
+        return "";
+      }
+
+      return data.toLocaleString(
+        "pt-BR",
+        {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit"
+        }
+      );
     }
 
     function dataHojeISO() {
-      const hoje = new Date();
+      const hoje =
+        new Date();
 
-      const ano = hoje.getFullYear();
-      const mes = String(
-        hoje.getMonth() + 1
-      ).padStart(2, "0");
+      const ano =
+        hoje.getFullYear();
 
-      const dia = String(
-        hoje.getDate()
-      ).padStart(2, "0");
+      const mes =
+        String(
+          hoje.getMonth() + 1
+        ).padStart(2, "0");
+
+      const dia =
+        String(
+          hoje.getDate()
+        ).padStart(2, "0");
 
       return `${ano}-${mes}-${dia}`;
     }
@@ -212,7 +490,9 @@
         .includes("conclu");
     }
 
-    function mensagemLidaPeloCliente(mensagem) {
+    function mensagemLidaPeloCliente(
+      mensagem
+    ) {
       return (
         mensagem.lidaCliente === true ||
         mensagem.lidaCliente === 1 ||
@@ -220,14 +500,36 @@
       );
     }
 
-    async function buscarJSON(url, opcoes = {}) {
-      const resposta = await fetch(url, opcoes);
-      const texto = await resposta.text();
+    function notificacaoLida(
+      notificacao
+    ) {
+      return (
+        notificacao.lida === true ||
+        notificacao.lida === 1 ||
+        notificacao.lida === "1"
+      );
+    }
+
+    async function buscarJSON(
+      url,
+      opcoes = {}
+    ) {
+      const resposta =
+        await fetch(
+          url,
+          opcoes
+        );
+
+      const texto =
+        await resposta.text();
 
       let dados = null;
 
       try {
-        dados = texto ? JSON.parse(texto) : null;
+        dados = texto
+          ? JSON.parse(texto)
+          : null;
+
       } catch (erro) {
         throw new Error(
           "A API não retornou dados válidos."
@@ -245,39 +547,44 @@
       return dados;
     }
 
-
     // =========================
     // DADOS DO CLIENTE
     // =========================
 
     function preencherDadosCliente() {
-      if (!usuarioLogado) {
-        return;
-      }
-
       nomeCliente.textContent =
-        `Olá, ${usuarioLogado.nome || "cliente"}`;
+        `Olá, ${
+          usuarioClienteLogado.nome ||
+          "cliente"
+        }`;
 
       dadoNome.textContent =
-        usuarioLogado.nome || "Não informado";
+        usuarioClienteLogado.nome ||
+        "Não informado";
 
       dadoEmail.textContent =
-        usuarioLogado.email || "Não informado";
+        usuarioClienteLogado.email ||
+        "Não informado";
 
       dadoTelefone.textContent =
-        usuarioLogado.telefone || "Não informado";
+        usuarioClienteLogado.telefone ||
+        "Não informado";
     }
 
-
     // =========================
-    // AGENDAMENTOS DO MYSQL
+    // AGENDAMENTOS
     // =========================
 
     async function carregarAreaCliente() {
       try {
         const url =
-          `${CLIENTE_API_BASE_URL}/api/agendamentos` +
-          `?clienteId=${encodeURIComponent(usuarioLogado.id)}`;
+          `${CLIENTE_API_BASE_URL}` +
+          `/api/agendamentos` +
+          `?clienteId=${
+            encodeURIComponent(
+              usuarioClienteLogado.id
+            )
+          }`;
 
         const agendamentos =
           await buscarJSON(url);
@@ -296,14 +603,15 @@
 
         proximoCorte.innerHTML = `
           <p class="cliente-vazio">
-            Não foi possível carregar seu próximo corte.
-            Verifique se a API está ligada.
+            Não foi possível carregar
+            seu próximo corte.
           </p>
         `;
 
         historicoCortes.innerHTML = `
           <p class="cliente-vazio">
-            Não foi possível carregar seu histórico.
+            Não foi possível carregar
+            seu histórico.
           </p>
         `;
       }
@@ -312,75 +620,124 @@
     function renderizarAgendamentosCliente(
       agendamentos
     ) {
-      const hoje = dataHojeISO();
+      const hoje =
+        dataHojeISO();
 
-      const futuros = agendamentos
-        .filter(function (agendamento) {
-          const data =
-            obterDataISO(agendamento.data);
+      const futuros =
+        agendamentos
+          .filter(function (
+            agendamento
+          ) {
+            const data =
+              obterDataISO(
+                agendamento.data
+              );
 
-          return (
-            data >= hoje &&
-            !statusEhCancelado(agendamento.status) &&
-            !statusEhConcluido(agendamento.status)
-          );
-        })
-        .sort(function (a, b) {
-          const dataA = new Date(
-            `${obterDataISO(a.data)}T${a.horario || "00:00"}`
-          );
+            return (
+              data >= hoje &&
+              !statusEhCancelado(
+                agendamento.status
+              ) &&
+              !statusEhConcluido(
+                agendamento.status
+              )
+            );
+          })
+          .sort(function (a, b) {
+            const dataA =
+              new Date(
+                `${
+                  obterDataISO(a.data)
+                }T${
+                  a.horario || "00:00"
+                }`
+              );
 
-          const dataB = new Date(
-            `${obterDataISO(b.data)}T${b.horario || "00:00"}`
-          );
+            const dataB =
+              new Date(
+                `${
+                  obterDataISO(b.data)
+                }T${
+                  b.horario || "00:00"
+                }`
+              );
 
-          return dataA - dataB;
-        });
+            return dataA - dataB;
+          });
 
-      const historico = agendamentos
-        .filter(function (agendamento) {
-          const data =
-            obterDataISO(agendamento.data);
+      const historico =
+        agendamentos
+          .filter(function (
+            agendamento
+          ) {
+            const data =
+              obterDataISO(
+                agendamento.data
+              );
 
-          return (
-            data < hoje ||
-            statusEhCancelado(agendamento.status) ||
-            statusEhConcluido(agendamento.status)
-          );
-        })
-        .sort(function (a, b) {
-          const dataA = new Date(
-            `${obterDataISO(a.data)}T${a.horario || "00:00"}`
-          );
+            return (
+              data < hoje ||
+              statusEhCancelado(
+                agendamento.status
+              ) ||
+              statusEhConcluido(
+                agendamento.status
+              )
+            );
+          })
+          .sort(function (a, b) {
+            const dataA =
+              new Date(
+                `${
+                  obterDataISO(a.data)
+                }T${
+                  a.horario || "00:00"
+                }`
+              );
 
-          const dataB = new Date(
-            `${obterDataISO(b.data)}T${b.horario || "00:00"}`
-          );
+            const dataB =
+              new Date(
+                `${
+                  obterDataISO(b.data)
+                }T${
+                  b.horario || "00:00"
+                }`
+              );
 
-          return dataB - dataA;
-        });
+            return dataB - dataA;
+          });
 
-      renderizarProximoCorte(futuros);
-      renderizarHistorico(historico);
+      renderizarProximoCorte(
+        futuros
+      );
+
+      renderizarHistorico(
+        historico
+      );
     }
 
-    function renderizarProximoCorte(futuros) {
+    function renderizarProximoCorte(
+      futuros
+    ) {
       if (futuros.length === 0) {
         proximoCorte.innerHTML = `
           <p class="cliente-vazio">
-            Você ainda não possui corte agendado.
+            Você ainda não possui
+            corte agendado.
           </p>
         `;
 
         return;
       }
 
-      const proximo = futuros[0];
+      const proximo =
+        futuros[0];
 
       proximoCorte.innerHTML = `
         <div class="corte-card">
           <p>
             <strong>Serviço:</strong>
+
             ${escaparHTML(
               proximo.servicos ||
               proximo.servico ||
@@ -390,11 +747,15 @@
 
           <p>
             <strong>Data:</strong>
-            ${formatarData(proximo.data)}
+
+            ${formatarData(
+              proximo.data
+            )}
           </p>
 
           <p>
             <strong>Horário:</strong>
+
             ${escaparHTML(
               proximo.horario ||
               "Não informado"
@@ -403,6 +764,7 @@
 
           <p>
             <strong>Status:</strong>
+
             ${escaparHTML(
               proximo.status ||
               "Aguardando confirmação"
@@ -411,6 +773,7 @@
 
           <p>
             <strong>Total:</strong>
+
             ${escaparHTML(
               proximo.totalEstimado ||
               "Não informado"
@@ -420,11 +783,13 @@
       `;
     }
 
-    function renderizarHistorico(historico) {
+    function renderizarHistorico(
+      historico
+    ) {
       if (historico.length === 0) {
         historicoCortes.innerHTML = `
           <p class="cliente-vazio">
-            Nenhum histórico encontrado até o momento.
+            Nenhum histórico encontrado.
           </p>
         `;
 
@@ -432,98 +797,331 @@
       }
 
       historicoCortes.innerHTML =
-        historico.map(function (agendamento) {
-          return `
-            <div class="historico-item">
-              <p>
-                <strong>
-                  ${escaparHTML(
-                    agendamento.servicos ||
-                    agendamento.servico ||
-                    "Corte"
+        historico
+          .map(function (
+            agendamento
+          ) {
+            return `
+              <div class="historico-item">
+                <p>
+                  <strong>
+                    ${escaparHTML(
+                      agendamento.servicos ||
+                      agendamento.servico ||
+                      "Corte"
+                    )}
+                  </strong>
+                </p>
+
+                <p>
+                  ${formatarData(
+                    agendamento.data
                   )}
-                </strong>
-              </p>
 
-              <p>
-                ${formatarData(agendamento.data)}
-                às
-                ${escaparHTML(
-                  agendamento.horario ||
-                  "horário não informado"
-                )}
-              </p>
+                  às
 
-              <span>
-                Status:
-                ${escaparHTML(
-                  agendamento.status ||
-                  "Aguardando confirmação"
-                )}
-              </span>
-            </div>
-          `;
-        }).join("");
+                  ${escaparHTML(
+                    agendamento.horario ||
+                    "horário não informado"
+                  )}
+                </p>
+
+                <span>
+                  Status:
+
+                  ${escaparHTML(
+                    agendamento.status ||
+                    "Aguardando confirmação"
+                  )}
+                </span>
+              </div>
+            `;
+          })
+          .join("");
     }
 
-
     // =========================
-    // NOTIFICAÇÃO DO CHAT
+    // BOLINHA DO CHAT
     // =========================
 
     async function atualizarNotificacaoChatCliente() {
-      if (!badgeChatCliente || !usuarioLogado) {
+      if (!badgeChatCliente) {
         return;
       }
 
       try {
-        const mensagens = await buscarJSON(
-          `${CLIENTE_API_BASE_URL}/api/mensagens/${usuarioLogado.id}`
-        );
+        const mensagens =
+          await buscarJSON(
+            `${CLIENTE_API_BASE_URL}` +
+            `/api/mensagens/` +
+            `${usuarioClienteLogado.id}`
+          );
 
         const temMensagemNova =
           Array.isArray(mensagens) &&
-          mensagens.some(function (mensagem) {
-            return (
-              mensagem.autor === "barbeiro" &&
-              !mensagemLidaPeloCliente(mensagem)
-            );
-          });
+          mensagens.some(
+            function (mensagem) {
+              return (
+                mensagem.autor ===
+                  "barbeiro" &&
+
+                !mensagemLidaPeloCliente(
+                  mensagem
+                )
+              );
+            }
+          );
 
         if (temMensagemNova) {
-          badgeChatCliente.classList.add("ativo");
+          badgeChatCliente
+            .classList
+            .add("ativo");
         } else {
-          badgeChatCliente.classList.remove("ativo");
+          badgeChatCliente
+            .classList
+            .remove("ativo");
         }
 
       } catch (erro) {
         console.error(
-          "Erro ao consultar notificações:",
+          "Erro ao consultar mensagens novas:",
           erro
         );
 
-        badgeChatCliente.classList.remove("ativo");
+        badgeChatCliente
+          .classList
+          .remove("ativo");
       }
     }
 
+    // =========================
+    // NOTIFICAÇÕES DO SITE
+    // =========================
+
+    async function carregarNotificacoesCliente() {
+      try {
+        const notificacoes =
+          await buscarJSON(
+            `${CLIENTE_API_BASE_URL}` +
+            `/api/notificacoes/` +
+            `${usuarioClienteLogado.id}`
+          );
+
+        renderizarNotificacoesCliente(
+          Array.isArray(notificacoes)
+            ? notificacoes
+            : []
+        );
+
+      } catch (erro) {
+        console.error(
+          "Erro ao carregar notificações:",
+          erro
+        );
+
+        listaNotificacoesCliente.innerHTML = `
+          <p class="cliente-vazio">
+            Não foi possível carregar
+            as notificações.
+          </p>
+        `;
+
+        atualizarContadorNotificacoes(0);
+      }
+    }
+
+    function atualizarContadorNotificacoes(
+      quantidade
+    ) {
+      badgeNotificacoesCliente.textContent =
+        String(quantidade);
+
+      if (quantidade > 0) {
+        badgeNotificacoesCliente
+          .classList
+          .add("ativo");
+
+        btnMarcarTodasLidas.disabled =
+          false;
+
+      } else {
+        badgeNotificacoesCliente
+          .classList
+          .remove("ativo");
+
+        btnMarcarTodasLidas.disabled =
+          true;
+      }
+    }
+
+    function renderizarNotificacoesCliente(
+      notificacoes
+    ) {
+      const naoLidas =
+        notificacoes.filter(
+          function (notificacao) {
+            return !notificacaoLida(
+              notificacao
+            );
+          }
+        );
+
+      atualizarContadorNotificacoes(
+        naoLidas.length
+      );
+
+      if (notificacoes.length === 0) {
+        listaNotificacoesCliente.innerHTML = `
+          <p class="cliente-vazio">
+            Você ainda não possui
+            notificações.
+          </p>
+        `;
+
+        return;
+      }
+
+      listaNotificacoesCliente.innerHTML =
+        notificacoes
+          .map(function (
+            notificacao
+          ) {
+            const lida =
+              notificacaoLida(
+                notificacao
+              );
+
+            return `
+              <button
+                type="button"
+                class="notificacao-cliente-item ${
+                  lida
+                    ? ""
+                    : "nao-lida"
+                }"
+                onclick="marcarNotificacaoComoLida(${notificacao.id})"
+              >
+                <span class="notificacao-cliente-cabecalho">
+                  <strong>
+                    ${escaparHTML(
+                      notificacao.titulo ||
+                      "Notificação"
+                    )}
+                  </strong>
+
+                  ${
+                    lida
+                      ? ""
+                      : `
+                        <span class="notificacao-cliente-nova">
+                          Nova
+                        </span>
+                      `
+                  }
+                </span>
+
+                <p>
+                  ${escaparHTML(
+                    notificacao.mensagem ||
+                    ""
+                  )}
+                </p>
+
+                <time>
+                  ${formatarDataHora(
+                    notificacao.criadaEm
+                  )}
+                </time>
+              </button>
+            `;
+          })
+          .join("");
+    }
+
+    async function marcarNotificacaoComoLida(
+      id
+    ) {
+      try {
+        await buscarJSON(
+          `${CLIENTE_API_BASE_URL}` +
+          `/api/notificacoes/` +
+          `${id}/lida`,
+          {
+            method: "PATCH"
+          }
+        );
+
+        await carregarNotificacoesCliente();
+
+      } catch (erro) {
+        console.error(
+          "Erro ao marcar notificação como lida:",
+          erro
+        );
+      }
+    }
+
+    async function marcarTodasNotificacoesComoLidas() {
+      if (
+        btnMarcarTodasLidas.disabled
+      ) {
+        return;
+      }
+
+      btnMarcarTodasLidas.disabled =
+        true;
+
+      btnMarcarTodasLidas.textContent =
+        "Marcando...";
+
+      try {
+        await buscarJSON(
+          `${CLIENTE_API_BASE_URL}` +
+          `/api/notificacoes/` +
+          `${usuarioClienteLogado.id}` +
+          `/lidas`,
+          {
+            method: "PATCH"
+          }
+        );
+
+        await carregarNotificacoesCliente();
+
+      } catch (erro) {
+        console.error(
+          "Erro ao marcar todas as notificações:",
+          erro
+        );
+
+        alert(
+          "Não foi possível marcar as notificações como lidas."
+        );
+
+      } finally {
+        btnMarcarTodasLidas.textContent =
+          "Marcar todas como lidas";
+      }
+    }
+
+    btnMarcarTodasLidas.addEventListener(
+      "click",
+      marcarTodasNotificacoesComoLidas
+    );
 
     // =========================
     // INICIAR
     // =========================
 
-    if (
-      usuarioLogado &&
-      usuarioLogado.tipo === "cliente"
-    ) {
-      preencherDadosCliente();
+    preencherDadosCliente();
+    carregarAreaCliente();
+    atualizarNotificacaoChatCliente();
+    carregarNotificacoesCliente();
+
+    setInterval(function () {
       carregarAreaCliente();
       atualizarNotificacaoChatCliente();
-
-      setInterval(function () {
-        carregarAreaCliente();
-        atualizarNotificacaoChatCliente();
-      }, 5000);
-    }
+      carregarNotificacoesCliente();
+    }, 5000);
   </script>
 
 </body>

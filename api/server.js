@@ -12,12 +12,59 @@ app.use(express.json());
 const PORT = process.env.PORT || 3000;
 
 // =========================
+// FUNÇÕES AUXILIARES
+// =========================
+
+async function criarNotificacao({
+  usuarioId,
+  tipo,
+  titulo,
+  mensagem,
+  referenciaId = null
+}) {
+  if (!usuarioId) {
+    return;
+  }
+
+  await conexao.query(
+    `INSERT INTO notificacoes
+      (
+        usuario_id,
+        tipo,
+        titulo,
+        mensagem,
+        referencia_id,
+        lida
+      )
+     VALUES (?, ?, ?, ?, ?, false)`,
+    [
+      usuarioId,
+      tipo,
+      titulo,
+      mensagem,
+      referenciaId
+    ]
+  );
+}
+
+function resumirTexto(texto, limite = 140) {
+  const conteudo = String(texto || "").trim();
+
+  if (conteudo.length <= limite) {
+    return conteudo;
+  }
+
+  return `${conteudo.slice(0, limite - 3)}...`;
+}
+
+// =========================
 // ROTA DE TESTE
 // =========================
 
 app.get("/", function (req, res) {
   res.json({
-    mensagem: "API Guapo The Barber funcionando com MySQL!"
+    mensagem:
+      "API Guapo The Barber funcionando com MySQL!"
   });
 });
 
@@ -32,19 +79,30 @@ app.post("/api/auth/login", async function (req, res) {
     if (!email || !senha) {
       return res.status(400).json({
         sucesso: false,
-        mensagem: "E-mail e senha são obrigatórios."
+        mensagem:
+          "E-mail e senha são obrigatórios."
       });
     }
 
     const [usuarios] = await conexao.query(
-      "SELECT id, nome, email, telefone, tipo FROM usuarios WHERE email = ? AND senha = ? LIMIT 1",
+      `SELECT
+        id,
+        nome,
+        email,
+        telefone,
+        tipo
+       FROM usuarios
+       WHERE email = ?
+         AND senha = ?
+       LIMIT 1`,
       [email, senha]
     );
 
     if (usuarios.length === 0) {
       return res.status(401).json({
         sucesso: false,
-        mensagem: "E-mail ou senha inválidos."
+        mensagem:
+          "E-mail ou senha inválidos."
       });
     }
 
@@ -58,7 +116,8 @@ app.post("/api/auth/login", async function (req, res) {
 
     return res.status(500).json({
       sucesso: false,
-      mensagem: "Erro interno no login."
+      mensagem:
+        "Erro interno no login."
     });
   }
 });
@@ -67,444 +126,1014 @@ app.post("/api/auth/login", async function (req, res) {
 // CADASTRO DE CLIENTE
 // =========================
 
-app.post("/api/auth/cadastro", async function (req, res) {
-  try {
-    const { nome, email, telefone, senha } = req.body;
-
-    if (!nome || !email || !senha) {
-      return res.status(400).json({
-        sucesso: false,
-        mensagem: "Nome, e-mail e senha são obrigatórios."
-      });
-    }
-
-    const [usuarioExistente] = await conexao.query(
-      "SELECT id FROM usuarios WHERE email = ? LIMIT 1",
-      [email]
-    );
-
-    if (usuarioExistente.length > 0) {
-      return res.status(400).json({
-        sucesso: false,
-        mensagem: "Já existe uma conta com esse e-mail."
-      });
-    }
-
-    const [resultado] = await conexao.query(
-      `INSERT INTO usuarios (nome, email, telefone, senha, tipo)
-       VALUES (?, ?, ?, ?, 'cliente')`,
-      [nome, email, telefone || "", senha]
-    );
-
-    return res.status(201).json({
-      sucesso: true,
-      mensagem: "Cliente cadastrado com sucesso.",
-      usuario: {
-        id: resultado.insertId,
+app.post(
+  "/api/auth/cadastro",
+  async function (req, res) {
+    try {
+      const {
         nome,
         email,
         telefone,
-        tipo: "cliente"
+        senha
+      } = req.body;
+
+      if (!nome || !email || !senha) {
+        return res.status(400).json({
+          sucesso: false,
+          mensagem:
+            "Nome, e-mail e senha são obrigatórios."
+        });
       }
-    });
 
-  } catch (erro) {
-    console.error("Erro no cadastro:", erro);
+      const [usuarioExistente] =
+        await conexao.query(
+          `SELECT id
+           FROM usuarios
+           WHERE email = ?
+           LIMIT 1`,
+          [email]
+        );
 
-    return res.status(500).json({
-      sucesso: false,
-      mensagem: "Erro interno no cadastro."
-    });
+      if (usuarioExistente.length > 0) {
+        return res.status(400).json({
+          sucesso: false,
+          mensagem:
+            "Já existe uma conta com esse e-mail."
+        });
+      }
+
+      const [resultado] =
+        await conexao.query(
+          `INSERT INTO usuarios
+            (
+              nome,
+              email,
+              telefone,
+              senha,
+              tipo
+            )
+           VALUES (?, ?, ?, ?, 'cliente')`,
+          [
+            nome,
+            email,
+            telefone || "",
+            senha
+          ]
+        );
+
+      return res.status(201).json({
+        sucesso: true,
+        mensagem:
+          "Cliente cadastrado com sucesso.",
+
+        usuario: {
+          id: resultado.insertId,
+          nome,
+          email,
+          telefone: telefone || "",
+          tipo: "cliente"
+        }
+      });
+
+    } catch (erro) {
+      console.error(
+        "Erro no cadastro:",
+        erro
+      );
+
+      return res.status(500).json({
+        sucesso: false,
+        mensagem:
+          "Erro interno no cadastro."
+      });
+    }
   }
-});
+);
 
 // =========================
 // LISTAR AGENDAMENTOS
 // =========================
 
-app.get("/api/agendamentos", async function (req, res) {
-  try {
-    const { data, inicio, fim, clienteId } = req.query;
-
-    let sql = `
-      SELECT 
-        id,
-        usuario_id AS clienteId,
-        nome,
-        email,
-        telefone,
-        servicos,
+app.get(
+  "/api/agendamentos",
+  async function (req, res) {
+    try {
+      const {
         data,
-        horario,
-        total_estimado AS totalEstimado,
-        observacao,
-        status,
-        criado_em AS criadoEm
-      FROM agendamentos
-      WHERE 1 = 1
-    `;
+        inicio,
+        fim,
+        clienteId
+      } = req.query;
 
-    const parametros = [];
+      let sql = `
+        SELECT
+          id,
+          usuario_id AS clienteId,
+          nome,
+          email,
+          telefone,
+          servicos,
+          data,
+          horario,
+          total_estimado AS totalEstimado,
+          observacao,
+          status,
+          criado_em AS criadoEm
+        FROM agendamentos
+        WHERE 1 = 1
+      `;
 
-    if (data) {
-      sql += " AND data = ?";
-      parametros.push(data);
+      const parametros = [];
+
+      if (data) {
+        sql += " AND data = ?";
+        parametros.push(data);
+      }
+
+      if (inicio && fim) {
+        sql +=
+          " AND data BETWEEN ? AND ?";
+
+        parametros.push(
+          inicio,
+          fim
+        );
+      }
+
+      if (clienteId) {
+        sql +=
+          " AND usuario_id = ?";
+
+        parametros.push(clienteId);
+      }
+
+      sql +=
+        " ORDER BY data ASC, horario ASC";
+
+      const [agendamentos] =
+        await conexao.query(
+          sql,
+          parametros
+        );
+
+      return res.json(agendamentos);
+
+    } catch (erro) {
+      console.error(
+        "Erro ao listar agendamentos:",
+        erro
+      );
+
+      return res.status(500).json({
+        sucesso: false,
+        mensagem:
+          "Erro ao listar agendamentos."
+      });
     }
-
-    if (inicio && fim) {
-      sql += " AND data BETWEEN ? AND ?";
-      parametros.push(inicio, fim);
-    }
-
-    if (clienteId) {
-      sql += " AND usuario_id = ?";
-      parametros.push(clienteId);
-   }
-   
-    sql += " ORDER BY data ASC, horario ASC";
-
-    const [agendamentos] = await conexao.query(sql, parametros);
-
-    res.json(agendamentos);
-
-  } catch (erro) {
-    console.error("Erro ao listar agendamentos:", erro);
-
-    res.status(500).json({
-      sucesso: false,
-      mensagem: "Erro ao listar agendamentos."
-    });
   }
-});
+);
 
 // =========================
 // CRIAR AGENDAMENTO
 // =========================
 
-app.post("/api/agendamentos", async function (req, res) {
-  try {
-    const {
-      clienteId,
-      usuario_id,
-      nome,
-      email,
-      telefone,
-      servicos,
-      servico,
-      data,
-      horario,
-      totalEstimado,
-      total_estimado,
-      observacao
-    } = req.body;
-
-    if (!nome || !data || !horario) {
-      return res.status(400).json({
-        sucesso: false,
-        mensagem: "Nome, data e horário são obrigatórios."
-      });
-    }
-
-    const idCliente = clienteId || usuario_id || null;
-    const servicosTexto = servicos || servico || "";
-    const totalTexto = totalEstimado || total_estimado || "";
-
-    const [resultado] = await conexao.query(
-      `INSERT INTO agendamentos 
-      (usuario_id, nome, email, telefone, servicos, data, horario, total_estimado, observacao, status)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        idCliente,
-        nome,
-        email || "",
-        telefone || "",
-        servicosTexto,
-        data,
-        horario,
-        totalTexto,
-        observacao || "",
-        "Aguardando confirmação"
-      ]
-    );
-
-    res.status(201).json({
-      sucesso: true,
-      mensagem: "Agendamento criado com sucesso.",
-      agendamento: {
-        id: resultado.insertId,
-        clienteId: idCliente,
+app.post(
+  "/api/agendamentos",
+  async function (req, res) {
+    try {
+      const {
+        clienteId,
+        usuario_id,
         nome,
         email,
         telefone,
-        servicos: servicosTexto,
+        servicos,
+        servico,
         data,
         horario,
-        totalEstimado: totalTexto,
-        observacao,
-        status: "Aguardando confirmação"
+        totalEstimado,
+        total_estimado,
+        observacao
+      } = req.body;
+
+      if (!nome || !data || !horario) {
+        return res.status(400).json({
+          sucesso: false,
+          mensagem:
+            "Nome, data e horário são obrigatórios."
+        });
       }
-    });
 
-  } catch (erro) {
-    console.error("Erro ao criar agendamento:", erro);
+      const idCliente =
+        clienteId ||
+        usuario_id ||
+        null;
 
-    res.status(500).json({
-      sucesso: false,
-      mensagem: "Erro ao criar agendamento."
-    });
-  }
-});
+      const servicosTexto =
+        servicos ||
+        servico ||
+        "";
 
-// =========================
-// ALTERAR STATUS DO AGENDAMENTO
-// =========================
+      const totalTexto =
+        totalEstimado ||
+        total_estimado ||
+        "";
 
-app.patch("/api/agendamentos/:id/status", async function (req, res) {
-  try {
-    const { id } = req.params;
-    const { status } = req.body;
+      const [resultado] =
+        await conexao.query(
+          `INSERT INTO agendamentos
+            (
+              usuario_id,
+              nome,
+              email,
+              telefone,
+              servicos,
+              data,
+              horario,
+              total_estimado,
+              observacao,
+              status
+            )
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            idCliente,
+            nome,
+            email || "",
+            telefone || "",
+            servicosTexto,
+            data,
+            horario,
+            totalTexto,
+            observacao || "",
+            "Aguardando confirmação"
+          ]
+        );
 
-    if (!status) {
-      return res.status(400).json({
+      if (idCliente) {
+        await criarNotificacao({
+          usuarioId: idCliente,
+
+          tipo: "agendamento",
+
+          titulo:
+            "Solicitação de agendamento recebida",
+
+          mensagem:
+            `Recebemos sua solicitação para ` +
+            `${data} às ${horario}. ` +
+            "Aguarde a confirmação do Guapo.",
+
+          referenciaId:
+            resultado.insertId
+        });
+      }
+
+      return res.status(201).json({
+        sucesso: true,
+
+        mensagem:
+          "Agendamento criado com sucesso.",
+
+        agendamento: {
+          id: resultado.insertId,
+          clienteId: idCliente,
+          nome,
+          email: email || "",
+          telefone: telefone || "",
+          servicos: servicosTexto,
+          data,
+          horario,
+          totalEstimado: totalTexto,
+          observacao:
+            observacao || "",
+
+          status:
+            "Aguardando confirmação"
+        }
+      });
+
+    } catch (erro) {
+      console.error(
+        "Erro ao criar agendamento:",
+        erro
+      );
+
+      return res.status(500).json({
         sucesso: false,
-        mensagem: "Status é obrigatório."
+        mensagem:
+          "Erro ao criar agendamento."
       });
     }
-
-    await conexao.query(
-      "UPDATE agendamentos SET status = ? WHERE id = ?",
-      [status, id]
-    );
-
-    res.json({
-      sucesso: true,
-      mensagem: "Status atualizado com sucesso."
-    });
-
-  } catch (erro) {
-    console.error("Erro ao alterar status:", erro);
-
-    res.status(500).json({
-      sucesso: false,
-      mensagem: "Erro ao alterar status."
-    });
   }
-});
+);
+
+// =========================
+// ALTERAR STATUS
+// =========================
+
+app.patch(
+  "/api/agendamentos/:id/status",
+  async function (req, res) {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+
+      if (!status) {
+        return res.status(400).json({
+          sucesso: false,
+          mensagem:
+            "Status é obrigatório."
+        });
+      }
+
+      const [agendamentos] =
+        await conexao.query(
+          `SELECT
+            id,
+            usuario_id AS clienteId,
+            servicos,
+
+            DATE_FORMAT(
+              data,
+              '%d/%m/%Y'
+            ) AS dataFormatada,
+
+            horario,
+            status
+           FROM agendamentos
+           WHERE id = ?
+           LIMIT 1`,
+          [id]
+        );
+
+      if (agendamentos.length === 0) {
+        return res.status(404).json({
+          sucesso: false,
+          mensagem:
+            "Agendamento não encontrado."
+        });
+      }
+
+      const agendamento =
+        agendamentos[0];
+
+      if (agendamento.status === status) {
+        return res.json({
+          sucesso: true,
+          mensagem:
+            "O agendamento já está com esse status."
+        });
+      }
+
+      await conexao.query(
+        `UPDATE agendamentos
+         SET status = ?
+         WHERE id = ?`,
+        [status, id]
+      );
+
+      if (agendamento.clienteId) {
+        let titulo =
+          "Agendamento atualizado";
+
+        let mensagem =
+          `O status do seu agendamento de ` +
+          `${agendamento.dataFormatada} ` +
+          `às ${agendamento.horario} ` +
+          `foi alterado para ${status}.`;
+
+        if (status === "Confirmado") {
+          titulo =
+            "Agendamento confirmado";
+
+          mensagem =
+            `Seu agendamento foi confirmado ` +
+            `para ${agendamento.dataFormatada} ` +
+            `às ${agendamento.horario}.`;
+        }
+
+        if (status === "Cancelado") {
+          titulo =
+            "Agendamento cancelado";
+
+          mensagem =
+            `Seu agendamento de ` +
+            `${agendamento.dataFormatada} ` +
+            `às ${agendamento.horario} ` +
+            "foi cancelado.";
+        }
+
+        if (
+          status ===
+          "Aguardando confirmação"
+        ) {
+          titulo =
+            "Agendamento aguardando confirmação";
+
+          mensagem =
+            `Seu agendamento de ` +
+            `${agendamento.dataFormatada} ` +
+            `às ${agendamento.horario} ` +
+            "está aguardando confirmação.";
+        }
+
+        await criarNotificacao({
+          usuarioId:
+            agendamento.clienteId,
+
+          tipo:
+            "agendamento",
+
+          titulo,
+          mensagem,
+
+          referenciaId:
+            Number(id)
+        });
+      }
+
+      return res.json({
+        sucesso: true,
+        mensagem:
+          "Status atualizado com sucesso."
+      });
+
+    } catch (erro) {
+      console.error(
+        "Erro ao alterar status:",
+        erro
+      );
+
+      return res.status(500).json({
+        sucesso: false,
+        mensagem:
+          "Erro ao alterar status."
+      });
+    }
+  }
+);
 
 // =========================
 // EXCLUIR AGENDAMENTO
 // =========================
 
-app.delete("/api/agendamentos/:id", async function (req, res) {
-  try {
-    const { id } = req.params;
+app.delete(
+  "/api/agendamentos/:id",
+  async function (req, res) {
+    try {
+      const { id } = req.params;
 
-    await conexao.query(
-      "DELETE FROM agendamentos WHERE id = ?",
-      [id]
-    );
+      const [agendamentos] =
+        await conexao.query(
+          `SELECT
+            usuario_id AS clienteId,
 
-    res.json({
-      sucesso: true,
-      mensagem: "Agendamento excluído com sucesso."
-    });
+            DATE_FORMAT(
+              data,
+              '%d/%m/%Y'
+            ) AS dataFormatada,
 
-  } catch (erro) {
-    console.error("Erro ao excluir agendamento:", erro);
+            horario
+           FROM agendamentos
+           WHERE id = ?
+           LIMIT 1`,
+          [id]
+        );
 
-    res.status(500).json({
-      sucesso: false,
-      mensagem: "Erro ao excluir agendamento."
-    });
+      if (agendamentos.length === 0) {
+        return res.status(404).json({
+          sucesso: false,
+          mensagem:
+            "Agendamento não encontrado."
+        });
+      }
+
+      const agendamento =
+        agendamentos[0];
+
+      await conexao.query(
+        `DELETE FROM agendamentos
+         WHERE id = ?`,
+        [id]
+      );
+
+      if (agendamento.clienteId) {
+        await criarNotificacao({
+          usuarioId:
+            agendamento.clienteId,
+
+          tipo:
+            "agendamento",
+
+          titulo:
+            "Agendamento removido",
+
+          mensagem:
+            `O agendamento de ` +
+            `${agendamento.dataFormatada} ` +
+            `às ${agendamento.horario} ` +
+            "foi removido.",
+
+          referenciaId:
+            Number(id)
+        });
+      }
+
+      return res.json({
+        sucesso: true,
+        mensagem:
+          "Agendamento excluído com sucesso."
+      });
+
+    } catch (erro) {
+      console.error(
+        "Erro ao excluir agendamento:",
+        erro
+      );
+
+      return res.status(500).json({
+        sucesso: false,
+        mensagem:
+          "Erro ao excluir agendamento."
+      });
+    }
   }
-});
+);
 
 // =========================
-// LISTAR TODAS AS CONVERSAS DO PAINEL
+// LISTAR CONVERSAS DO PAINEL
 // =========================
 
-app.get("/api/mensagens", async function (req, res) {
-  try {
-    const [mensagens] = await conexao.query(`
-      SELECT 
-        mensagens.id,
-        mensagens.cliente_id AS clienteId,
-        usuarios.nome AS clienteNome,
-        usuarios.email AS clienteEmail,
-        usuarios.telefone AS clienteTelefone,
-        mensagens.autor,
-        mensagens.texto,
-        mensagens.lida_cliente AS lidaCliente,
-        mensagens.lida_barbeiro AS lidaBarbeiro,
-        mensagens.criada_em AS dataHora
-      FROM mensagens
-      INNER JOIN usuarios ON usuarios.id = mensagens.cliente_id
-      ORDER BY mensagens.criada_em ASC
-    `);
+app.get(
+  "/api/mensagens",
+  async function (req, res) {
+    try {
+      const [mensagens] =
+        await conexao.query(`
+          SELECT
+            mensagens.id,
 
-    res.json(mensagens);
+            mensagens.cliente_id
+              AS clienteId,
 
-  } catch (erro) {
-    console.error("Erro ao listar mensagens:", erro);
+            usuarios.nome
+              AS clienteNome,
 
-    res.status(500).json({
-      sucesso: false,
-      mensagem: "Erro ao listar mensagens."
-    });
+            usuarios.email
+              AS clienteEmail,
+
+            usuarios.telefone
+              AS clienteTelefone,
+
+            mensagens.autor,
+            mensagens.texto,
+
+            mensagens.lida_cliente
+              AS lidaCliente,
+
+            mensagens.lida_barbeiro
+              AS lidaBarbeiro,
+
+            mensagens.criada_em
+              AS dataHora
+
+          FROM mensagens
+
+          INNER JOIN usuarios
+            ON usuarios.id =
+               mensagens.cliente_id
+
+          ORDER BY mensagens.criada_em ASC
+        `);
+
+      return res.json(mensagens);
+
+    } catch (erro) {
+      console.error(
+        "Erro ao listar mensagens:",
+        erro
+      );
+
+      return res.status(500).json({
+        sucesso: false,
+        mensagem:
+          "Erro ao listar mensagens."
+      });
+    }
   }
-});
+);
 
 // =========================
-// LISTAR MENSAGENS DE UM CLIENTE
+// MENSAGENS DE UM CLIENTE
 // =========================
 
-app.get("/api/mensagens/:clienteId", async function (req, res) {
-  try {
-    const { clienteId } = req.params;
+app.get(
+  "/api/mensagens/:clienteId",
+  async function (req, res) {
+    try {
+      const { clienteId } =
+        req.params;
 
-    const [mensagens] = await conexao.query(`
-      SELECT 
-        mensagens.id,
-        mensagens.cliente_id AS clienteId,
-        usuarios.nome AS clienteNome,
-        usuarios.email AS clienteEmail,
-        usuarios.telefone AS clienteTelefone,
-        mensagens.autor,
-        mensagens.texto,
-        mensagens.lida_cliente AS lidaCliente,
-        mensagens.lida_barbeiro AS lidaBarbeiro,
-        mensagens.criada_em AS dataHora
-      FROM mensagens
-      INNER JOIN usuarios ON usuarios.id = mensagens.cliente_id
-      WHERE mensagens.cliente_id = ?
-      ORDER BY mensagens.criada_em ASC
-    `, [clienteId]);
+      const [mensagens] =
+        await conexao.query(
+          `SELECT
+            mensagens.id,
 
-    res.json(mensagens);
+            mensagens.cliente_id
+              AS clienteId,
 
-  } catch (erro) {
-    console.error("Erro ao listar mensagens do cliente:", erro);
+            usuarios.nome
+              AS clienteNome,
 
-    res.status(500).json({
-      sucesso: false,
-      mensagem: "Erro ao listar mensagens do cliente."
-    });
+            usuarios.email
+              AS clienteEmail,
+
+            usuarios.telefone
+              AS clienteTelefone,
+
+            mensagens.autor,
+            mensagens.texto,
+
+            mensagens.lida_cliente
+              AS lidaCliente,
+
+            mensagens.lida_barbeiro
+              AS lidaBarbeiro,
+
+            mensagens.criada_em
+              AS dataHora
+
+           FROM mensagens
+
+           INNER JOIN usuarios
+             ON usuarios.id =
+                mensagens.cliente_id
+
+           WHERE mensagens.cliente_id = ?
+
+           ORDER BY mensagens.criada_em ASC`,
+          [clienteId]
+        );
+
+      return res.json(mensagens);
+
+    } catch (erro) {
+      console.error(
+        "Erro ao listar mensagens do cliente:",
+        erro
+      );
+
+      return res.status(500).json({
+        sucesso: false,
+        mensagem:
+          "Erro ao listar mensagens do cliente."
+      });
+    }
   }
-});
+);
 
 // =========================
 // ENVIAR MENSAGEM
 // =========================
 
-app.post("/api/mensagens", async function (req, res) {
-  try {
-    const { clienteId, autor, texto } = req.body;
-
-    if (!clienteId || !autor || !texto) {
-      return res.status(400).json({
-        sucesso: false,
-        mensagem: "Cliente, autor e texto são obrigatórios."
-      });
-    }
-
-    const lidaCliente = autor === "cliente" ? true : false;
-    const lidaBarbeiro = autor === "barbeiro" ? true : false;
-
-    const [resultado] = await conexao.query(
-      `INSERT INTO mensagens 
-      (cliente_id, autor, texto, lida_cliente, lida_barbeiro)
-      VALUES (?, ?, ?, ?, ?)`,
-      [clienteId, autor, texto, lidaCliente, lidaBarbeiro]
-    );
-
-    res.status(201).json({
-      sucesso: true,
-      mensagem: "Mensagem enviada com sucesso.",
-      novaMensagem: {
-        id: resultado.insertId,
+app.post(
+  "/api/mensagens",
+  async function (req, res) {
+    try {
+      const {
         clienteId,
         autor,
-        texto,
-        lidaCliente,
-        lidaBarbeiro,
-        dataHora: new Date().toISOString()
+        texto
+      } = req.body;
+
+      if (!clienteId || !autor || !texto) {
+        return res.status(400).json({
+          sucesso: false,
+          mensagem:
+            "Cliente, autor e texto são obrigatórios."
+        });
       }
-    });
 
-  } catch (erro) {
-    console.error("Erro ao enviar mensagem:", erro);
+      if (
+        !["cliente", "barbeiro"]
+          .includes(autor)
+      ) {
+        return res.status(400).json({
+          sucesso: false,
+          mensagem:
+            "Autor da mensagem inválido."
+        });
+      }
 
-    res.status(500).json({
-      sucesso: false,
-      mensagem: "Erro ao enviar mensagem."
-    });
+      const lidaCliente =
+        autor === "cliente";
+
+      const lidaBarbeiro =
+        autor === "barbeiro";
+
+      const [resultado] =
+        await conexao.query(
+          `INSERT INTO mensagens
+            (
+              cliente_id,
+              autor,
+              texto,
+              lida_cliente,
+              lida_barbeiro
+            )
+           VALUES (?, ?, ?, ?, ?)`,
+          [
+            clienteId,
+            autor,
+            texto,
+            lidaCliente,
+            lidaBarbeiro
+          ]
+        );
+
+      if (autor === "barbeiro") {
+        await criarNotificacao({
+          usuarioId:
+            clienteId,
+
+          tipo:
+            "mensagem",
+
+          titulo:
+            "Nova mensagem do Guapo",
+
+          mensagem:
+            resumirTexto(texto),
+
+          referenciaId:
+            resultado.insertId
+        });
+      }
+
+      return res.status(201).json({
+        sucesso: true,
+
+        mensagem:
+          "Mensagem enviada com sucesso.",
+
+        novaMensagem: {
+          id: resultado.insertId,
+          clienteId,
+          autor,
+          texto,
+          lidaCliente,
+          lidaBarbeiro,
+          dataHora:
+            new Date().toISOString()
+        }
+      });
+
+    } catch (erro) {
+      console.error(
+        "Erro ao enviar mensagem:",
+        erro
+      );
+
+      return res.status(500).json({
+        sucesso: false,
+        mensagem:
+          "Erro ao enviar mensagem."
+      });
+    }
   }
-});
+);
 
 // =========================
-// MARCAR MENSAGENS COMO LIDAS PELO CLIENTE
+// MENSAGENS LIDAS PELO CLIENTE
 // =========================
 
-app.patch("/api/mensagens/:clienteId/lidas-cliente", async function (req, res) {
-  try {
-    const { clienteId } = req.params;
+app.patch(
+  "/api/mensagens/:clienteId/lidas-cliente",
+  async function (req, res) {
+    try {
+      const { clienteId } =
+        req.params;
 
-    await conexao.query(
-      `UPDATE mensagens 
-       SET lida_cliente = true 
-       WHERE cliente_id = ? AND autor = 'barbeiro'`,
-      [clienteId]
-    );
+      await conexao.query(
+        `UPDATE mensagens
+         SET lida_cliente = true
+         WHERE cliente_id = ?
+           AND autor = 'barbeiro'`,
+        [clienteId]
+      );
 
-    res.json({
-      sucesso: true,
-      mensagem: "Mensagens marcadas como lidas pelo cliente."
-    });
+      return res.json({
+        sucesso: true,
+        mensagem:
+          "Mensagens marcadas como lidas pelo cliente."
+      });
 
-  } catch (erro) {
-    console.error("Erro ao marcar lidas pelo cliente:", erro);
+    } catch (erro) {
+      console.error(
+        "Erro ao marcar lidas pelo cliente:",
+        erro
+      );
 
-    res.status(500).json({
-      sucesso: false,
-      mensagem: "Erro ao marcar mensagens como lidas pelo cliente."
-    });
+      return res.status(500).json({
+        sucesso: false,
+        mensagem:
+          "Erro ao marcar mensagens como lidas pelo cliente."
+      });
+    }
   }
-});
+);
 
 // =========================
-// MARCAR MENSAGENS COMO LIDAS PELO BARBEIRO
+// MENSAGENS LIDAS PELO BARBEIRO
 // =========================
 
-app.patch("/api/mensagens/:clienteId/lidas-barbeiro", async function (req, res) {
-  try {
-    const { clienteId } = req.params;
+app.patch(
+  "/api/mensagens/:clienteId/lidas-barbeiro",
+  async function (req, res) {
+    try {
+      const { clienteId } =
+        req.params;
 
-    await conexao.query(
-      `UPDATE mensagens 
-       SET lida_barbeiro = true 
-       WHERE cliente_id = ? AND autor = 'cliente'`,
-      [clienteId]
-    );
+      await conexao.query(
+        `UPDATE mensagens
+         SET lida_barbeiro = true
+         WHERE cliente_id = ?
+           AND autor = 'cliente'`,
+        [clienteId]
+      );
 
-    res.json({
-      sucesso: true,
-      mensagem: "Mensagens marcadas como lidas pelo barbeiro."
-    });
+      return res.json({
+        sucesso: true,
+        mensagem:
+          "Mensagens marcadas como lidas pelo barbeiro."
+      });
 
-  } catch (erro) {
-    console.error("Erro ao marcar lidas pelo barbeiro:", erro);
+    } catch (erro) {
+      console.error(
+        "Erro ao marcar lidas pelo barbeiro:",
+        erro
+      );
 
-    res.status(500).json({
-      sucesso: false,
-      mensagem: "Erro ao marcar mensagens como lidas pelo barbeiro."
-    });
+      return res.status(500).json({
+        sucesso: false,
+        mensagem:
+          "Erro ao marcar mensagens como lidas pelo barbeiro."
+      });
+    }
   }
-});
+);
+
+// =========================
+// LISTAR NOTIFICAÇÕES
+// =========================
+
+app.get(
+  "/api/notificacoes/:usuarioId",
+  async function (req, res) {
+    try {
+      const { usuarioId } =
+        req.params;
+
+      const [notificacoes] =
+        await conexao.query(
+          `SELECT
+            id,
+
+            usuario_id
+              AS usuarioId,
+
+            tipo,
+            titulo,
+            mensagem,
+
+            referencia_id
+              AS referenciaId,
+
+            lida,
+
+            criada_em
+              AS criadaEm
+
+           FROM notificacoes
+
+           WHERE usuario_id = ?
+
+           ORDER BY criada_em DESC
+
+           LIMIT 100`,
+          [usuarioId]
+        );
+
+      return res.json(notificacoes);
+
+    } catch (erro) {
+      console.error(
+        "Erro ao listar notificações:",
+        erro
+      );
+
+      return res.status(500).json({
+        sucesso: false,
+        mensagem:
+          "Erro ao listar notificações."
+      });
+    }
+  }
+);
+
+// =========================
+// MARCAR UMA COMO LIDA
+// =========================
+
+app.patch(
+  "/api/notificacoes/:id/lida",
+  async function (req, res) {
+    try {
+      const { id } =
+        req.params;
+
+      const [resultado] =
+        await conexao.query(
+          `UPDATE notificacoes
+           SET lida = true
+           WHERE id = ?`,
+          [id]
+        );
+
+      if (resultado.affectedRows === 0) {
+        return res.status(404).json({
+          sucesso: false,
+          mensagem:
+            "Notificação não encontrada."
+        });
+      }
+
+      return res.json({
+        sucesso: true,
+        mensagem:
+          "Notificação marcada como lida."
+      });
+
+    } catch (erro) {
+      console.error(
+        "Erro ao marcar notificação como lida:",
+        erro
+      );
+
+      return res.status(500).json({
+        sucesso: false,
+        mensagem:
+          "Erro ao marcar notificação como lida."
+      });
+    }
+  }
+);
+
+// =========================
+// MARCAR TODAS COMO LIDAS
+// =========================
+
+app.patch(
+  "/api/notificacoes/:usuarioId/lidas",
+  async function (req, res) {
+    try {
+      const { usuarioId } =
+        req.params;
+
+      await conexao.query(
+        `UPDATE notificacoes
+         SET lida = true
+         WHERE usuario_id = ?`,
+        [usuarioId]
+      );
+
+      return res.json({
+        sucesso: true,
+        mensagem:
+          "Todas as notificações foram marcadas como lidas."
+      });
+
+    } catch (erro) {
+      console.error(
+        "Erro ao marcar todas as notificações como lidas:",
+        erro
+      );
+
+      return res.status(500).json({
+        sucesso: false,
+        mensagem:
+          "Erro ao marcar todas as notificações como lidas."
+      });
+    }
+  }
+);
 
 // =========================
 // INICIAR SERVIDOR
 // =========================
 
 app.listen(PORT, function () {
-  console.log(`API rodando na porta ${PORT}`);
+  console.log(
+    `API rodando na porta ${PORT}`
+  );
 });
