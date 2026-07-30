@@ -1,14 +1,16 @@
-const API_BASE_URL =
-  "http://localhost:3000";
+window.GUAPO_API_BASE_URL =
+  "https://the-barber-guapo.onrender.com";
 
-const USUARIO_LOGADO_KEY =
+window.GUAPO_USUARIO_LOGADO_KEY =
   "guapo_usuario_logado";
 
-function salvarUsuarioLogado(
-  usuario
-) {
+// =========================
+// USUÁRIO LOGADO
+// =========================
+
+function salvarUsuarioLogado(usuario) {
   localStorage.setItem(
-    USUARIO_LOGADO_KEY,
+    window.GUAPO_USUARIO_LOGADO_KEY,
     JSON.stringify(usuario)
   );
 }
@@ -16,17 +18,33 @@ function salvarUsuarioLogado(
 function pegarUsuarioLogado() {
   const dados =
     localStorage.getItem(
-      USUARIO_LOGADO_KEY
+      window.GUAPO_USUARIO_LOGADO_KEY
     );
 
-  return dados
-    ? JSON.parse(dados)
-    : null;
+  if (!dados) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(dados);
+
+  } catch (erro) {
+    console.error(
+      "Erro ao ler usuário salvo:",
+      erro
+    );
+
+    localStorage.removeItem(
+      window.GUAPO_USUARIO_LOGADO_KEY
+    );
+
+    return null;
+  }
 }
 
 function sair() {
   localStorage.removeItem(
-    USUARIO_LOGADO_KEY
+    window.GUAPO_USUARIO_LOGADO_KEY
   );
 
   localStorage.removeItem(
@@ -37,9 +55,11 @@ function sair() {
     "login.html";
 }
 
-async function lerRespostaJSON(
-  resposta
-) {
+// =========================
+// RESPOSTA DA API
+// =========================
+
+async function lerRespostaJSON(resposta) {
   const texto =
     await resposta.text();
 
@@ -51,6 +71,11 @@ async function lerRespostaJSON(
       : {};
 
   } catch (erro) {
+    console.error(
+      "Resposta inválida da API:",
+      texto
+    );
+
     dados = {
       sucesso: false,
       mensagem:
@@ -72,6 +97,10 @@ async function lerRespostaJSON(
   return dados;
 }
 
+// =========================
+// LOGIN
+// =========================
+
 async function fazerLogin(
   email,
   senha
@@ -79,7 +108,7 @@ async function fazerLogin(
   try {
     const resposta =
       await fetch(
-        `${API_BASE_URL}/api/auth/login`,
+        `${window.GUAPO_API_BASE_URL}/api/auth/login`,
         {
           method: "POST",
 
@@ -132,11 +161,16 @@ async function fazerLogin(
 
     return {
       sucesso: false,
+
       mensagem:
-        "Não foi possível conectar com a API."
+        "Não foi possível conectar com a API. Aguarde alguns segundos e tente novamente."
     };
   }
 }
+
+// =========================
+// CADASTRO
+// =========================
 
 async function cadastrarCliente(
   nome,
@@ -147,7 +181,7 @@ async function cadastrarCliente(
   try {
     const resposta =
       await fetch(
-        `${API_BASE_URL}/api/auth/cadastro`,
+        `${window.GUAPO_API_BASE_URL}/api/auth/cadastro`,
         {
           method: "POST",
 
@@ -193,6 +227,7 @@ async function cadastrarCliente(
 
     return {
       sucesso: true,
+
       mensagem:
         dados.mensagem,
 
@@ -208,11 +243,16 @@ async function cadastrarCliente(
 
     return {
       sucesso: false,
+
       mensagem:
-        "Não foi possível conectar com a API."
+        "Não foi possível conectar com a API. Aguarde alguns segundos e tente novamente."
     };
   }
 }
+
+// =========================
+// SOLICITAR CÓDIGO
+// =========================
 
 async function solicitarCodigoRecuperacao(
   email
@@ -220,7 +260,7 @@ async function solicitarCodigoRecuperacao(
   try {
     const resposta =
       await fetch(
-        `${API_BASE_URL}/api/auth/recuperacao/solicitar`,
+        `${window.GUAPO_API_BASE_URL}/api/auth/recuperacao/solicitar`,
         {
           method: "POST",
 
@@ -250,11 +290,16 @@ async function solicitarCodigoRecuperacao(
 
     return {
       sucesso: false,
+
       mensagem:
-        "Não foi possível conectar com a API."
+        "Não foi possível conectar com a API. Aguarde alguns segundos e tente novamente."
     };
   }
 }
+
+// =========================
+// VERIFICAR CÓDIGO
+// =========================
 
 async function verificarCodigoRecuperacao(
   email,
@@ -263,7 +308,7 @@ async function verificarCodigoRecuperacao(
   try {
     const resposta =
       await fetch(
-        `${API_BASE_URL}/api/auth/recuperacao/verificar`,
+        `${window.GUAPO_API_BASE_URL}/api/auth/recuperacao/verificar`,
         {
           method: "POST",
 
@@ -297,11 +342,16 @@ async function verificarCodigoRecuperacao(
 
     return {
       sucesso: false,
+
       mensagem:
-        "Não foi possível conectar com a API."
+        "Não foi possível conectar com a API. Aguarde alguns segundos e tente novamente."
     };
   }
 }
+
+// =========================
+// REDEFINIR SENHA
+// =========================
 
 async function redefinirSenha(
   email,
@@ -311,7 +361,7 @@ async function redefinirSenha(
   try {
     const resposta =
       await fetch(
-        `${API_BASE_URL}/api/auth/recuperacao/redefinir`,
+        `${window.GUAPO_API_BASE_URL}/api/auth/recuperacao/redefinir`,
         {
           method: "POST",
 
@@ -348,13 +398,16 @@ async function redefinirSenha(
 
     return {
       sucesso: false,
+
       mensagem:
-        "Não foi possível conectar com a API."
+        "Não foi possível conectar com a API. Aguarde alguns segundos e tente novamente."
     };
   }
 }
 
-// Compatibilidade com códigos antigos
+// =========================
+// COMPATIBILIDADE ANTIGA
+// =========================
 
 function carregarUsuarios() {
   return [];

@@ -2,12 +2,22 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>Chat - Guapo The Barber</title>
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
 
-  <link rel="stylesheet" href="style.css" />
+  <title>
+    Chat - Guapo The Barber
+  </title>
+
+  <link
+    rel="stylesheet"
+    href="style.css"
+  />
 </head>
+
 <body class="admin-body">
 
   <main class="chat-container">
@@ -19,182 +29,383 @@
           <span>The Barber</span>
         </div>
 
-        <a href="cliente.html" class="chat-voltar">Voltar</a>
+        <a
+          href="cliente.html"
+          class="chat-voltar"
+        >
+          Voltar
+        </a>
       </header>
 
       <div class="chat-info">
-        <p class="admin-tag">Atendimento</p>
-        <h2>Conversar com o barbeiro</h2>
-        <p>Envie sua dúvida, pedido de ajuste ou mensagem sobre seu agendamento.</p>
+        <p class="admin-tag">
+          Atendimento
+        </p>
+
+        <h2>
+          Conversar com o barbeiro
+        </h2>
+
+        <p>
+          Envie sua dúvida, pedido de ajuste
+          ou mensagem sobre seu agendamento.
+        </p>
       </div>
 
-      <div class="chat-mensagens" id="chatMensagens">
+      <div
+        class="chat-mensagens"
+        id="chatMensagens"
+      >
         <div class="chat-vazio">
-          <p>Carregando mensagens...</p>
+          <p>
+            Carregando mensagens...
+          </p>
         </div>
       </div>
 
-      <form id="formChat" class="chat-form">
-        <input 
-          type="text" 
-          id="mensagemTexto" 
-          placeholder="Digite sua mensagem..." 
+      <form
+        id="formChat"
+        class="chat-form"
+      >
+        <input
+          type="text"
+          id="mensagemTexto"
+          placeholder="Digite sua mensagem..."
+          autocomplete="off"
           required
         />
 
-        <button type="submit" id="btnEnviarMensagem">Enviar</button>
+        <button
+          type="submit"
+          id="btnEnviarMensagem"
+        >
+          Enviar
+        </button>
       </form>
 
     </section>
   </main>
 
-  <script src="auth.js"></script>
+  <script src="auth.js?v=31"></script>
 
   <script>
-    const API_CHAT_URL = "http://localhost:3000";
+    const API_CHAT_URL =
+      "https://the-barber-guapo.onrender.com";
 
-    const usuarioLogado = pegarUsuarioLogado();
+    const usuarioLogado =
+      pegarUsuarioLogado();
 
     if (!usuarioLogado) {
-      window.location.href = "login.html";
-      throw new Error("Usuário não logado.");
+      window.location.replace(
+        "login.html"
+      );
+
+      throw new Error(
+        "Usuário não logado."
+      );
     }
 
-    if (usuarioLogado.tipo === "barbeiro") {
-      window.location.href = "painel.html";
-      throw new Error("Barbeiro redirecionado para o painel.");
+    if (
+      usuarioLogado.tipo ===
+      "barbeiro"
+    ) {
+      window.location.replace(
+        "painel.html"
+      );
+
+      throw new Error(
+        "Barbeiro redirecionado para o painel."
+      );
     }
 
-    const chatMensagens = document.getElementById("chatMensagens");
-    const formChat = document.getElementById("formChat");
-    const mensagemTexto = document.getElementById("mensagemTexto");
-    const btnEnviarMensagem = document.getElementById("btnEnviarMensagem");
+    const chatMensagens =
+      document.getElementById(
+        "chatMensagens"
+      );
+
+    const formChat =
+      document.getElementById(
+        "formChat"
+      );
+
+    const mensagemTexto =
+      document.getElementById(
+        "mensagemTexto"
+      );
+
+    const btnEnviarMensagem =
+      document.getElementById(
+        "btnEnviarMensagem"
+      );
 
     function escaparHTML(texto) {
-      const div = document.createElement("div");
-      div.textContent = texto || "";
+      const div =
+        document.createElement("div");
+
+      div.textContent =
+        texto || "";
+
       return div.innerHTML;
     }
 
     function formatarHora(dataISO) {
-      if (!dataISO) return "";
+      if (!dataISO) {
+        return "";
+      }
 
-      const data = new Date(dataISO);
+      const data =
+        new Date(dataISO);
 
-      return data.toLocaleString("pt-BR", {
-        day: "2-digit",
-        month: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit"
-      });
+      return data.toLocaleString(
+        "pt-BR",
+        {
+          day: "2-digit",
+          month: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit"
+        }
+      );
+    }
+
+    async function buscarJSON(
+      url,
+      opcoes = {}
+    ) {
+      const resposta =
+        await fetch(
+          url,
+          opcoes
+        );
+
+      const texto =
+        await resposta.text();
+
+      let dados = null;
+
+      try {
+        dados = texto
+          ? JSON.parse(texto)
+          : null;
+
+      } catch (erro) {
+        throw new Error(
+          "A API retornou uma resposta inválida."
+        );
+      }
+
+      if (!resposta.ok) {
+        throw new Error(
+          dados?.mensagem ||
+          dados?.erro ||
+          "Erro na solicitação."
+        );
+      }
+
+      return dados;
     }
 
     async function marcarMensagensDoBarbeiroComoLidas() {
       try {
-        await fetch(`${API_CHAT_URL}/api/mensagens/${usuarioLogado.id}/lidas-cliente`, {
-          method: "PATCH"
-        });
+        await buscarJSON(
+          `${API_CHAT_URL}` +
+          `/api/mensagens/` +
+          `${usuarioLogado.id}` +
+          `/lidas-cliente`,
+          {
+            method: "PATCH"
+          }
+        );
+
       } catch (erro) {
-        console.error("Erro ao marcar mensagens como lidas:", erro);
+        console.error(
+          "Erro ao marcar mensagens como lidas:",
+          erro
+        );
       }
     }
 
     async function carregarMensagens() {
       try {
-        const resposta = await fetch(`${API_CHAT_URL}/api/mensagens/${usuarioLogado.id}`);
-        const mensagens = await resposta.json();
+        const mensagens =
+          await buscarJSON(
+            `${API_CHAT_URL}` +
+            `/api/mensagens/` +
+            `${usuarioLogado.id}`
+          );
 
-        renderizarMensagens(mensagens);
+        renderizarMensagens(
+          Array.isArray(mensagens)
+            ? mensagens
+            : []
+        );
 
         await marcarMensagensDoBarbeiroComoLidas();
 
       } catch (erro) {
-        console.error("Erro ao carregar mensagens:", erro);
+        console.error(
+          "Erro ao carregar mensagens:",
+          erro
+        );
 
         chatMensagens.innerHTML = `
           <div class="chat-vazio">
-            <p>Erro ao carregar mensagens.</p>
-            <span>Verifique se a API está ligada.</span>
+            <p>
+              Erro ao carregar mensagens.
+            </p>
+
+            <span>
+              Aguarde alguns segundos e tente novamente.
+            </span>
           </div>
         `;
       }
     }
 
-    function renderizarMensagens(mensagens) {
-      if (!mensagens || mensagens.length === 0) {
+    function renderizarMensagens(
+      mensagens
+    ) {
+      if (
+        !mensagens ||
+        mensagens.length === 0
+      ) {
         chatMensagens.innerHTML = `
           <div class="chat-vazio">
-            <p>Nenhuma mensagem ainda.</p>
-            <span>Envie uma mensagem para iniciar a conversa.</span>
+            <p>
+              Nenhuma mensagem ainda.
+            </p>
+
+            <span>
+              Envie uma mensagem para iniciar a conversa.
+            </span>
           </div>
         `;
+
         return;
       }
 
-      chatMensagens.innerHTML = mensagens.map(function (mensagem) {
-        const classeAutor = mensagem.autor === "cliente" ? "mensagem-cliente" : "mensagem-barbeiro";
-        const nomeAutor = mensagem.autor === "cliente" ? "Você" : "Guapo";
+      chatMensagens.innerHTML =
+        mensagens
+          .map(function (mensagem) {
+            const classeAutor =
+              mensagem.autor === "cliente"
+                ? "mensagem-cliente"
+                : "mensagem-barbeiro";
 
-        return `
-          <div class="mensagem-chat ${classeAutor}">
-            <div class="mensagem-balao">
-              <strong>${escaparHTML(nomeAutor)}</strong>
-              <p>${escaparHTML(mensagem.texto)}</p>
-              <span>${formatarHora(mensagem.dataHora)}</span>
-            </div>
-          </div>
-        `;
-      }).join("");
+            const nomeAutor =
+              mensagem.autor === "cliente"
+                ? "Você"
+                : "Guapo";
 
-      chatMensagens.scrollTop = chatMensagens.scrollHeight;
+            return `
+              <div class="mensagem-chat ${classeAutor}">
+                <div class="mensagem-balao">
+                  <strong>
+                    ${escaparHTML(nomeAutor)}
+                  </strong>
+
+                  <p>
+                    ${escaparHTML(mensagem.texto)}
+                  </p>
+
+                  <span>
+                    ${formatarHora(mensagem.dataHora)}
+                  </span>
+                </div>
+              </div>
+            `;
+          })
+          .join("");
+
+      chatMensagens.scrollTop =
+        chatMensagens.scrollHeight;
     }
 
-    formChat.addEventListener("submit", async function (event) {
-      event.preventDefault();
+    formChat.addEventListener(
+      "submit",
+      async function (event) {
+        event.preventDefault();
 
-      const texto = mensagemTexto.value.trim();
+        const texto =
+          mensagemTexto.value.trim();
 
-      if (!texto) return;
-
-      btnEnviarMensagem.disabled = true;
-      btnEnviarMensagem.textContent = "Enviando...";
-
-      try {
-        const resposta = await fetch(`${API_CHAT_URL}/api/mensagens`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            clienteId: usuarioLogado.id,
-            autor: "cliente",
-            texto: texto
-          })
-        });
-
-        const retorno = await resposta.json();
-
-        if (!resposta.ok || !retorno.sucesso) {
-          alert(retorno.mensagem || "Erro ao enviar mensagem.");
+        if (!texto) {
           return;
         }
 
-        mensagemTexto.value = "";
-        await carregarMensagens();
+        btnEnviarMensagem.disabled =
+          true;
 
-      } catch (erro) {
-        console.error("Erro ao enviar mensagem:", erro);
-        alert("Erro ao conectar com a API. Verifique se o servidor está ligado.");
-      } finally {
-        btnEnviarMensagem.disabled = false;
-        btnEnviarMensagem.textContent = "Enviar";
+        btnEnviarMensagem.textContent =
+          "Enviando...";
+
+        try {
+          const retorno =
+            await buscarJSON(
+              `${API_CHAT_URL}/api/mensagens`,
+              {
+                method: "POST",
+
+                headers: {
+                  "Content-Type":
+                    "application/json"
+                },
+
+                body: JSON.stringify({
+                  clienteId:
+                    usuarioLogado.id,
+
+                  autor:
+                    "cliente",
+
+                  texto:
+                    texto
+                })
+              }
+            );
+
+          if (!retorno.sucesso) {
+            alert(
+              retorno.mensagem ||
+              "Erro ao enviar mensagem."
+            );
+
+            return;
+          }
+
+          mensagemTexto.value = "";
+
+          await carregarMensagens();
+
+        } catch (erro) {
+          console.error(
+            "Erro ao enviar mensagem:",
+            erro
+          );
+
+          alert(
+            "Erro ao conectar com a API. Aguarde alguns segundos e tente novamente."
+          );
+
+        } finally {
+          btnEnviarMensagem.disabled =
+            false;
+
+          btnEnviarMensagem.textContent =
+            "Enviar";
+        }
       }
-    });
+    );
 
     carregarMensagens();
 
     setInterval(function () {
-      carregarMensagens();
+      const campoEstaAtivo =
+        document.activeElement ===
+        mensagemTexto;
+
+      if (!campoEstaAtivo) {
+        carregarMensagens();
+      }
     }, 5000);
   </script>
 

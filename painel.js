@@ -3,7 +3,8 @@
 // =========================
 
 // Nome exclusivo para não entrar em conflito com o auth.js
-const PAINEL_API_BASE_URL = "http://localhost:3000";
+const PAINEL_API_BASE_URL =
+  "https://the-barber-guapo.onrender.com";
 
 const API_AGENDAMENTOS_URL =
   `${PAINEL_API_BASE_URL}/api/agendamentos`;
@@ -216,7 +217,7 @@ async function carregarAgendamentos(
 
         <p>
           Confirme se a API está ligada em:
-          <strong>http://localhost:3000</strong>
+          <strong>https://the-barber-guapo.onrender.com</strong>
         </p>
       </div>
     `;

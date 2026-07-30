@@ -2,348 +2,672 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>Agendamento | Guapo The Barber</title>
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
 
-  <link rel="stylesheet" href="style.css" />
+  <title>
+    Agendamento | Guapo The Barber
+  </title>
+
+  <link
+    rel="stylesheet"
+    href="style.css"
+  />
 </head>
 
 <body class="agenda-body">
 
   <header class="agenda-topo">
     <div class="agenda-container agenda-menu">
+
       <div class="agenda-logo">
-        <img src="perfil.png" alt="Guapo The Barber">
+        <img
+          src="perfil.png"
+          alt="Guapo The Barber"
+        />
+
         <div>
-          <h1>Guapo The Barber</h1>
-          <p>Agendamento online</p>
+          <h1>
+            Guapo The Barber
+          </h1>
+
+          <p>
+            Agendamento online
+          </p>
         </div>
       </div>
 
-      <a href="index.html" class="agenda-voltar">Voltar ao site</a>
+      <a
+        href="index.html"
+        class="agenda-voltar"
+      >
+        Voltar ao site
+      </a>
+
     </div>
 
     <div class="agenda-container">
       <div class="agenda-passos">
-        <div class="passo ativo" data-passo="1">
+
+        <div
+          class="passo ativo"
+          data-passo="1"
+        >
           <span>1</span>
           <p>Serviços</p>
         </div>
 
         <div class="linha"></div>
 
-        <div class="passo" data-passo="2">
+        <div
+          class="passo"
+          data-passo="2"
+        >
           <span>2</span>
           <p>Horário</p>
         </div>
 
         <div class="linha"></div>
 
-        <div class="passo" data-passo="3">
+        <div
+          class="passo"
+          data-passo="3"
+        >
           <span>3</span>
           <p>Confirmar</p>
         </div>
+
       </div>
     </div>
   </header>
 
   <main class="agenda-main">
 
-    <!-- ETAPA 1 - SERVIÇOS -->
-    <section class="agenda-etapa ativa" id="etapaServicos">
+    <!-- ETAPA 1 -->
+
+    <section
+      class="agenda-etapa ativa"
+      id="etapaServicos"
+    >
       <div class="agenda-container agenda-lista">
 
-        <h2>Selecione os serviços</h2>
-        <p class="agenda-subtexto">Escolha um ou mais serviços para continuar o agendamento.</p>
+        <h2>
+          Selecione os serviços
+        </h2>
 
-        <div class="agenda-servico" data-nome="Corte" data-preco="50" data-tempo="00:30">
+        <p class="agenda-subtexto">
+          Escolha um ou mais serviços
+          para continuar o agendamento.
+        </p>
+
+        <div
+          class="agenda-servico"
+          data-nome="Corte"
+          data-preco="50"
+          data-tempo="01:00"
+        >
           <div class="servico-img">
-            <img src="servico-01.jpg" alt="Corte" onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');">
+            <img
+              src="servico-01.jpg"
+              alt="Corte"
+              onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');"
+            />
           </div>
 
           <div class="servico-info">
             <h3>01 - Corte</h3>
-            <p>Corte masculino feito na máquina e/ou tesoura, com acabamento preciso.</p>
+
+            <p>
+              Corte masculino feito na máquina
+              e/ou tesoura, com acabamento preciso.
+            </p>
           </div>
 
           <div class="servico-acao">
             <strong>R$ 50,00</strong>
             <small>01:00</small>
-            <button type="button">Selecionar</button>
+            <button type="button">
+              Selecionar
+            </button>
           </div>
         </div>
 
-        <div class="agenda-servico" data-nome="Corte + sobrancelha" data-preco="60" data-tempo="00:30">
+        <div
+          class="agenda-servico"
+          data-nome="Corte + sobrancelha"
+          data-preco="60"
+          data-tempo="01:00"
+        >
           <div class="servico-img">
-            <img src="servico-02.jpg" alt="Corte + sobrancelha" onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');">
+            <img
+              src="servico-02.jpg"
+              alt="Corte + sobrancelha"
+              onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');"
+            />
           </div>
 
           <div class="servico-info">
-            <h3>02 - Corte + sobrancelha</h3>
-            <p>Corte completo com sobrancelha para deixar o visual alinhado.</p>
+            <h3>
+              02 - Corte + sobrancelha
+            </h3>
+
+            <p>
+              Corte completo com sobrancelha
+              para deixar o visual alinhado.
+            </p>
           </div>
 
           <div class="servico-acao">
             <strong>R$ 60,00</strong>
             <small>01:00</small>
-            <button type="button">Selecionar</button>
+            <button type="button">
+              Selecionar
+            </button>
           </div>
         </div>
 
-        <div class="agenda-servico" data-nome="Corte + barboterapia" data-preco="85" data-tempo="01:00">
+        <div
+          class="agenda-servico"
+          data-nome="Corte + barboterapia"
+          data-preco="85"
+          data-tempo="01:30"
+        >
           <div class="servico-img">
-            <img src="servico-03.jpg" alt="Corte + barboterapia" onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');">
+            <img
+              src="servico-03.jpg"
+              alt="Corte + barboterapia"
+              onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');"
+            />
           </div>
 
           <div class="servico-info">
-            <h3>03 - Corte + barboterapia</h3>
-            <p>Corte, sobrancelha de cortesia e barba com toalha quente e vaporizador de ozônio.</p>
+            <h3>
+              03 - Corte + barboterapia
+            </h3>
+
+            <p>
+              Corte, sobrancelha de cortesia
+              e barba com toalha quente e
+              vaporizador de ozônio.
+            </p>
           </div>
 
           <div class="servico-acao">
             <strong>R$ 85,00</strong>
             <small>01:30</small>
-            <button type="button">Selecionar</button>
+            <button type="button">
+              Selecionar
+            </button>
           </div>
         </div>
 
-        <div class="agenda-servico" data-nome="Corte + barba simples" data-preco="70" data-tempo="00:40">
+        <div
+          class="agenda-servico"
+          data-nome="Corte + barba simples"
+          data-preco="70"
+          data-tempo="01:00"
+        >
           <div class="servico-img">
-            <img src="servico-04.jpg" alt="Corte + barba simples" onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');">
+            <img
+              src="servico-04.jpg"
+              alt="Corte + barba simples"
+              onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');"
+            />
           </div>
 
           <div class="servico-info">
-            <h3>04 - Corte + barba simples</h3>
-            <p>Corte na máquina e/ou tesoura com barba simples feita apenas na máquina.</p>
+            <h3>
+              04 - Corte + barba simples
+            </h3>
+
+            <p>
+              Corte na máquina e/ou tesoura
+              com barba simples feita apenas
+              na máquina.
+            </p>
           </div>
 
           <div class="servico-acao">
             <strong>R$ 70,00</strong>
             <small>01:00</small>
-            <button type="button">Selecionar</button>
+            <button type="button">
+              Selecionar
+            </button>
           </div>
         </div>
 
-        <div class="agenda-servico" data-nome="Barboterapia" data-preco="45" data-tempo="00:30">
+        <div
+          class="agenda-servico"
+          data-nome="Barboterapia"
+          data-preco="40"
+          data-tempo="01:00"
+        >
           <div class="servico-img">
-            <img src="servico-05.jpg" alt="Barboterapia" onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');">
+            <img
+              src="servico-05.jpg"
+              alt="Barboterapia"
+              onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');"
+            />
           </div>
 
           <div class="servico-info">
             <h3>05 - Barboterapia</h3>
-            <p>Barba com toalha quente, cuidado no detalhe e vaporizador de ozônio.</p>
+
+            <p>
+              Barba com toalha quente,
+              cuidado no detalhe e
+              vaporizador de ozônio.
+            </p>
           </div>
 
           <div class="servico-acao">
             <strong>R$ 40,00</strong>
             <small>01:00</small>
-            <button type="button">Selecionar</button>
+            <button type="button">
+              Selecionar
+            </button>
           </div>
         </div>
 
-        <div class="agenda-servico" data-nome="Barba simples" data-preco="25" data-tempo="00:20">
+        <div
+          class="agenda-servico"
+          data-nome="Barba simples"
+          data-preco="25"
+          data-tempo="00:20"
+        >
           <div class="servico-img">
-            <img src="servico-06.jpg" alt="Barba simples" onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');">
+            <img
+              src="servico-06.jpg"
+              alt="Barba simples"
+              onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');"
+            />
           </div>
 
           <div class="servico-info">
             <h3>06 - Barba simples</h3>
-            <p>Barba feita apenas na máquina.</p>
+
+            <p>
+              Barba feita apenas na máquina.
+            </p>
           </div>
 
           <div class="servico-acao">
             <strong>R$ 25,00</strong>
             <small>00:20</small>
-            <button type="button">Selecionar</button>
+            <button type="button">
+              Selecionar
+            </button>
           </div>
         </div>
 
-        <div class="agenda-servico" data-nome="Sobrancelha" data-preco="10" data-tempo="00:05">
+        <div
+          class="agenda-servico"
+          data-nome="Sobrancelha"
+          data-preco="10"
+          data-tempo="00:05"
+        >
           <div class="servico-img">
-            <img src="servico-07.jpg" alt="Sobrancelha" onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');">
+            <img
+              src="servico-07.jpg"
+              alt="Sobrancelha"
+              onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');"
+            />
           </div>
 
           <div class="servico-info">
             <h3>07 - Sobrancelha</h3>
-            <p>Feita na navalha, mantendo o desenho natural e alinhado.</p>
+
+            <p>
+              Feita na navalha, mantendo
+              o desenho natural e alinhado.
+            </p>
           </div>
 
           <div class="servico-acao">
             <strong>R$ 10,00</strong>
             <small>00:05</small>
-            <button type="button">Selecionar</button>
+            <button type="button">
+              Selecionar
+            </button>
           </div>
         </div>
 
-        <div class="agenda-servico" data-nome="Hairline / pezinho" data-preco="20" data-tempo="00:15">
+        <div
+          class="agenda-servico"
+          data-nome="Hairline / pezinho"
+          data-preco="20"
+          data-tempo="00:15"
+        >
           <div class="servico-img">
-            <img src="servico-08.jpg" alt="Hairline / pezinho" onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');">
+            <img
+              src="servico-08.jpg"
+              alt="Hairline / pezinho"
+              onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');"
+            />
           </div>
 
           <div class="servico-info">
-            <h3>08 - Hairline / pezinho</h3>
-            <p>Higienização e alinhamento do perfil.</p>
+            <h3>
+              08 - Hairline / pezinho
+            </h3>
+
+            <p>
+              Higienização e alinhamento
+              do perfil.
+            </p>
           </div>
 
           <div class="servico-acao">
             <strong>R$ 20,00</strong>
             <small>00:15</small>
-            <button type="button">Selecionar</button>
+            <button type="button">
+              Selecionar
+            </button>
           </div>
         </div>
 
-        <div class="agenda-servico" data-nome="Coloração" data-preco="130" data-tempo="04:00" data-apartir="true">
+        <div
+          class="agenda-servico"
+          data-nome="Coloração"
+          data-preco="130"
+          data-tempo="04:00"
+          data-apartir="true"
+        >
           <div class="servico-img">
-            <img src="servico-09.jpg" alt="Coloração" onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');">
+            <img
+              src="servico-09.jpg"
+              alt="Coloração"
+              onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');"
+            />
           </div>
 
           <div class="servico-info">
             <h3>09 - Coloração</h3>
-            <p>Luzes, cores e trabalhos artísticos como animal print e estilos personalizados.</p>
+
+            <p>
+              Luzes, cores e trabalhos
+              artísticos como animal print
+              e estilos personalizados.
+            </p>
           </div>
 
           <div class="servico-acao">
             <em>A partir de</em>
             <strong>R$ 130,00</strong>
             <small>04:00</small>
-            <button type="button">Selecionar</button>
+            <button type="button">
+              Selecionar
+            </button>
           </div>
         </div>
 
-        <div class="agenda-servico" data-nome="Descoloração" data-preco="120" data-tempo="04:00" data-apartir="true">
+        <div
+          class="agenda-servico"
+          data-nome="Descoloração"
+          data-preco="120"
+          data-tempo="04:00"
+          data-apartir="true"
+        >
           <div class="servico-img">
-            <img src="servico-10.jpg" alt="Descoloração" onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');">
+            <img
+              src="servico-10.jpg"
+              alt="Descoloração"
+              onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');"
+            />
           </div>
 
           <div class="servico-info">
             <h3>10 - Descoloração</h3>
-            <p>Nevou, descoloração completa e transformação de locs.</p>
+
+            <p>
+              Nevou, descoloração completa
+              e transformação de locs.
+            </p>
           </div>
 
           <div class="servico-acao">
             <em>A partir de</em>
             <strong>R$ 120,00</strong>
             <small>04:00</small>
-            <button type="button">Selecionar</button>
+            <button type="button">
+              Selecionar
+            </button>
           </div>
         </div>
 
-        <div class="agenda-servico" data-nome="Hidratação + finalização" data-preco="45" data-tempo="00:30">
+        <div
+          class="agenda-servico"
+          data-nome="Hidratação + finalização"
+          data-preco="45"
+          data-tempo="00:30"
+        >
           <div class="servico-img">
-            <img src="servico-11.jpg" alt="Hidratação + finalização" onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');">
+            <img
+              src="servico-11.jpg"
+              alt="Hidratação + finalização"
+              onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');"
+            />
           </div>
 
           <div class="servico-info">
-            <h3>11 - Hidratação + finalização</h3>
-            <p>Para cabelos ondulados, cacheados e crespos, com shampoo, máscara e finalização.</p>
+            <h3>
+              11 - Hidratação + finalização
+            </h3>
+
+            <p>
+              Para cabelos ondulados,
+              cacheados e crespos, com shampoo,
+              máscara e finalização.
+            </p>
           </div>
 
           <div class="servico-acao">
             <strong>R$ 45,00</strong>
             <small>00:30</small>
-            <button type="button">Selecionar</button>
+            <button type="button">
+              Selecionar
+            </button>
           </div>
         </div>
 
-        <div class="agenda-servico" data-nome="Terapia capilar" data-preco="80" data-tempo="01:00" data-apartir="true">
+        <div
+          class="agenda-servico"
+          data-nome="Terapia capilar"
+          data-preco="80"
+          data-tempo="01:00"
+          data-apartir="true"
+        >
           <div class="servico-img">
-            <img src="servico-12.jpg" alt="Terapia capilar" onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');">
+            <img
+              src="servico-12.jpg"
+              alt="Terapia capilar"
+              onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');"
+            />
           </div>
 
           <div class="servico-info">
             <h3>12 - Terapia capilar</h3>
-            <p>Para caspa, dermatite ou fortalecimento capilar.</p>
+
+            <p>
+              Para caspa, dermatite ou
+              fortalecimento capilar.
+            </p>
           </div>
 
           <div class="servico-acao">
             <em>A partir de</em>
             <strong>R$ 80,00</strong>
             <small>01:00</small>
-            <button type="button">Selecionar</button>
+            <button type="button">
+              Selecionar
+            </button>
           </div>
         </div>
 
-        <div class="agenda-servico" data-nome="Limpeza de pele" data-preco="80" data-tempo="01:00">
+        <div
+          class="agenda-servico"
+          data-nome="Limpeza de pele"
+          data-preco="35"
+          data-tempo="00:30"
+        >
           <div class="servico-img">
-            <img src="servico-13.jpg" alt="Limpeza de pele" onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');">
+            <img
+              src="servico-13.jpg"
+              alt="Limpeza de pele"
+              onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');"
+            />
           </div>
 
           <div class="servico-info">
             <h3>13 - Limpeza de pele</h3>
-            <p>Limpeza personalizada com toalha quente, massageador e vaporizador de ozônio.</p>
+
+            <p>
+              Limpeza personalizada com
+              toalha quente, massageador
+              e vaporizador de ozônio.
+            </p>
           </div>
 
           <div class="servico-acao">
             <strong>R$ 35,00</strong>
             <small>00:30</small>
-            <button type="button">Selecionar</button>
+            <button type="button">
+              Selecionar
+            </button>
           </div>
         </div>
 
       </div>
     </section>
 
-    <!-- ETAPA 2 - HORÁRIO -->
-    <section class="agenda-etapa" id="etapaHorario">
+    <!-- ETAPA 2 -->
+
+    <section
+      class="agenda-etapa"
+      id="etapaHorario"
+    >
       <div class="agenda-container agenda-card">
-       <h2>Selecione o horário</h2>
 
-<p class="agenda-subtexto">
-  Escolha a data e o melhor horário para atendimento.
-</p>
+        <h2>
+          Selecione o horário
+        </h2>
 
-<p class="agenda-subtexto">
-  Atendimento de terça a sexta, das 09h às 19h.
-  Aos sábados, das 09h às 15h30.
-</p>
+        <p class="agenda-subtexto">
+          Escolha a data e o melhor
+          horário para atendimento.
+        </p>
+
+        <p class="agenda-subtexto">
+          Atendimento de terça a sexta,
+          das 09h às 19h.
+          Aos sábados, das 09h às 15h30.
+        </p>
 
         <div class="agenda-bloco">
-          <label for="data">Escolha o dia</label>
+          <label for="data">
+            Escolha o dia
+          </label>
 
-          <div class="datas-carrossel" id="datasCarrossel"></div>
+          <div
+            class="datas-carrossel"
+            id="datasCarrossel"
+          ></div>
 
-          <input type="hidden" id="data" required>
+          <input
+            type="hidden"
+            id="data"
+            required
+          />
         </div>
 
         <div class="agenda-bloco">
-          <label for="horario">Escolha o horário</label>
+          <label for="horario">
+            Escolha o horário
+          </label>
 
-          <div class="agenda-horarios horarios-grid" id="horariosGrid"></div>
+          <div
+            class="agenda-horarios horarios-grid"
+            id="horariosGrid"
+          ></div>
 
-          <input type="hidden" id="horario" required>
+          <input
+            type="hidden"
+            id="horario"
+            required
+          />
         </div>
+
       </div>
     </section>
 
-    <!-- ETAPA 3 - CONFIRMAR -->
-    <section class="agenda-etapa" id="etapaConfirmar">
+    <!-- ETAPA 3 -->
+
+    <section
+      class="agenda-etapa"
+      id="etapaConfirmar"
+    >
       <div class="agenda-container agenda-card">
-        <h2>Confirmar solicitação</h2>
+
+        <h2>
+          Confirmar solicitação
+        </h2>
+
         <p class="agenda-subtexto">
-          Confira as informações antes de enviar. Seus dados serão usados a partir do seu login.
+          Confira as informações antes de enviar.
+          Seus dados serão usados a partir
+          do seu login.
         </p>
 
         <div class="agenda-dados-login">
           <h3>Cliente</h3>
 
-          <p><strong>Nome:</strong> <span id="confirmarNome">Cliente</span></p>
-          <p><strong>E-mail:</strong> <span id="confirmarEmail">-</span></p>
-          <p><strong>Telefone:</strong> <span id="confirmarTelefone">-</span></p>
+          <p>
+            <strong>Nome:</strong>
+            <span id="confirmarNome">
+              Cliente
+            </span>
+          </p>
+
+          <p>
+            <strong>E-mail:</strong>
+            <span id="confirmarEmail">
+              -
+            </span>
+          </p>
+
+          <p>
+            <strong>Telefone:</strong>
+            <span id="confirmarTelefone">
+              -
+            </span>
+          </p>
         </div>
 
         <div class="agenda-campo">
-          <label for="observacao">Observação, se tiver</label>
-          <textarea 
-            id="observacao" 
-            rows="4" 
+          <label for="observacao">
+            Observação, se tiver
+          </label>
+
+          <textarea
+            id="observacao"
+            rows="4"
             placeholder="Ex: primeira vez, cabelo cacheado, quero corte e barba..."
           ></textarea>
         </div>
 
-        <div class="agenda-resumo-final" id="resumoFinal"></div>
+        <div
+          class="agenda-resumo-final"
+          id="resumoFinal"
+        ></div>
 
-        <p id="mensagemStatus" class="mensagem-status"></p>
+        <p
+          id="mensagemStatus"
+          class="mensagem-status"
+        ></p>
+
       </div>
     </section>
 
@@ -351,19 +675,40 @@
 
   <footer class="agenda-footer-fixo">
     <div class="agenda-container agenda-footer-conteudo">
+
       <div>
-        <strong id="resumoQuantidade">Nenhum serviço selecionado</strong>
-        <p id="resumoValor">Selecione um serviço para continuar</p>
+        <strong id="resumoQuantidade">
+          Nenhum serviço selecionado
+        </strong>
+
+        <p id="resumoValor">
+          Selecione um serviço para continuar
+        </p>
       </div>
 
       <div class="agenda-botoes">
-        <button type="button" id="btnVoltar" class="btn-voltar">Voltar</button>
-        <button type="button" id="btnProximo" class="btn-proximo">Próximo</button>
+        <button
+          type="button"
+          id="btnVoltar"
+          class="btn-voltar"
+        >
+          Voltar
+        </button>
+
+        <button
+          type="button"
+          id="btnProximo"
+          class="btn-proximo"
+        >
+          Próximo
+        </button>
       </div>
+
     </div>
   </footer>
 
-  <script src="auth.js"></script>
-<script src="agendamento.js?v=15"></script>
+  <script src="auth.js?v=31"></script>
+  <script src="agendamento.js?v=31"></script>
+
 </body>
 </html>
