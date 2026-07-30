@@ -16,6 +16,79 @@
     rel="stylesheet"
     href="style.css"
   />
+
+  <style>
+    .recuperacao-etapa[hidden] {
+      display: none !important;
+    }
+
+    .codigo-recuperacao {
+      text-align: center;
+      font-size: 24px;
+      letter-spacing: 10px;
+      font-weight: bold;
+    }
+
+    .recuperacao-email {
+      margin: 0 0 20px;
+      padding: 12px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      text-align: center;
+      overflow-wrap: anywhere;
+    }
+
+    .recuperacao-voltar {
+      border: 0;
+      background: transparent;
+      color: #d4af37;
+      cursor: pointer;
+      text-decoration: underline;
+      font: inherit;
+    }
+
+    /* =========================
+       CAMPO DE SENHA
+    ========================= */
+
+    .campo-senha {
+      position: relative;
+      width: 100%;
+    }
+
+    .campo-senha input {
+      width: 100%;
+      padding-right: 95px;
+      box-sizing: border-box;
+    }
+
+    .btn-mostrar-senha {
+      position: absolute;
+      top: 50%;
+      right: 16px;
+      transform: translateY(-50%);
+
+      border: 0;
+      background: transparent;
+      color: #d4af37;
+
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+
+      padding: 6px;
+    }
+
+    .btn-mostrar-senha:hover {
+      color: #ffffff;
+    }
+
+    .btn-mostrar-senha:focus {
+      outline: 2px solid #d4af37;
+      outline-offset: 2px;
+      border-radius: 6px;
+    }
+  </style>
 </head>
 
 <body class="admin-body">
@@ -32,16 +105,25 @@
         Recuperar acesso
       </p>
 
-      <h2>Esqueci minha senha</h2>
+      <h2 id="tituloRecuperacao">
+        Esqueci minha senha
+      </h2>
 
-      <p class="login-admin-texto">
+      <p
+        id="textoRecuperacao"
+        class="login-admin-texto"
+      >
         Informe seu e-mail para receber
         um código de recuperação.
       </p>
 
+      <!-- =========================
+           ETAPA 1: INFORMAR E-MAIL
+      ========================== -->
+
       <form
         id="formSolicitarCodigo"
-        class="login-admin-form"
+        class="login-admin-form recuperacao-etapa"
       >
         <label for="email">
           E-mail cadastrado
@@ -63,50 +145,117 @@
         </button>
       </form>
 
+      <!-- =========================
+           ETAPA 2: CONFIRMAR CÓDIGO
+      ========================== -->
+
       <form
-        id="formRedefinirSenha"
-        class="login-admin-form"
+        id="formVerificarCodigo"
+        class="login-admin-form recuperacao-etapa"
         hidden
       >
+        <p
+          id="emailEnviado"
+          class="recuperacao-email"
+        ></p>
+
         <label for="codigo">
-          Código recebido por e-mail
+          Código de 6 números
         </label>
 
         <input
           type="text"
           id="codigo"
-          placeholder="Digite os 6 números"
+          class="codigo-recuperacao"
+          placeholder="000000"
           inputmode="numeric"
           maxlength="6"
           autocomplete="one-time-code"
           required
         />
 
+        <button
+          type="submit"
+          id="btnVerificarCodigo"
+        >
+          Confirmar código
+        </button>
+
+        <button
+          type="button"
+          id="btnReenviarCodigo"
+          class="recuperacao-voltar"
+        >
+          Reenviar código
+        </button>
+
+        <button
+          type="button"
+          id="btnTrocarEmail"
+          class="recuperacao-voltar"
+        >
+          Usar outro e-mail
+        </button>
+      </form>
+
+      <!-- =========================
+           ETAPA 3: NOVA SENHA
+      ========================== -->
+
+      <form
+        id="formRedefinirSenha"
+        class="login-admin-form recuperacao-etapa"
+        hidden
+      >
         <label for="novaSenha">
           Nova senha
         </label>
 
-        <input
-          type="password"
-          id="novaSenha"
-          placeholder="Mínimo de 6 caracteres"
-          minlength="6"
-          autocomplete="new-password"
-          required
-        />
+        <div class="campo-senha">
+          <input
+            type="password"
+            id="novaSenha"
+            placeholder="Mínimo de 6 caracteres"
+            minlength="6"
+            autocomplete="new-password"
+            required
+          />
+
+          <button
+            type="button"
+            class="btn-mostrar-senha"
+            data-campo="novaSenha"
+            aria-label="Mostrar nova senha"
+            aria-pressed="false"
+          >
+            Mostrar
+          </button>
+        </div>
 
         <label for="confirmarSenha">
           Confirmar nova senha
         </label>
 
-        <input
-          type="password"
-          id="confirmarSenha"
-          placeholder="Digite novamente"
-          minlength="6"
-          autocomplete="new-password"
-          required
-        />
+        <div class="campo-senha">
+          <input
+            type="password"
+            id="confirmarSenha"
+            placeholder="Digite novamente"
+            minlength="6"
+            autocomplete="new-password"
+            required
+          />
+
+          <button
+            type="button"
+            class="btn-mostrar-senha"
+            data-campo="confirmarSenha"
+            aria-label="Mostrar confirmação da senha"
+            aria-pressed="false"
+          >
+            Mostrar
+          </button>
+        </div>
 
         <button
           type="submit"
@@ -140,12 +289,27 @@
     </section>
   </main>
 
-  <script src="auth.js?v=21"></script>
+  <script src="auth.js?v=24"></script>
 
   <script>
+    const tituloRecuperacao =
+      document.getElementById(
+        "tituloRecuperacao"
+      );
+
+    const textoRecuperacao =
+      document.getElementById(
+        "textoRecuperacao"
+      );
+
     const formSolicitarCodigo =
       document.getElementById(
         "formSolicitarCodigo"
+      );
+
+    const formVerificarCodigo =
+      document.getElementById(
+        "formVerificarCodigo"
       );
 
     const formRedefinirSenha =
@@ -156,6 +320,11 @@
     const campoEmail =
       document.getElementById(
         "email"
+      );
+
+    const emailEnviado =
+      document.getElementById(
+        "emailEnviado"
       );
 
     const campoCodigo =
@@ -183,10 +352,32 @@
         "btnEnviarCodigo"
       );
 
+    const btnVerificarCodigo =
+      document.getElementById(
+        "btnVerificarCodigo"
+      );
+
+    const btnReenviarCodigo =
+      document.getElementById(
+        "btnReenviarCodigo"
+      );
+
+    const btnTrocarEmail =
+      document.getElementById(
+        "btnTrocarEmail"
+      );
+
     const btnRedefinirSenha =
       document.getElementById(
         "btnRedefinirSenha"
       );
+
+    let emailRecuperacao = "";
+    let codigoConfirmado = "";
+
+    // =========================
+    // MENSAGENS
+    // =========================
 
     function mostrarMensagem(
       texto,
@@ -203,6 +394,173 @@
         );
     }
 
+    // =========================
+    // MOSTRAR E OCULTAR SENHA
+    // =========================
+
+    document
+      .querySelectorAll(
+        ".btn-mostrar-senha"
+      )
+      .forEach(function (botao) {
+        botao.addEventListener(
+          "click",
+          function () {
+            const campoId =
+              botao.dataset.campo;
+
+            const campoSenha =
+              document.getElementById(
+                campoId
+              );
+
+            if (!campoSenha) {
+              return;
+            }
+
+            const senhaEstaVisivel =
+              campoSenha.type === "text";
+
+            if (senhaEstaVisivel) {
+              campoSenha.type =
+                "password";
+
+              botao.textContent =
+                "Mostrar";
+
+              botao.setAttribute(
+                "aria-pressed",
+                "false"
+              );
+
+              botao.setAttribute(
+                "aria-label",
+                "Mostrar senha"
+              );
+
+            } else {
+              campoSenha.type =
+                "text";
+
+              botao.textContent =
+                "Ocultar";
+
+              botao.setAttribute(
+                "aria-pressed",
+                "true"
+              );
+
+              botao.setAttribute(
+                "aria-label",
+                "Ocultar senha"
+              );
+            }
+          }
+        );
+      });
+
+    // =========================
+    // CONTROLE DAS ETAPAS
+    // =========================
+
+    function esconderEtapas() {
+      formSolicitarCodigo.hidden =
+        true;
+
+      formVerificarCodigo.hidden =
+        true;
+
+      formRedefinirSenha.hidden =
+        true;
+    }
+
+    function mostrarEtapaEmail() {
+      esconderEtapas();
+
+      formSolicitarCodigo.hidden =
+        false;
+
+      tituloRecuperacao.textContent =
+        "Esqueci minha senha";
+
+      textoRecuperacao.textContent =
+        "Informe seu e-mail para receber um código de recuperação.";
+
+      mostrarMensagem("");
+
+      campoEmail.readOnly =
+        false;
+
+      campoEmail.focus();
+    }
+
+    function mostrarEtapaCodigo() {
+      esconderEtapas();
+
+      formVerificarCodigo.hidden =
+        false;
+
+      tituloRecuperacao.textContent =
+        "Digite o código";
+
+      textoRecuperacao.textContent =
+        "Enviamos um código de 6 números para o e-mail abaixo.";
+
+      emailEnviado.textContent =
+        emailRecuperacao;
+
+      mostrarMensagem(
+        "Verifique também a pasta de spam."
+      );
+
+      campoCodigo.value = "";
+
+      campoCodigo.focus();
+    }
+
+    function mostrarEtapaNovaSenha() {
+      esconderEtapas();
+
+      formRedefinirSenha.hidden =
+        false;
+
+      tituloRecuperacao.textContent =
+        "Crie uma nova senha";
+
+      textoRecuperacao.textContent =
+        "Código confirmado. Agora escolha sua nova senha.";
+
+      mostrarMensagem(
+        "Código confirmado com sucesso!"
+      );
+
+      campoNovaSenha.type =
+        "password";
+
+      campoConfirmarSenha.type =
+        "password";
+
+      document
+        .querySelectorAll(
+          ".btn-mostrar-senha"
+        )
+        .forEach(function (botao) {
+          botao.textContent =
+            "Mostrar";
+
+          botao.setAttribute(
+            "aria-pressed",
+            "false"
+          );
+        });
+
+      campoNovaSenha.focus();
+    }
+
+    // =========================
+    // CAMPO DO CÓDIGO
+    // =========================
+
     campoCodigo.addEventListener(
       "input",
       function () {
@@ -213,12 +571,16 @@
       }
     );
 
+    // =========================
+    // ENVIAR CÓDIGO
+    // =========================
+
     formSolicitarCodigo.addEventListener(
       "submit",
       async function (event) {
         event.preventDefault();
 
-        const email =
+        emailRecuperacao =
           campoEmail.value
             .trim()
             .toLowerCase();
@@ -235,13 +597,113 @@
 
         const retorno =
           await solicitarCodigoRecuperacao(
-            email
+            emailRecuperacao
           );
 
         btnEnviarCodigo.disabled =
           false;
 
         btnEnviarCodigo.textContent =
+          "Enviar código";
+
+        if (!retorno.sucesso) {
+          mostrarMensagem(
+            retorno.mensagem,
+            true
+          );
+
+          return;
+        }
+
+        mostrarEtapaCodigo();
+      }
+    );
+
+    // =========================
+    // CONFIRMAR CÓDIGO
+    // =========================
+
+    formVerificarCodigo.addEventListener(
+      "submit",
+      async function (event) {
+        event.preventDefault();
+
+        const codigo =
+          campoCodigo.value.trim();
+
+        if (!/^\d{6}$/.test(codigo)) {
+          mostrarMensagem(
+            "Digite o código completo de 6 números.",
+            true
+          );
+
+          return;
+        }
+
+        btnVerificarCodigo.disabled =
+          true;
+
+        btnVerificarCodigo.textContent =
+          "Confirmando...";
+
+        mostrarMensagem(
+          "Verificando código..."
+        );
+
+        const retorno =
+          await verificarCodigoRecuperacao(
+            emailRecuperacao,
+            codigo
+          );
+
+        btnVerificarCodigo.disabled =
+          false;
+
+        btnVerificarCodigo.textContent =
+          "Confirmar código";
+
+        if (!retorno.sucesso) {
+          mostrarMensagem(
+            retorno.mensagem,
+            true
+          );
+
+          return;
+        }
+
+        codigoConfirmado =
+          codigo;
+
+        mostrarEtapaNovaSenha();
+      }
+    );
+
+    // =========================
+    // REENVIAR CÓDIGO
+    // =========================
+
+    btnReenviarCodigo.addEventListener(
+      "click",
+      async function () {
+        btnReenviarCodigo.disabled =
+          true;
+
+        btnReenviarCodigo.textContent =
+          "Reenviando...";
+
+        mostrarMensagem(
+          "Enviando um novo código..."
+        );
+
+        const retorno =
+          await solicitarCodigoRecuperacao(
+            emailRecuperacao
+          );
+
+        btnReenviarCodigo.disabled =
+          false;
+
+        btnReenviarCodigo.textContent =
           "Reenviar código";
 
         if (!retorno.sucesso) {
@@ -253,48 +715,49 @@
           return;
         }
 
-        campoEmail.readOnly =
-          true;
-
-        formRedefinirSenha.hidden =
-          false;
+        campoCodigo.value = "";
 
         mostrarMensagem(
-          retorno.mensagem
+          "Novo código enviado. Verifique seu e-mail."
         );
 
         campoCodigo.focus();
       }
     );
 
+    // =========================
+    // TROCAR E-MAIL
+    // =========================
+
+    btnTrocarEmail.addEventListener(
+      "click",
+      function () {
+        emailRecuperacao = "";
+        codigoConfirmado = "";
+
+        campoEmail.value = "";
+        campoCodigo.value = "";
+        campoNovaSenha.value = "";
+        campoConfirmarSenha.value = "";
+
+        mostrarEtapaEmail();
+      }
+    );
+
+    // =========================
+    // REDEFINIR SENHA
+    // =========================
+
     formRedefinirSenha.addEventListener(
       "submit",
       async function (event) {
         event.preventDefault();
-
-        const email =
-          campoEmail.value
-            .trim()
-            .toLowerCase();
-
-        const codigo =
-          campoCodigo.value
-            .trim();
 
         const novaSenha =
           campoNovaSenha.value;
 
         const confirmarSenha =
           campoConfirmarSenha.value;
-
-        if (!/^\d{6}$/.test(codigo)) {
-          mostrarMensagem(
-            "Digite o código de 6 números.",
-            true
-          );
-
-          return;
-        }
 
         if (novaSenha.length < 6) {
           mostrarMensagem(
@@ -324,13 +787,13 @@
           "Redefinindo...";
 
         mostrarMensagem(
-          "Redefinindo sua senha..."
+          "Salvando sua nova senha..."
         );
 
         const retorno =
           await redefinirSenha(
-            email,
-            codigo,
+            emailRecuperacao,
+            codigoConfirmado,
             novaSenha
           );
 
@@ -349,8 +812,17 @@
           return;
         }
 
+        tituloRecuperacao.textContent =
+          "Senha alterada!";
+
+        textoRecuperacao.textContent =
+          "Sua nova senha foi cadastrada com sucesso.";
+
+        formRedefinirSenha.hidden =
+          true;
+
         mostrarMensagem(
-          "Senha redefinida com sucesso! Redirecionando para o login..."
+          "Redirecionando para o login..."
         );
 
         setTimeout(function () {

@@ -256,6 +256,53 @@ async function solicitarCodigoRecuperacao(
   }
 }
 
+async function verificarCodigoRecuperacao(
+  email,
+  codigo
+) {
+  try {
+    const resposta =
+      await fetch(
+        `${API_BASE_URL}/api/auth/recuperacao/verificar`,
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body: JSON.stringify({
+            email:
+              String(email || "")
+                .trim()
+                .toLowerCase(),
+
+            codigo:
+              String(codigo || "")
+                .trim()
+          })
+        }
+      );
+
+    return await lerRespostaJSON(
+      resposta
+    );
+
+  } catch (erro) {
+    console.error(
+      "Erro ao verificar código:",
+      erro
+    );
+
+    return {
+      sucesso: false,
+      mensagem:
+        "Não foi possível conectar com a API."
+    };
+  }
+}
+
 async function redefinirSenha(
   email,
   codigo,

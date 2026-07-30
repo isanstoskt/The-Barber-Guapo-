@@ -68,6 +68,75 @@ function escaparHTMLServidor(texto) {
     .replaceAll("'", "&#039;");
 }
 
+function formatarDataBR(data) {
+  if (!data) {
+    return "Data não informada";
+  }
+
+  const dataISO =
+    String(data).split("T")[0];
+
+  const partes =
+    dataISO.split("-");
+
+  if (partes.length !== 3) {
+    return dataISO;
+  }
+
+  return (
+    `${partes[2]}/` +
+    `${partes[1]}/` +
+    `${partes[0]}`
+  );
+}
+
+function resumirTexto(
+  texto,
+  limite = 140
+) {
+  const conteudo =
+    String(texto || "").trim();
+
+  if (conteudo.length <= limite) {
+    return conteudo;
+  }
+
+  return `${conteudo.slice(0, limite - 3)}...`;
+}
+
+async function criarNotificacao({
+  usuarioId,
+  tipo,
+  titulo,
+  mensagem,
+  referenciaId = null
+}) {
+  if (!usuarioId) {
+    return;
+  }
+
+  await conexao.query(
+    `
+      INSERT INTO notificacoes (
+        usuario_id,
+        tipo,
+        titulo,
+        mensagem,
+        referencia_id,
+        lida
+      )
+      VALUES (?, ?, ?, ?, ?, false)
+    `,
+    [
+      usuarioId,
+      tipo,
+      titulo,
+      mensagem,
+      referenciaId
+    ]
+  );
+}
+
 async function enviarCodigoRecuperacao({
   para,
   nome,
@@ -155,8 +224,8 @@ Guapo The Barber
         </p>
 
         <p>
-          Use o código abaixo para redefinir
-          sua senha:
+          Use o código abaixo para
+          redefinir sua senha:
         </p>
 
         <div
@@ -192,88 +261,22 @@ Guapo The Barber
             font-size: 13px;
           "
         >
-          Caso você não tenha solicitado a
-          recuperação, ignore este e-mail.
+          Caso você não tenha solicitado
+          a recuperação, ignore este e-mail.
         </p>
       </div>
     `
   });
 }
 
-async function criarNotificacao({
-  usuarioId,
-  tipo,
-  titulo,
-  mensagem,
-  referenciaId = null
-}) {
-  if (!usuarioId) {
-    return;
-  }
-
-  await conexao.query(
-    `
-      INSERT INTO notificacoes (
-        usuario_id,
-        tipo,
-        titulo,
-        mensagem,
-        referencia_id,
-        lida
-      )
-      VALUES (?, ?, ?, ?, ?, false)
-    `,
-    [
-      usuarioId,
-      tipo,
-      titulo,
-      mensagem,
-      referenciaId
-    ]
-  );
-}
-
-function resumirTexto(texto, limite = 140) {
-  const conteudo =
-    String(texto || "").trim();
-
-  if (conteudo.length <= limite) {
-    return conteudo;
-  }
-
-  return `${conteudo.slice(0, limite - 3)}...`;
-}
-
-function formatarDataBR(data) {
-  if (!data) {
-    return "Data não informada";
-  }
-
-  const dataISO =
-    String(data).split("T")[0];
-
-  const partes =
-    dataISO.split("-");
-
-  if (partes.length !== 3) {
-    return dataISO;
-  }
-
-  return (
-    `${partes[2]}/` +
-    `${partes[1]}/` +
-    `${partes[0]}`
-  );
-}
-
 // =========================
-// ROTA DE TESTE
+// TESTE DA API
 // =========================
 
 app.get("/", function (req, res) {
   res.json({
     mensagem:
-      "API Guapo The Barber funcionando com MySQL, bcrypt e e-mail!"
+      "API Guapo The Barber funcionando!"
   });
 });
 
@@ -345,11 +348,6 @@ app.post(
           );
 
       } else {
-        /*
-          Permite o login de contas antigas
-          que ainda possuem senha normal.
-        */
-
         senhaValida =
           senhaInformada ===
           String(usuario.senha);
@@ -569,16 +567,11 @@ app.post(
           [email]
         );
 
-      /*
-        Não informa se o endereço existe
-        para proteger os cadastros.
-      */
-
       if (usuarios.length === 0) {
         return res.json({
           sucesso: true,
           mensagem:
-            "Caso o e-mail esteja cadastrado, você receberá um código de recuperação."
+            "Caso o e-mail esteja cadastrado, você receberá um código."
         });
       }
 
@@ -615,7 +608,10 @@ app.post(
             VALUES (
               ?,
               ?,
-              DATE_ADD(NOW(), INTERVAL 15 MINUTE),
+              DATE_ADD(
+                NOW(),
+                INTERVAL 15 MINUTE
+              ),
               0,
               false
             )
@@ -643,7 +639,7 @@ app.post(
         );
 
         console.error(
-          "Erro ao enviar código por e-mail:",
+          "Erro ao enviar código:",
           erroEmail
         );
 
@@ -676,7 +672,151 @@ app.post(
 );
 
 // =========================
-// REDEFINIR SENHA COM CÓDIGO
+// VERIFICAR CÓDIGO
+// =========================
+
+app.post(
+  "/api/auth/recuperacao/verificar",
+  async function (req, res) {
+    try {
+      const email =
+        normalizarEmail(
+          req.body.email
+        );
+
+      const codigo =
+        String(
+          req.body.codigo || ""
+        ).trim();
+
+      if (!email || !codigo) {
+        return res.status(400).json({
+          sucesso: false,
+          mensagem:
+            "E-mail e código são obrigatórios."
+        });
+      }
+
+      if (!/^\d{6}$/.test(codigo)) {
+        return res.status(400).json({
+          sucesso: false,
+          mensagem:
+            "O código precisa ter 6 números."
+        });
+      }
+
+      const [usuarios] =
+        await conexao.query(
+          `
+            SELECT id
+            FROM usuarios
+            WHERE LOWER(email) = ?
+            LIMIT 1
+          `,
+          [email]
+        );
+
+      if (usuarios.length === 0) {
+        return res.status(400).json({
+          sucesso: false,
+          mensagem:
+            "Código inválido ou expirado."
+        });
+      }
+
+      const usuario =
+        usuarios[0];
+
+      const [recuperacoes] =
+        await conexao.query(
+          `
+            SELECT
+              id,
+              codigo_hash AS codigoHash,
+              tentativas
+
+            FROM recuperacoes_senha
+
+            WHERE usuario_id = ?
+              AND utilizado = false
+              AND expira_em >= NOW()
+
+            ORDER BY criado_em DESC
+            LIMIT 1
+          `,
+          [usuario.id]
+        );
+
+      if (
+        recuperacoes.length === 0
+      ) {
+        return res.status(400).json({
+          sucesso: false,
+          mensagem:
+            "Código inválido ou expirado. Solicite um novo código."
+        });
+      }
+
+      const recuperacao =
+        recuperacoes[0];
+
+      if (
+        recuperacao.tentativas >= 5
+      ) {
+        return res.status(400).json({
+          sucesso: false,
+          mensagem:
+            "Número máximo de tentativas atingido. Solicite outro código."
+        });
+      }
+
+      const codigoValido =
+        await bcrypt.compare(
+          codigo,
+          recuperacao.codigoHash
+        );
+
+      if (!codigoValido) {
+        await conexao.query(
+          `
+            UPDATE recuperacoes_senha
+            SET tentativas =
+              tentativas + 1
+            WHERE id = ?
+          `,
+          [recuperacao.id]
+        );
+
+        return res.status(400).json({
+          sucesso: false,
+          mensagem:
+            "Código incorreto."
+        });
+      }
+
+      return res.json({
+        sucesso: true,
+        mensagem:
+          "Código confirmado com sucesso."
+      });
+
+    } catch (erro) {
+      console.error(
+        "Erro ao verificar código:",
+        erro
+      );
+
+      return res.status(500).json({
+        sucesso: false,
+        mensagem:
+          "Erro ao verificar o código."
+      });
+    }
+  }
+);
+
+// =========================
+// REDEFINIR SENHA
 // =========================
 
 app.post(
@@ -729,9 +869,7 @@ app.post(
       const [usuarios] =
         await conexao.query(
           `
-            SELECT
-              id,
-              email
+            SELECT id
             FROM usuarios
             WHERE LOWER(email) = ?
             LIMIT 1
@@ -757,36 +895,31 @@ app.post(
               id,
               codigo_hash AS codigoHash,
               tentativas
+
             FROM recuperacoes_senha
+
             WHERE usuario_id = ?
               AND utilizado = false
               AND expira_em >= NOW()
+
             ORDER BY criado_em DESC
             LIMIT 1
           `,
           [usuario.id]
         );
 
-      if (recuperacoes.length === 0) {
+      if (
+        recuperacoes.length === 0
+      ) {
         return res.status(400).json({
           sucesso: false,
           mensagem:
-            "Código inválido ou expirado. Solicite um novo código."
+            "Código inválido ou expirado. Solicite outro código."
         });
       }
 
       const recuperacao =
         recuperacoes[0];
-
-      if (
-        recuperacao.tentativas >= 5
-      ) {
-        return res.status(400).json({
-          sucesso: false,
-          mensagem:
-            "Número máximo de tentativas atingido. Solicite outro código."
-        });
-      }
 
       const codigoValido =
         await bcrypt.compare(
@@ -795,15 +928,6 @@ app.post(
         );
 
       if (!codigoValido) {
-        await conexao.query(
-          `
-            UPDATE recuperacoes_senha
-            SET tentativas = tentativas + 1
-            WHERE id = ?
-          `,
-          [recuperacao.id]
-        );
-
         return res.status(400).json({
           sucesso: false,
           mensagem:
@@ -1044,10 +1168,13 @@ app.post(
         await enviarEmailAgendamento({
           para: email,
           nome,
+
           status:
             "Aguardando confirmação",
+
           data,
           horario,
+
           servicos:
             servicosTexto
         });
@@ -1444,7 +1571,7 @@ app.delete(
 );
 
 // =========================
-// LISTAR CONVERSAS
+// LISTAR MENSAGENS
 // =========================
 
 app.get(
@@ -1511,7 +1638,7 @@ app.get(
 );
 
 // =========================
-// MENSAGENS DE UM CLIENTE
+// MENSAGENS DO CLIENTE
 // =========================
 
 app.get(
@@ -1570,14 +1697,14 @@ app.get(
 
     } catch (erro) {
       console.error(
-        "Erro ao listar mensagens do cliente:",
+        "Erro ao listar mensagens:",
         erro
       );
 
       return res.status(500).json({
         sucesso: false,
         mensagem:
-          "Erro ao listar mensagens do cliente."
+          "Erro ao listar mensagens."
       });
     }
   }
@@ -1616,7 +1743,7 @@ app.post(
         return res.status(400).json({
           sucesso: false,
           mensagem:
-            "Autor da mensagem inválido."
+            "Autor inválido."
         });
       }
 
@@ -1720,6 +1847,7 @@ app.post(
 
           clienteId,
           autor,
+
           texto:
             textoLimpo,
 
@@ -1770,19 +1898,19 @@ app.patch(
       return res.json({
         sucesso: true,
         mensagem:
-          "Mensagens marcadas como lidas pelo cliente."
+          "Mensagens marcadas como lidas."
       });
 
     } catch (erro) {
       console.error(
-        "Erro ao marcar lidas pelo cliente:",
+        "Erro ao marcar mensagens:",
         erro
       );
 
       return res.status(500).json({
         sucesso: false,
         mensagem:
-          "Erro ao marcar mensagens como lidas pelo cliente."
+          "Erro ao marcar mensagens."
       });
     }
   }
@@ -1812,19 +1940,19 @@ app.patch(
       return res.json({
         sucesso: true,
         mensagem:
-          "Mensagens marcadas como lidas pelo barbeiro."
+          "Mensagens marcadas como lidas."
       });
 
     } catch (erro) {
       console.error(
-        "Erro ao marcar lidas pelo barbeiro:",
+        "Erro ao marcar mensagens:",
         erro
       );
 
       return res.status(500).json({
         sucesso: false,
         mensagem:
-          "Erro ao marcar mensagens como lidas pelo barbeiro."
+          "Erro ao marcar mensagens."
       });
     }
   }
@@ -1931,14 +2059,14 @@ app.patch(
 
     } catch (erro) {
       console.error(
-        "Erro ao marcar notificação como lida:",
+        "Erro ao marcar notificação:",
         erro
       );
 
       return res.status(500).json({
         sucesso: false,
         mensagem:
-          "Erro ao marcar notificação como lida."
+          "Erro ao marcar notificação."
       });
     }
   }
@@ -1972,14 +2100,14 @@ app.patch(
 
     } catch (erro) {
       console.error(
-        "Erro ao marcar todas as notificações como lidas:",
+        "Erro ao marcar notificações:",
         erro
       );
 
       return res.status(500).json({
         sucesso: false,
         mensagem:
-          "Erro ao marcar todas as notificações como lidas."
+          "Erro ao marcar notificações."
       });
     }
   }
