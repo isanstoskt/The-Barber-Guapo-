@@ -64,13 +64,12 @@
       margin-top: 14px;
     }
 
-    .login-admin-form
-    .btn-secundario-recuperacao {
+    .login-admin-form .btn-secundario-recuperacao {
       flex: 1;
 
       width: auto;
-      height: 48px;
       min-width: 0;
+      height: 48px;
 
       margin: 0;
       padding: 0 16px;
@@ -85,11 +84,16 @@
       font-weight: 600;
 
       cursor: pointer;
-      transition: 0.2s ease;
+
+      transition:
+        border-color 0.2s ease,
+        background-color 0.2s ease,
+        color 0.2s ease;
     }
 
-    .login-admin-form
-    .btn-secundario-recuperacao:hover {
+    .login-admin-form .btn-secundario-recuperacao:hover {
+      transform: none !important;
+
       border-color: #d4af37;
       background: rgba(212, 175, 55, 0.08);
       color: #d4af37;
@@ -106,59 +110,102 @@
 
     .campo-senha input {
       width: 100%;
-      padding-right: 58px !important;
+      padding-right: 62px !important;
       box-sizing: border-box;
     }
 
     /*
-      O !important evita que o estilo geral
-      dos botões transforme o olhinho em
-      um botão dourado grande.
+      O transform precisa permanecer igual
+      no normal, hover, foco e clique.
     */
 
     .campo-senha .btn-olho-senha {
-      position: absolute;
-      top: 50%;
-      right: 10px;
+      position: absolute !important;
 
-      transform: translateY(-50%);
+      top: 50% !important;
+      right: 10px !important;
 
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      transform: translateY(-50%) !important;
+
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
 
       width: 42px !important;
       min-width: 42px !important;
+      max-width: 42px !important;
+
       height: 42px !important;
+      min-height: 42px !important;
+      max-height: 42px !important;
 
       margin: 0 !important;
       padding: 0 !important;
 
-      border: 0 !important;
+      border: none !important;
       border-radius: 50% !important;
 
       background: transparent !important;
       color: #d4af37 !important;
 
-      cursor: pointer;
       box-shadow: none !important;
+      cursor: pointer;
 
       transition:
         color 0.2s ease,
-        background 0.2s ease;
+        background-color 0.2s ease !important;
     }
 
     .campo-senha .btn-olho-senha:hover {
+      top: 50% !important;
+      right: 10px !important;
+
+      transform: translateY(-50%) !important;
+
       background: rgba(212, 175, 55, 0.1) !important;
       color: #ffffff !important;
+
+      box-shadow: none !important;
+    }
+
+    .campo-senha .btn-olho-senha:focus {
+      top: 50% !important;
+      right: 10px !important;
+
+      transform: translateY(-50%) !important;
+
+      background: rgba(212, 175, 55, 0.1) !important;
+      box-shadow: none !important;
     }
 
     .campo-senha .btn-olho-senha:focus-visible {
+      top: 50% !important;
+      right: 10px !important;
+
+      transform: translateY(-50%) !important;
+
       outline: 2px solid #d4af37;
       outline-offset: 2px;
     }
 
+    .campo-senha .btn-olho-senha:active {
+      top: 50% !important;
+      right: 10px !important;
+
+      transform: translateY(-50%) !important;
+
+      background: rgba(212, 175, 55, 0.15) !important;
+      box-shadow: none !important;
+    }
+
+    .campo-senha .btn-olho-senha::before,
+    .campo-senha .btn-olho-senha::after {
+      display: none !important;
+    }
+
     .btn-olho-senha svg {
+      display: block;
+
       width: 22px;
       height: 22px;
 
@@ -172,7 +219,7 @@
     }
 
     .icone-oculto {
-      display: none;
+      display: none !important;
     }
 
     .bloco-mensagem-recuperacao {
@@ -193,10 +240,19 @@
         flex-direction: column;
       }
 
-      .login-admin-form
-      .btn-secundario-recuperacao {
+      .login-admin-form .btn-secundario-recuperacao {
         width: 100%;
         flex: none;
+      }
+
+      .campo-senha .btn-olho-senha,
+      .campo-senha .btn-olho-senha:hover,
+      .campo-senha .btn-olho-senha:focus,
+      .campo-senha .btn-olho-senha:active {
+        top: 50% !important;
+        right: 8px !important;
+
+        transform: translateY(-50%) !important;
       }
     }
   </style>
@@ -343,8 +399,6 @@
             aria-label="Mostrar nova senha"
             aria-pressed="false"
           >
-            <!-- Olho aberto -->
-
             <svg
               class="icone-olho-aberto"
               viewBox="0 0 24 24"
@@ -361,16 +415,12 @@
               ></circle>
             </svg>
 
-            <!-- Olho cortado -->
-
             <svg
               class="icone-olho-fechado icone-oculto"
               viewBox="0 0 24 24"
               aria-hidden="true"
             >
-              <path
-                d="M3 3l18 18"
-              ></path>
+              <path d="M3 3l18 18"></path>
 
               <path
                 d="M10.6 10.6a2 2 0 0 0 2.8 2.8"
@@ -408,8 +458,6 @@
             aria-label="Mostrar confirmação da senha"
             aria-pressed="false"
           >
-            <!-- Olho aberto -->
-
             <svg
               class="icone-olho-aberto"
               viewBox="0 0 24 24"
@@ -426,16 +474,12 @@
               ></circle>
             </svg>
 
-            <!-- Olho cortado -->
-
             <svg
               class="icone-olho-fechado icone-oculto"
               viewBox="0 0 24 24"
               aria-hidden="true"
             >
-              <path
-                d="M3 3l18 18"
-              ></path>
+              <path d="M3 3l18 18"></path>
 
               <path
                 d="M10.6 10.6a2 2 0 0 0 2.8 2.8"
@@ -486,7 +530,7 @@
     </section>
   </main>
 
-  <script src="auth.js?v=25"></script>
+  <script src="auth.js?v=26"></script>
 
   <script>
     const tituloRecuperacao =
