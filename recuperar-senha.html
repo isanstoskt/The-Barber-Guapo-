@@ -1,102 +1,365 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>Recuperar senha - Guapo The Barber</title>
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
 
-  <link rel="stylesheet" href="style.css" />
+  <title>
+    Recuperar senha - Guapo The Barber
+  </title>
+
+  <link
+    rel="stylesheet"
+    href="style.css"
+  />
 </head>
+
 <body class="admin-body">
 
   <main class="login-admin-container">
     <section class="login-admin-card">
+
       <div class="login-admin-logo">
         <h1>Guapo</h1>
         <span>The Barber</span>
       </div>
 
-      <p class="admin-tag">Recuperar acesso</p>
+      <p class="admin-tag">
+        Recuperar acesso
+      </p>
+
       <h2>Esqueci minha senha</h2>
 
       <p class="login-admin-texto">
-        Informe o e-mail cadastrado e crie uma nova senha para acessar sua conta.
+        Informe seu e-mail para receber
+        um código de recuperação.
       </p>
 
-      <form id="formRecuperarSenha" class="login-admin-form">
-        <label for="email">E-mail cadastrado</label>
-        <input 
-          type="email" 
-          id="email" 
-          placeholder="Digite seu e-mail" 
-          required 
+      <form
+        id="formSolicitarCodigo"
+        class="login-admin-form"
+      >
+        <label for="email">
+          E-mail cadastrado
+        </label>
+
+        <input
+          type="email"
+          id="email"
+          placeholder="Digite seu e-mail"
+          autocomplete="email"
+          required
         />
 
-        <label for="novaSenha">Nova senha</label>
-        <input 
-          type="password" 
-          id="novaSenha" 
-          placeholder="Digite uma nova senha" 
-          required 
-        />
-
-        <label for="confirmarSenha">Confirmar nova senha</label>
-        <input 
-          type="password" 
-          id="confirmarSenha" 
-          placeholder="Confirme a nova senha" 
-          required 
-        />
-
-        <button type="submit">Redefinir senha</button>
+        <button
+          type="submit"
+          id="btnEnviarCodigo"
+        >
+          Enviar código
+        </button>
       </form>
 
-      <p id="mensagemRecuperar" class="mensagem-login"></p>
+      <form
+        id="formRedefinirSenha"
+        class="login-admin-form"
+        hidden
+      >
+        <label for="codigo">
+          Código recebido por e-mail
+        </label>
+
+        <input
+          type="text"
+          id="codigo"
+          placeholder="Digite os 6 números"
+          inputmode="numeric"
+          maxlength="6"
+          autocomplete="one-time-code"
+          required
+        />
+
+        <label for="novaSenha">
+          Nova senha
+        </label>
+
+        <input
+          type="password"
+          id="novaSenha"
+          placeholder="Mínimo de 6 caracteres"
+          minlength="6"
+          autocomplete="new-password"
+          required
+        />
+
+        <label for="confirmarSenha">
+          Confirmar nova senha
+        </label>
+
+        <input
+          type="password"
+          id="confirmarSenha"
+          placeholder="Digite novamente"
+          minlength="6"
+          autocomplete="new-password"
+          required
+        />
+
+        <button
+          type="submit"
+          id="btnRedefinirSenha"
+        >
+          Redefinir senha
+        </button>
+      </form>
+
+      <p
+        id="mensagemRecuperar"
+        class="mensagem-login"
+      ></p>
 
       <div class="login-links">
-        <a href="login.html" class="login-voltar destaque-link">Voltar para o login</a>
-        <a href="index.html" class="login-voltar">Voltar para o site</a>
+        <a
+          href="login.html"
+          class="login-voltar destaque-link"
+        >
+          Voltar para o login
+        </a>
+
+        <a
+          href="index.html"
+          class="login-voltar"
+        >
+          Voltar para o site
+        </a>
       </div>
+
     </section>
   </main>
 
-  <script src="auth.js"></script>
+  <script src="auth.js?v=21"></script>
 
   <script>
-    const formRecuperarSenha = document.getElementById("formRecuperarSenha");
-    const mensagemRecuperar = document.getElementById("mensagemRecuperar");
+    const formSolicitarCodigo =
+      document.getElementById(
+        "formSolicitarCodigo"
+      );
 
-    formRecuperarSenha.addEventListener("submit", function (event) {
-      event.preventDefault();
+    const formRedefinirSenha =
+      document.getElementById(
+        "formRedefinirSenha"
+      );
 
-      const email = document.getElementById("email").value.trim();
-      const novaSenha = document.getElementById("novaSenha").value.trim();
-      const confirmarSenha = document.getElementById("confirmarSenha").value.trim();
+    const campoEmail =
+      document.getElementById(
+        "email"
+      );
 
-      mensagemRecuperar.classList.remove("erro");
+    const campoCodigo =
+      document.getElementById(
+        "codigo"
+      );
 
-      if (novaSenha !== confirmarSenha) {
-        mensagemRecuperar.textContent = "As senhas não conferem.";
-        mensagemRecuperar.classList.add("erro");
-        return;
+    const campoNovaSenha =
+      document.getElementById(
+        "novaSenha"
+      );
+
+    const campoConfirmarSenha =
+      document.getElementById(
+        "confirmarSenha"
+      );
+
+    const mensagemRecuperar =
+      document.getElementById(
+        "mensagemRecuperar"
+      );
+
+    const btnEnviarCodigo =
+      document.getElementById(
+        "btnEnviarCodigo"
+      );
+
+    const btnRedefinirSenha =
+      document.getElementById(
+        "btnRedefinirSenha"
+      );
+
+    function mostrarMensagem(
+      texto,
+      erro = false
+    ) {
+      mensagemRecuperar.textContent =
+        texto;
+
+      mensagemRecuperar
+        .classList
+        .toggle(
+          "erro",
+          erro
+        );
+    }
+
+    campoCodigo.addEventListener(
+      "input",
+      function () {
+        campoCodigo.value =
+          campoCodigo.value
+            .replace(/\D/g, "")
+            .slice(0, 6);
       }
+    );
 
-      const retorno = redefinirSenha(email, novaSenha);
+    formSolicitarCodigo.addEventListener(
+      "submit",
+      async function (event) {
+        event.preventDefault();
 
-      if (!retorno.sucesso) {
-        mensagemRecuperar.textContent = retorno.mensagem;
-        mensagemRecuperar.classList.add("erro");
-        return;
+        const email =
+          campoEmail.value
+            .trim()
+            .toLowerCase();
+
+        btnEnviarCodigo.disabled =
+          true;
+
+        btnEnviarCodigo.textContent =
+          "Enviando...";
+
+        mostrarMensagem(
+          "Enviando código..."
+        );
+
+        const retorno =
+          await solicitarCodigoRecuperacao(
+            email
+          );
+
+        btnEnviarCodigo.disabled =
+          false;
+
+        btnEnviarCodigo.textContent =
+          "Reenviar código";
+
+        if (!retorno.sucesso) {
+          mostrarMensagem(
+            retorno.mensagem,
+            true
+          );
+
+          return;
+        }
+
+        campoEmail.readOnly =
+          true;
+
+        formRedefinirSenha.hidden =
+          false;
+
+        mostrarMensagem(
+          retorno.mensagem
+        );
+
+        campoCodigo.focus();
       }
+    );
 
-      mensagemRecuperar.textContent = "Senha redefinida com sucesso! Redirecionando para o login...";
+    formRedefinirSenha.addEventListener(
+      "submit",
+      async function (event) {
+        event.preventDefault();
 
-      setTimeout(function () {
-        window.location.href = "login.html";
-      }, 1800);
-    });
+        const email =
+          campoEmail.value
+            .trim()
+            .toLowerCase();
+
+        const codigo =
+          campoCodigo.value
+            .trim();
+
+        const novaSenha =
+          campoNovaSenha.value;
+
+        const confirmarSenha =
+          campoConfirmarSenha.value;
+
+        if (!/^\d{6}$/.test(codigo)) {
+          mostrarMensagem(
+            "Digite o código de 6 números.",
+            true
+          );
+
+          return;
+        }
+
+        if (novaSenha.length < 6) {
+          mostrarMensagem(
+            "A senha precisa ter pelo menos 6 caracteres.",
+            true
+          );
+
+          return;
+        }
+
+        if (
+          novaSenha !==
+          confirmarSenha
+        ) {
+          mostrarMensagem(
+            "As senhas não conferem.",
+            true
+          );
+
+          return;
+        }
+
+        btnRedefinirSenha.disabled =
+          true;
+
+        btnRedefinirSenha.textContent =
+          "Redefinindo...";
+
+        mostrarMensagem(
+          "Redefinindo sua senha..."
+        );
+
+        const retorno =
+          await redefinirSenha(
+            email,
+            codigo,
+            novaSenha
+          );
+
+        if (!retorno.sucesso) {
+          btnRedefinirSenha.disabled =
+            false;
+
+          btnRedefinirSenha.textContent =
+            "Redefinir senha";
+
+          mostrarMensagem(
+            retorno.mensagem,
+            true
+          );
+
+          return;
+        }
+
+        mostrarMensagem(
+          "Senha redefinida com sucesso! Redirecionando para o login..."
+        );
+
+        setTimeout(function () {
+          window.location.replace(
+            "login.html"
+          );
+        }, 1800);
+      }
+    );
   </script>
 
 </body>
