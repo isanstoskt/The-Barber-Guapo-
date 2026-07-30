@@ -1,3 +1,15 @@
+# Dependências
 node_modules/
 api/node_modules/
+
+# Variáveis secretas
 .env
+api/.env
+
+# Certificados
+*.pem
+api/*.pem
+
+# Arquivos temporários
+*.log
+.DS_Store
