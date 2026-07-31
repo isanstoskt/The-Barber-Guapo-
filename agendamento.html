@@ -1,1577 +1,714 @@
-// =========================
-// CONFIGURAÇÃO DA API
-// =========================
-
-const GUAPO_API_URL =
-  "https://the-barber-guapo.onrender.com";
-
-
-// =========================
-// VERIFICAR LOGIN
-// =========================
-
-const usuarioLogado =
-  pegarUsuarioLogado();
-
-if (!usuarioLogado) {
-  localStorage.setItem(
-    "guapo_redirect_apos_login",
-    "agendamento.html"
-  );
-
-  window.location.replace(
-    "login.html"
-  );
-
-  throw new Error(
-    "Cliente precisa estar logado para agendar."
-  );
-}
-
-if (
-  usuarioLogado.tipo ===
-  "barbeiro"
-) {
-  window.location.replace(
-    "painel.html"
-  );
-
-  throw new Error(
-    "Barbeiro não agenda como cliente."
-  );
-}
-
-
-// =========================
-// ESTADO DO AGENDAMENTO
-// =========================
-
-let etapaAtual = 1;
-
-let servicosSelecionados = [];
-
-let horarioSelecionado = "";
-
-let envioEmAndamento = false;
-
-let agendamentoFinalizado = false;
-
-
-// =========================
-// ELEMENTOS
-// =========================
-
-const etapas = {
-  1: document.getElementById(
-    "etapaServicos"
-  ),
-
-  2: document.getElementById(
-    "etapaHorario"
-  ),
-
-  3: document.getElementById(
-    "etapaConfirmar"
-  )
-};
-
-const btnProximo =
-  document.getElementById(
-    "btnProximo"
-  );
-
-const btnVoltar =
-  document.getElementById(
-    "btnVoltar"
-  );
-
-const resumoQuantidade =
-  document.getElementById(
-    "resumoQuantidade"
-  );
-
-const resumoValor =
-  document.getElementById(
-    "resumoValor"
-  );
-
-const resumoFinal =
-  document.getElementById(
-    "resumoFinal"
-  );
-
-const mensagemStatus =
-  document.getElementById(
-    "mensagemStatus"
-  );
-
-const campoData =
-  document.getElementById(
-    "data"
-  );
-
-const inputHorario =
-  document.getElementById(
-    "horario"
-  );
-
-const datasCarrossel =
-  document.getElementById(
-    "datasCarrossel"
-  );
-
-const horariosGrid =
-  document.getElementById(
-    "horariosGrid"
-  );
-
-const confirmarNome =
-  document.getElementById(
-    "confirmarNome"
-  );
-
-const confirmarEmail =
-  document.getElementById(
-    "confirmarEmail"
-  );
-
-const confirmarTelefone =
-  document.getElementById(
-    "confirmarTelefone"
-  );
-
-const campoObservacao =
-  document.getElementById(
-    "observacao"
-  );
-
-
-// =========================
-// HORÁRIOS
-// =========================
-
-const horariosSemana = [
-  "09:00",
-  "09:30",
-  "10:00",
-  "10:30",
-  "11:00",
-  "11:30",
-  "13:00",
-  "13:30",
-  "14:00",
-  "14:30",
-  "15:00",
-  "15:30",
-  "16:00",
-  "16:30",
-  "17:00",
-  "17:30",
-  "18:00",
-  "18:30"
-];
-
-const horariosSabado = [
-  "09:00",
-  "09:30",
-  "10:00",
-  "10:30",
-  "11:00",
-  "11:30",
-  "12:00",
-  "12:30",
-  "13:00",
-  "13:30",
-  "14:00",
-  "14:30",
-  "15:00",
-  "15:30"
-];
-
-const diasSemana = [
-  "Dom",
-  "Seg",
-  "Ter",
-  "Qua",
-  "Qui",
-  "Sex",
-  "Sáb"
-];
-
-const meses = [
-  "jan",
-  "fev",
-  "mar",
-  "abr",
-  "mai",
-  "jun",
-  "jul",
-  "ago",
-  "set",
-  "out",
-  "nov",
-  "dez"
-];
-
-
-// =========================
-// FUNÇÕES GERAIS
-// =========================
-
-function formatarMoeda(valor) {
-  return valor.toLocaleString(
-    "pt-BR",
-    {
-      style: "currency",
-      currency: "BRL"
-    }
-  );
-}
-
-function formatarDataISO(data) {
-  const ano =
-    data.getFullYear();
-
-  const mes =
-    String(
-      data.getMonth() + 1
-    ).padStart(2, "0");
-
-  const dia =
-    String(
-      data.getDate()
-    ).padStart(2, "0");
-
-  return `${ano}-${mes}-${dia}`;
-}
-
-function obterDataISO(dataBanco) {
-  if (!dataBanco) {
-    return "";
-  }
-
-  return String(dataBanco)
-    .split("T")[0];
-}
-
-function formatarDataBR(
-  dataISO
-) {
-  if (!dataISO) {
-    return "";
-  }
-
-  const partes =
-    dataISO.split("-");
-
-  if (partes.length !== 3) {
-    return dataISO;
-  }
-
-  return (
-    `${partes[2]}/` +
-    `${partes[1]}/` +
-    `${partes[0]}`
-  );
-}
-
-function criarDataLocal(
-  dataISO
-) {
-  return new Date(
-    `${dataISO}T12:00:00`
-  );
-}
-
-function normalizarTexto(texto) {
-  return String(texto || "")
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, " ");
-}
-
-function aguardar(tempo) {
-  return new Promise(
-    function (resolve) {
-      setTimeout(
-        resolve,
-        tempo
-      );
-    }
-  );
-}
-
-function diaPermitido(data) {
-  const diaSemana =
-    data.getDay();
-
-  return (
-    diaSemana >= 2 &&
-    diaSemana <= 6
-  );
-}
-
-function obterHorariosDoDia(
-  dataISO
-) {
-  const data =
-    criarDataLocal(dataISO);
-
-  const diaSemana =
-    data.getDay();
-
-  if (diaSemana === 6) {
-    return [
-      ...horariosSabado
-    ];
-  }
-
-  if (
-    diaSemana >= 2 &&
-    diaSemana <= 5
-  ) {
-    return [
-      ...horariosSemana
-    ];
-  }
-
-  return [];
-}
-
-function horarioJaPassouHoje(
-  dataISO,
-  horario
-) {
-  const agora =
-    new Date();
-
-  const hojeISO =
-    formatarDataISO(agora);
-
-  if (dataISO !== hojeISO) {
-    return false;
-  }
-
-  const partes =
-    horario
-      .split(":")
-      .map(Number);
-
-  const hora =
-    partes[0];
-
-  const minuto =
-    partes[1];
-
-  const horarioData =
-    new Date();
-
-  horarioData.setHours(
-    hora,
-    minuto,
-    0,
-    0
-  );
-
-  return horarioData <= agora;
-}
-
-async function buscarJSON(
-  url,
-  opcoes = {}
-) {
-  const resposta =
-    await fetch(
-      url,
-      opcoes
-    );
-
-  const texto =
-    await resposta.text();
-
-  let dados = null;
-
-  try {
-    dados = texto
-      ? JSON.parse(texto)
-      : null;
-
-  } catch (erro) {
-    throw new Error(
-      "A API retornou uma resposta inválida."
-    );
-  }
-
-  if (!resposta.ok) {
-    throw new Error(
-      dados?.mensagem ||
-      dados?.erro ||
-      "Erro na solicitação."
-    );
-  }
-
-  return dados;
-}
-
-
-// =========================
-// DATAS DO CARROSSEL
-// =========================
-
-function criarDatasCarrossel() {
-  if (
-    !datasCarrossel ||
-    !horariosGrid ||
-    !campoData
-  ) {
-    return;
-  }
-
-  datasCarrossel.innerHTML =
-    "";
-
-  const hoje =
-    new Date();
-
-  let quantidadeCriada = 0;
-
-  let diasAvancados = 0;
-
-  while (
-    quantidadeCriada < 21 &&
-    diasAvancados < 60
-  ) {
-    const data =
-      new Date(hoje);
-
-    data.setDate(
-      hoje.getDate() +
-      diasAvancados
-    );
-
-    diasAvancados++;
-
-    if (!diaPermitido(data)) {
-      continue;
-    }
-
-    const dataISO =
-      formatarDataISO(data);
-
-    const diaSemana =
-      diasSemana[
-        data.getDay()
-      ];
-
-    const dia =
-      data.getDate();
-
-    const mes =
-      meses[
-        data.getMonth()
-      ];
-
-    const ano =
-      String(
-        data.getFullYear()
-      ).slice(2);
-
-    const botao =
-      document.createElement(
-        "button"
-      );
-
-    botao.type =
-      "button";
-
-    botao.classList.add(
-      "data-card"
-    );
-
-    botao.dataset.data =
-      dataISO;
-
-    botao.innerHTML = `
-      <span>
-        ${diaSemana}
-      </span>
-
-      <strong>
-        ${dia}
-      </strong>
-
-      <small>
-        ${mes}/${ano}
-      </small>
-    `;
-
-    botao.addEventListener(
-      "click",
-      function () {
-        selecionarDataCarrossel(
-          dataISO,
-          botao
-        );
-      }
-    );
-
-    datasCarrossel.appendChild(
-      botao
-    );
-
-    quantidadeCriada++;
-  }
-
-  const primeiraData =
-    datasCarrossel
-      .querySelector(
-        ".data-card"
-      );
-
-  if (primeiraData) {
-    primeiraData.click();
-  }
-}
-
-async function selecionarDataCarrossel(
-  dataISO,
-  botaoSelecionado
-) {
-  campoData.value =
-    dataISO;
-
-  horarioSelecionado =
-    "";
-
-  if (inputHorario) {
-    inputHorario.value =
-      "";
-  }
-
-  document
-    .querySelectorAll(
-      ".data-card"
-    )
-    .forEach(
-      function (botao) {
-        botao.classList.remove(
-          "ativo"
-        );
-      }
-    );
-
-  botaoSelecionado
-    .classList
-    .add("ativo");
-
-  await carregarHorariosDisponiveis(
-    dataISO
-  );
-
-  validarEtapa();
-}
-
-
-// =========================
-// HORÁRIOS DISPONÍVEIS
-// =========================
-
-async function carregarHorariosDisponiveis(
-  dataISO
-) {
-  if (!horariosGrid) {
-    return;
-  }
-
-  horariosGrid.innerHTML = `
-    <p class="horarios-msg">
-      Carregando horários...
-    </p>
-  `;
-
-  try {
-    const agendamentos =
-      await buscarJSON(
-        `${GUAPO_API_URL}` +
-        `/api/agendamentos` +
-        `?data=${
-          encodeURIComponent(
-            dataISO
-          )
-        }`
-      );
-
-    const listaAgendamentos =
-      Array.isArray(
-        agendamentos
-      )
-        ? agendamentos
-        : [];
-
-    const horariosOcupados =
-      listaAgendamentos
-        .filter(
-          function (
-            agendamento
-          ) {
-            const status =
-              String(
-                agendamento.status ||
-                ""
-              ).toLowerCase();
-
-            return !status.includes(
-              "cancel"
-            );
-          }
-        )
-        .map(
-          function (
-            agendamento
-          ) {
-            return String(
-              agendamento.horario ||
-              ""
-            ).slice(0, 5);
-          }
-        );
-
-    const horariosDoDia =
-      obterHorariosDoDia(
-        dataISO
-      );
-
-    const horariosDisponiveis =
-      horariosDoDia.filter(
-        function (horario) {
-          return (
-            !horariosOcupados.includes(
-              horario
-            ) &&
-            !horarioJaPassouHoje(
-              dataISO,
-              horario
-            )
-          );
-        }
-      );
-
-    if (
-      horariosDisponiveis.length ===
-      0
-    ) {
-      horariosGrid.innerHTML = `
-        <p class="horarios-msg">
-          Nenhum horário disponível
-          para este dia.
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>
+    Agendamento | Guapo The Barber
+  </title>
+
+  <link
+    rel="stylesheet"
+    href="style.css"
+  />
+</head>
+
+<body class="agenda-body">
+
+  <header class="agenda-topo">
+    <div class="agenda-container agenda-menu">
+
+      <div class="agenda-logo">
+        <img
+          src="perfil.png"
+          alt="Guapo The Barber"
+        />
+
+        <div>
+          <h1>
+            Guapo The Barber
+          </h1>
+
+          <p>
+            Agendamento online
+          </p>
+        </div>
+      </div>
+
+      <a
+        href="index.html"
+        class="agenda-voltar"
+      >
+        Voltar ao site
+      </a>
+
+    </div>
+
+    <div class="agenda-container">
+      <div class="agenda-passos">
+
+        <div
+          class="passo ativo"
+          data-passo="1"
+        >
+          <span>1</span>
+          <p>Serviços</p>
+        </div>
+
+        <div class="linha"></div>
+
+        <div
+          class="passo"
+          data-passo="2"
+        >
+          <span>2</span>
+          <p>Horário</p>
+        </div>
+
+        <div class="linha"></div>
+
+        <div
+          class="passo"
+          data-passo="3"
+        >
+          <span>3</span>
+          <p>Confirmar</p>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <main class="agenda-main">
+
+    <!-- ETAPA 1 -->
+
+    <section
+      class="agenda-etapa ativa"
+      id="etapaServicos"
+    >
+      <div class="agenda-container agenda-lista">
+
+        <h2>
+          Selecione os serviços
+        </h2>
+
+        <p class="agenda-subtexto">
+          Escolha um ou mais serviços
+          para continuar o agendamento.
         </p>
-      `;
-
-      return;
-    }
-
-    horariosGrid.innerHTML =
-      "";
-
-    horariosDisponiveis.forEach(
-      function (horario) {
-        const botao =
-          document.createElement(
-            "button"
-          );
-
-        botao.type =
-          "button";
-
-        botao.classList.add(
-          "horario-card"
-        );
-
-        botao.textContent =
-          horario;
-
-        botao.addEventListener(
-          "click",
-          function () {
-            selecionarHorarioCarrossel(
-              horario,
-              botao
-            );
-          }
-        );
-
-        horariosGrid.appendChild(
-          botao
-        );
-      }
-    );
-
-  } catch (erro) {
-    console.error(
-      "Erro ao carregar horários:",
-      erro
-    );
-
-    horariosGrid.innerHTML = `
-      <p class="horarios-msg">
-        Não foi possível carregar
-        os horários.
-
-        Aguarde alguns segundos
-        e tente novamente.
-      </p>
-    `;
-  }
-}
-
-function selecionarHorarioCarrossel(
-  horario,
-  botaoSelecionado
-) {
-  horarioSelecionado =
-    horario;
-
-  if (inputHorario) {
-    inputHorario.value =
-      horario;
-  }
-
-  document
-    .querySelectorAll(
-      ".horario-card"
-    )
-    .forEach(
-      function (botao) {
-        botao.classList.remove(
-          "ativo"
-        );
-      }
-    );
-
-  botaoSelecionado
-    .classList
-    .add("ativo");
-
-  validarEtapa();
-}
-
-
-// =========================
-// ETAPAS
-// =========================
-
-function atualizarPassos() {
-  document
-    .querySelectorAll(
-      ".agenda-etapa"
-    )
-    .forEach(
-      function (etapa) {
-        etapa.classList.remove(
-          "ativa"
-        );
-      }
-    );
-
-  if (etapas[etapaAtual]) {
-    etapas[etapaAtual]
-      .classList
-      .add("ativa");
-  }
-
-  document
-    .querySelectorAll(
-      ".passo"
-    )
-    .forEach(
-      function (passo) {
-        const numeroPasso =
-          Number(
-            passo.dataset.passo
-          );
-
-        passo.classList.toggle(
-          "ativo",
-          numeroPasso ===
-          etapaAtual
-        );
-      }
-    );
-
-  btnVoltar.style.display =
-    etapaAtual === 1
-      ? "none"
-      : "inline-block";
-
-  btnProximo.textContent =
-    etapaAtual === 3
-      ? "Enviar solicitação"
-      : "Próximo";
-
-  validarEtapa();
-
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth"
-  });
-}
-
-function atualizarResumo() {
-  const total =
-    servicosSelecionados.reduce(
-      function (
-        soma,
-        servico
-      ) {
-        return (
-          soma +
-          servico.preco
-        );
-      },
-      0
-    );
-
-  if (
-    servicosSelecionados.length ===
-    0
-  ) {
-    resumoQuantidade.textContent =
-      "Nenhum serviço selecionado";
-
-    resumoValor.textContent =
-      "Selecione um serviço para continuar";
-
-    return;
-  }
-
-  resumoQuantidade.textContent =
-    servicosSelecionados.length ===
-      1
-      ? "1 serviço selecionado"
-      : (
-        `${servicosSelecionados.length} ` +
-        "serviços selecionados"
-      );
-
-  resumoValor.textContent =
-    `Total estimado: ${
-      formatarMoeda(total)
-    }`;
-}
-
-function validarEtapa() {
-  if (
-    envioEmAndamento ||
-    agendamentoFinalizado
-  ) {
-    btnProximo.disabled =
-      true;
-
-    return;
-  }
-
-  if (etapaAtual === 1) {
-    btnProximo.disabled =
-      servicosSelecionados.length ===
-      0;
-
-    return;
-  }
-
-  if (etapaAtual === 2) {
-    btnProximo.disabled =
-      !campoData.value ||
-      !horarioSelecionado;
-
-    return;
-  }
-
-  btnProximo.disabled =
-    false;
-}
-
-
-// =========================
-// SELEÇÃO DE SERVIÇOS
-// =========================
-
-document
-  .querySelectorAll(
-    ".agenda-servico"
-  )
-  .forEach(
-    function (card) {
-      const botao =
-        card.querySelector(
-          "button"
-        );
-
-      if (!botao) {
-        return;
-      }
-
-      botao.addEventListener(
-        "click",
-        function () {
-          if (
-            envioEmAndamento ||
-            agendamentoFinalizado
-          ) {
-            return;
-          }
-
-          const nome =
-            card.dataset.nome;
-
-          const preco =
-            Number(
-              card.dataset.preco
-            );
-
-          const tempo =
-            card.dataset.tempo;
-
-          const apartir =
-            card.dataset.apartir ===
-            "true";
-
-          const jaSelecionado =
-            servicosSelecionados.find(
-              function (servico) {
-                return (
-                  servico.nome ===
-                  nome
-                );
-              }
-            );
-
-          if (jaSelecionado) {
-            servicosSelecionados =
-              servicosSelecionados.filter(
-                function (servico) {
-                  return (
-                    servico.nome !==
-                    nome
-                  );
-                }
-              );
-
-            card.classList.remove(
-              "selecionado"
-            );
-
-            botao.textContent =
-              "Selecionar";
-
-          } else {
-            servicosSelecionados.push({
-              nome,
-              preco,
-              tempo,
-              apartir
-            });
-
-            card.classList.add(
-              "selecionado"
-            );
-
-            botao.textContent =
-              "Selecionado";
-          }
-
-          atualizarResumo();
-
-          validarEtapa();
-        }
-      );
-    }
-  );
-
-
-// =========================
-// OBSERVAÇÃO
-// =========================
-
-if (campoObservacao) {
-  campoObservacao.addEventListener(
-    "input",
-    montarResumoFinal
-  );
-
-  campoObservacao.addEventListener(
-    "change",
-    montarResumoFinal
-  );
-}
-
-
-// =========================
-// BOTÕES DE NAVEGAÇÃO
-// =========================
-
-btnVoltar.addEventListener(
-  "click",
-  function () {
-    if (
-      envioEmAndamento ||
-      agendamentoFinalizado
-    ) {
-      return;
-    }
-
-    if (etapaAtual > 1) {
-      etapaAtual--;
-
-      atualizarPassos();
-    }
-  }
-);
-
-btnProximo.addEventListener(
-  "click",
-  async function () {
-    if (
-      envioEmAndamento ||
-      agendamentoFinalizado
-    ) {
-      return;
-    }
-
-    if (etapaAtual === 1) {
-      if (
-        servicosSelecionados.length ===
-        0
-      ) {
-        alert(
-          "Selecione pelo menos um serviço."
-        );
-
-        return;
-      }
-
-      etapaAtual = 2;
-
-      atualizarPassos();
-
-      return;
-    }
-
-    if (etapaAtual === 2) {
-      if (
-        !campoData.value ||
-        !horarioSelecionado
-      ) {
-        alert(
-          "Selecione a data e o horário."
-        );
-
-        return;
-      }
-
-      montarResumoFinal();
-
-      etapaAtual = 3;
-
-      atualizarPassos();
-
-      return;
-    }
-
-    if (etapaAtual === 3) {
-      await enviarAgendamento();
-    }
-  }
-);
-
-
-// =========================
-// RESUMO FINAL
-// =========================
-
-function montarResumoFinal() {
-  const observacao =
-    campoObservacao
-      ? campoObservacao.value.trim()
-      : "";
-
-  const total =
-    servicosSelecionados.reduce(
-      function (
-        soma,
-        servico
-      ) {
-        return (
-          soma +
-          servico.preco
-        );
-      },
-      0
-    );
-
-  const listaServicos =
-    servicosSelecionados
-      .map(
-        function (servico) {
-          const textoPreco =
-            servico.apartir
-              ? (
-                "A partir de " +
-                formatarMoeda(
-                  servico.preco
-                )
-              )
-              : formatarMoeda(
-                servico.preco
-              );
-
-          return `
-            <li>
-              ${servico.nome}
+
+        <div
+          class="agenda-servico"
+          data-nome="Corte"
+          data-preco="50"
+          data-tempo="01:00"
+        >
+          <div class="servico-img">
+            <img
+              src="servico-01.jpg"
+              alt="Corte"
+              onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');"
+            />
+          </div>
+
+          <div class="servico-info">
+            <h3>01 - Corte</h3>
+
+            <p>
+              Corte masculino feito na máquina
+              e/ou tesoura, com acabamento preciso.
+            </p>
+          </div>
+
+          <div class="servico-acao">
+            <strong>R$ 50,00</strong>
+            <small>01:00</small>
+            <button type="button">
+              Selecionar
+            </button>
+          </div>
+        </div>
+
+        <div
+          class="agenda-servico"
+          data-nome="Corte + sobrancelha"
+          data-preco="60"
+          data-tempo="01:00"
+        >
+          <div class="servico-img">
+            <img
+              src="servico-02.jpg"
+              alt="Corte + sobrancelha"
+              onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');"
+            />
+          </div>
+
+          <div class="servico-info">
+            <h3>
+              02 - Corte + sobrancelha
+            </h3>
+
+            <p>
+              Corte completo com sobrancelha
+              para deixar o visual alinhado.
+            </p>
+          </div>
+
+          <div class="servico-acao">
+            <strong>R$ 60,00</strong>
+            <small>01:00</small>
+            <button type="button">
+              Selecionar
+            </button>
+          </div>
+        </div>
+
+        <div
+          class="agenda-servico"
+          data-nome="Corte + barboterapia"
+          data-preco="85"
+          data-tempo="01:30"
+        >
+          <div class="servico-img">
+            <img
+              src="servico-03.jpg"
+              alt="Corte + barboterapia"
+              onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');"
+            />
+          </div>
+
+          <div class="servico-info">
+            <h3>
+              03 - Corte + barboterapia
+            </h3>
+
+            <p>
+              Corte, sobrancelha de cortesia
+              e barba com toalha quente e
+              vaporizador de ozônio.
+            </p>
+          </div>
+
+          <div class="servico-acao">
+            <strong>R$ 85,00</strong>
+            <small>01:30</small>
+            <button type="button">
+              Selecionar
+            </button>
+          </div>
+        </div>
+
+        <div
+          class="agenda-servico"
+          data-nome="Corte + barba simples"
+          data-preco="70"
+          data-tempo="01:00"
+        >
+          <div class="servico-img">
+            <img
+              src="servico-04.jpg"
+              alt="Corte + barba simples"
+              onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');"
+            />
+          </div>
+
+          <div class="servico-info">
+            <h3>
+              04 - Corte + barba simples
+            </h3>
+
+            <p>
+              Corte na máquina e/ou tesoura
+              com barba simples feita apenas
+              na máquina.
+            </p>
+          </div>
+
+          <div class="servico-acao">
+            <strong>R$ 70,00</strong>
+            <small>01:00</small>
+            <button type="button">
+              Selecionar
+            </button>
+          </div>
+        </div>
+
+        <div
+          class="agenda-servico"
+          data-nome="Barboterapia"
+          data-preco="40"
+          data-tempo="01:00"
+        >
+          <div class="servico-img">
+            <img
+              src="servico-05.jpg"
+              alt="Barboterapia"
+              onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');"
+            />
+          </div>
+
+          <div class="servico-info">
+            <h3>05 - Barboterapia</h3>
+
+            <p>
+              Barba com toalha quente,
+              cuidado no detalhe e
+              vaporizador de ozônio.
+            </p>
+          </div>
+
+          <div class="servico-acao">
+            <strong>R$ 40,00</strong>
+            <small>01:00</small>
+            <button type="button">
+              Selecionar
+            </button>
+          </div>
+        </div>
+
+        <div
+          class="agenda-servico"
+          data-nome="Barba simples"
+          data-preco="25"
+          data-tempo="00:20"
+        >
+          <div class="servico-img">
+            <img
+              src="servico-06.jpg"
+              alt="Barba simples"
+              onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');"
+            />
+          </div>
+
+          <div class="servico-info">
+            <h3>06 - Barba simples</h3>
+
+            <p>
+              Barba feita apenas na máquina.
+            </p>
+          </div>
+
+          <div class="servico-acao">
+            <strong>R$ 25,00</strong>
+            <small>00:20</small>
+            <button type="button">
+              Selecionar
+            </button>
+          </div>
+        </div>
+
+        <div
+          class="agenda-servico"
+          data-nome="Sobrancelha"
+          data-preco="10"
+          data-tempo="00:05"
+        >
+          <div class="servico-img">
+            <img
+              src="servico-07.jpg"
+              alt="Sobrancelha"
+              onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');"
+            />
+          </div>
+
+          <div class="servico-info">
+            <h3>07 - Sobrancelha</h3>
+
+            <p>
+              Feita na navalha, mantendo
+              o desenho natural e alinhado.
+            </p>
+          </div>
+
+          <div class="servico-acao">
+            <strong>R$ 10,00</strong>
+            <small>00:05</small>
+            <button type="button">
+              Selecionar
+            </button>
+          </div>
+        </div>
+
+        <div
+          class="agenda-servico"
+          data-nome="Hairline / pezinho"
+          data-preco="20"
+          data-tempo="00:15"
+        >
+          <div class="servico-img">
+            <img
+              src="servico-08.jpg"
+              alt="Hairline / pezinho"
+              onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');"
+            />
+          </div>
+
+          <div class="servico-info">
+            <h3>
+              08 - Hairline / pezinho
+            </h3>
+
+            <p>
+              Higienização e alinhamento
+              do perfil.
+            </p>
+          </div>
+
+          <div class="servico-acao">
+            <strong>R$ 20,00</strong>
+            <small>00:15</small>
+            <button type="button">
+              Selecionar
+            </button>
+          </div>
+        </div>
+
+        <div
+          class="agenda-servico"
+          data-nome="Coloração"
+          data-preco="130"
+          data-tempo="04:00"
+          data-apartir="true"
+        >
+          <div class="servico-img">
+            <img
+              src="servico-09.jpg"
+              alt="Coloração"
+              onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');"
+            />
+          </div>
+
+          <div class="servico-info">
+            <h3>09 - Coloração</h3>
+
+            <p>
+              Luzes, cores e trabalhos
+              artísticos como animal print
+              e estilos personalizados.
+            </p>
+          </div>
+
+          <div class="servico-acao">
+            <em>A partir de</em>
+            <strong>R$ 130,00</strong>
+            <small>04:00</small>
+            <button type="button">
+              Selecionar
+            </button>
+          </div>
+        </div>
+
+        <div
+          class="agenda-servico"
+          data-nome="Descoloração"
+          data-preco="120"
+          data-tempo="04:00"
+          data-apartir="true"
+        >
+          <div class="servico-img">
+            <img
+              src="servico-10.jpg"
+              alt="Descoloração"
+              onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');"
+            />
+          </div>
+
+          <div class="servico-info">
+            <h3>10 - Descoloração</h3>
+
+            <p>
+              Nevou, descoloração completa
+              e transformação de locs.
+            </p>
+          </div>
+
+          <div class="servico-acao">
+            <em>A partir de</em>
+            <strong>R$ 120,00</strong>
+            <small>04:00</small>
+            <button type="button">
+              Selecionar
+            </button>
+          </div>
+        </div>
+
+        <div
+          class="agenda-servico"
+          data-nome="Hidratação + finalização"
+          data-preco="45"
+          data-tempo="00:30"
+        >
+          <div class="servico-img">
+            <img
+              src="servico-11.jpg"
+              alt="Hidratação + finalização"
+              onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');"
+            />
+          </div>
+
+          <div class="servico-info">
+            <h3>
+              11 - Hidratação + finalização
+            </h3>
+
+            <p>
+              Para cabelos ondulados,
+              cacheados e crespos, com shampoo,
+              máscara e finalização.
+            </p>
+          </div>
+
+          <div class="servico-acao">
+            <strong>R$ 45,00</strong>
+            <small>00:30</small>
+            <button type="button">
+              Selecionar
+            </button>
+          </div>
+        </div>
+
+        <div
+          class="agenda-servico"
+          data-nome="Terapia capilar"
+          data-preco="80"
+          data-tempo="01:00"
+          data-apartir="true"
+        >
+          <div class="servico-img">
+            <img
+              src="servico-12.jpg"
+              alt="Terapia capilar"
+              onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');"
+            />
+          </div>
+
+          <div class="servico-info">
+            <h3>12 - Terapia capilar</h3>
+
+            <p>
+              Para caspa, dermatite ou
+              fortalecimento capilar.
+            </p>
+          </div>
+
+          <div class="servico-acao">
+            <em>A partir de</em>
+            <strong>R$ 80,00</strong>
+            <small>01:00</small>
+            <button type="button">
+              Selecionar
+            </button>
+          </div>
+        </div>
+
+        <div
+          class="agenda-servico"
+          data-nome="Limpeza de pele"
+          data-preco="35"
+          data-tempo="00:30"
+        >
+          <div class="servico-img">
+            <img
+              src="servico-13.jpg"
+              alt="Limpeza de pele"
+              onerror="this.style.display='none'; this.parentElement.classList.add('sem-imagem');"
+            />
+          </div>
+
+          <div class="servico-info">
+            <h3>13 - Limpeza de pele</h3>
+
+            <p>
+              Limpeza personalizada com
+              toalha quente, massageador
+              e vaporizador de ozônio.
+            </p>
+          </div>
+
+          <div class="servico-acao">
+            <strong>R$ 35,00</strong>
+            <small>00:30</small>
+            <button type="button">
+              Selecionar
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ETAPA 2 -->
+
+    <section
+      class="agenda-etapa"
+      id="etapaHorario"
+    >
+      <div class="agenda-container agenda-card">
+
+        <h2>
+          Selecione o horário
+        </h2>
+
+        <p class="agenda-subtexto">
+          Escolha a data e o melhor
+          horário para atendimento.
+        </p>
+
+        <p class="agenda-subtexto">
+          Atendimento de terça a sexta,
+          das 09h às 19h.
+          Aos sábados, das 09h às 15h30.
+        </p>
+
+        <div class="agenda-bloco">
+          <label for="data">
+            Escolha o dia
+          </label>
+
+          <div
+            class="datas-carrossel"
+            id="datasCarrossel"
+          ></div>
+
+          <input
+            type="hidden"
+            id="data"
+            required
+          />
+        </div>
+
+        <div class="agenda-bloco">
+          <label for="horario">
+            Escolha o horário
+          </label>
+
+          <div
+            class="agenda-horarios horarios-grid"
+            id="horariosGrid"
+          ></div>
+
+          <input
+            type="hidden"
+            id="horario"
+            required
+          />
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ETAPA 3 -->
+
+    <section
+      class="agenda-etapa"
+      id="etapaConfirmar"
+    >
+      <div class="agenda-container agenda-card">
+
+        <h2>
+          Confirmar solicitação
+        </h2>
+
+        <p class="agenda-subtexto">
+          Confira as informações antes de enviar.
+          Seus dados serão usados a partir
+          do seu login.
+        </p>
+
+        <div class="agenda-dados-login">
+          <h3>Cliente</h3>
+
+          <p>
+            <strong>Nome:</strong>
+            <span id="confirmarNome">
+              Cliente
+            </span>
+          </p>
+
+          <p>
+            <strong>E-mail:</strong>
+            <span id="confirmarEmail">
               -
-              ${textoPreco}
+            </span>
+          </p>
+
+          <p>
+            <strong>Telefone:</strong>
+            <span id="confirmarTelefone">
               -
-              ${servico.tempo}
-            </li>
-          `;
-        }
-      )
-      .join("");
-
-  if (confirmarNome) {
-    confirmarNome.textContent =
-      usuarioLogado.nome ||
-      "Cliente";
-  }
-
-  if (confirmarEmail) {
-    confirmarEmail.textContent =
-      usuarioLogado.email ||
-      "Não informado";
-  }
-
-  if (confirmarTelefone) {
-    confirmarTelefone.textContent =
-      usuarioLogado.telefone ||
-      "Não informado";
-  }
-
-  resumoFinal.innerHTML = `
-    <p>
-      <strong>Data:</strong>
-
-      ${formatarDataBR(
-        campoData.value
-      )}
-    </p>
-
-    <p>
-      <strong>Horário:</strong>
-
-      ${horarioSelecionado}
-    </p>
-
-    <p>
-      <strong>Serviços:</strong>
-    </p>
-
-    <ul>
-      ${listaServicos}
-    </ul>
-
-    <p>
-      <strong>Total estimado:</strong>
-
-      ${formatarMoeda(total)}
-    </p>
-
-    <p>
-      <strong>Observação:</strong>
-
-      ${observacao || "Sem observação"}
-    </p>
-  `;
-}
-
-
-// =========================
-// VERIFICAR SE FOI SALVO
-// =========================
-
-async function verificarAgendamentoSalvo(
-  dadosAgendamento
-) {
-  const totalTentativas = 5;
-
-  for (
-    let tentativa = 1;
-    tentativa <= totalTentativas;
-    tentativa++
-  ) {
-    try {
-      const agendamentos =
-        await buscarJSON(
-          `${GUAPO_API_URL}` +
-          `/api/agendamentos` +
-          `?clienteId=${
-            encodeURIComponent(
-              usuarioLogado.id
-            )
-          }`
-        );
-
-      const lista =
-        Array.isArray(
-          agendamentos
-        )
-          ? agendamentos
-          : [];
-
-      const encontrado =
-        lista.find(
-          function (agendamento) {
-            const mesmaData =
-              obterDataISO(
-                agendamento.data
-              ) ===
-              dadosAgendamento.data;
-
-            const mesmoHorario =
-              String(
-                agendamento.horario ||
-                ""
-              ).slice(0, 5) ===
-              dadosAgendamento.horario;
-
-            const mesmosServicos =
-              normalizarTexto(
-                agendamento.servicos ||
-                agendamento.servico
-              ) ===
-              normalizarTexto(
-                dadosAgendamento.servicos
-              );
-
-            const naoCancelado =
-              !String(
-                agendamento.status ||
-                ""
-              )
-                .toLowerCase()
-                .includes(
-                  "cancel"
-                );
-
-            return (
-              mesmaData &&
-              mesmoHorario &&
-              mesmosServicos &&
-              naoCancelado
-            );
-          }
-        );
-
-      if (encontrado) {
-        return encontrado;
-      }
-
-    } catch (erro) {
-      console.warn(
-        "Ainda não foi possível verificar o agendamento:",
-        erro
-      );
-    }
-
-    await aguardar(1000);
-  }
-
-  return null;
-}
-
-
-// =========================
-// FINALIZAR COM SUCESSO
-// =========================
-
-function finalizarAgendamentoComSucesso() {
-  if (agendamentoFinalizado) {
-    return;
-  }
-
-  agendamentoFinalizado =
-    true;
-
-  envioEmAndamento =
-    false;
-
-  mensagemStatus.textContent =
-    "Solicitação enviada com sucesso! Abrindo sua área...";
-
-  btnProximo.disabled =
-    true;
-
-  btnProximo.textContent =
-    "Enviado";
-
-  btnVoltar.style.display =
-    "none";
-
-  resumoQuantidade.textContent =
-    "Agendamento enviado";
-
-  resumoValor.textContent =
-    "Acompanhe a confirmação na sua área.";
-
-  localStorage.removeItem(
-    "guapo_redirect_apos_login"
-  );
-
-  salvarUsuarioLogado(
-    usuarioLogado
-  );
-
-  setTimeout(
-    function () {
-      window.location.replace(
-        "cliente.html"
-      );
-    },
-    800
-  );
-}
-
-
-// =========================
-// ENVIAR AGENDAMENTO
-// =========================
-
-async function enviarAgendamento() {
-  if (
-    envioEmAndamento ||
-    agendamentoFinalizado
-  ) {
-    return;
-  }
-
-  envioEmAndamento =
-    true;
-
-  const observacao =
-    campoObservacao
-      ? campoObservacao.value.trim()
-      : "";
-
-  const total =
-    servicosSelecionados.reduce(
-      function (
-        soma,
-        servico
-      ) {
-        return (
-          soma +
-          servico.preco
-        );
-      },
-      0
-    );
-
-  const servicosTexto =
-    servicosSelecionados
-      .map(
-        function (servico) {
-          const preco =
-            servico.apartir
-              ? (
-                "A partir de " +
-                formatarMoeda(
-                  servico.preco
-                )
-              )
-              : formatarMoeda(
-                servico.preco
-              );
-
-          return (
-            `${servico.nome} - ` +
-            `${preco} - ` +
-            `${servico.tempo}`
-          );
-        }
-      )
-      .join(" | ");
-
-  const dadosAgendamento = {
-    clienteId:
-      usuarioLogado.id,
-
-    nome:
-      usuarioLogado.nome,
-
-    telefone:
-      usuarioLogado.telefone ||
-      "",
-
-    email:
-      usuarioLogado.email ||
-      "",
-
-    data:
-      campoData.value,
-
-    horario:
-      horarioSelecionado,
-
-    servicos:
-      servicosTexto,
-
-    totalEstimado:
-      formatarMoeda(total),
-
-    observacao:
-      observacao ||
-      "Sem observação"
-  };
-
-  mensagemStatus.textContent =
-    "Enviando solicitação...";
-
-  btnProximo.disabled =
-    true;
-
-  btnProximo.textContent =
-    "Enviando...";
-
-  btnVoltar.disabled =
-    true;
-
-  const controlador =
-    new AbortController();
-
-  const tempoLimite =
-    setTimeout(
-      function () {
-        controlador.abort();
-      },
-      8000
-    );
-
-  try {
-    const resposta =
-      await fetch(
-        `${GUAPO_API_URL}/api/agendamentos`,
-        {
-          method: "POST",
-
-          headers: {
-            "Content-Type":
-              "application/json"
-          },
-
-          body:
-            JSON.stringify(
-              dadosAgendamento
-            ),
-
-          signal:
-            controlador.signal
-        }
-      );
-
-    clearTimeout(
-      tempoLimite
-    );
-
-    const texto =
-      await resposta.text();
-
-    let retorno = {};
-
-    try {
-      retorno =
-        texto
-          ? JSON.parse(texto)
-          : {};
-
-    } catch (erro) {
-      retorno = {};
-    }
-
-    if (
-      resposta.ok &&
-      retorno.sucesso
-    ) {
-      finalizarAgendamentoComSucesso();
-
-      return;
-    }
-
-    const salvo =
-      await verificarAgendamentoSalvo(
-        dadosAgendamento
-      );
-
-    if (salvo) {
-      finalizarAgendamentoComSucesso();
-
-      return;
-    }
-
-    throw new Error(
-      retorno.mensagem ||
-      retorno.erro ||
-      "Não foi possível enviar o agendamento."
-    );
-
-  } catch (erro) {
-    clearTimeout(
-      tempoLimite
-    );
-
-    console.error(
-      "Erro ou demora ao enviar agendamento:",
-      erro
-    );
-
-    mensagemStatus.textContent =
-      "Verificando se o agendamento foi salvo...";
-
-    const salvo =
-      await verificarAgendamentoSalvo(
-        dadosAgendamento
-      );
-
-    if (salvo) {
-      finalizarAgendamentoComSucesso();
-
-      return;
-    }
-
-    envioEmAndamento =
-      false;
-
-    mensagemStatus.textContent =
-      "Não foi possível confirmar o envio. Tente novamente.";
-
-    btnProximo.disabled =
-      false;
-
-    btnProximo.textContent =
-      "Enviar solicitação";
-
-    btnVoltar.disabled =
-      false;
-  }
-}
-
-
-// =========================
-// INICIAR
-// =========================
-
-criarDatasCarrossel();
-
-atualizarResumo();
-
-atualizarPassos();
-
-<script src="auth.js?v=32"></script>
-<script src="agendamento.js?v=33"></script>
+            </span>
+          </p>
+        </div>
+
+        <div class="agenda-campo">
+          <label for="observacao">
+            Observação, se tiver
+          </label>
+
+          <textarea
+            id="observacao"
+            rows="4"
+            placeholder="Ex: primeira vez, cabelo cacheado, quero corte e barba..."
+          ></textarea>
+        </div>
+
+        <div
+          class="agenda-resumo-final"
+          id="resumoFinal"
+        ></div>
+
+        <p
+          id="mensagemStatus"
+          class="mensagem-status"
+        ></p>
+
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="agenda-footer-fixo">
+    <div class="agenda-container agenda-footer-conteudo">
+
+      <div>
+        <strong id="resumoQuantidade">
+          Nenhum serviço selecionado
+        </strong>
+
+        <p id="resumoValor">
+          Selecione um serviço para continuar
+        </p>
+      </div>
+
+      <div class="agenda-botoes">
+        <button
+          type="button"
+          id="btnVoltar"
+          class="btn-voltar"
+        >
+          Voltar
+        </button>
+
+        <button
+          type="button"
+          id="btnProximo"
+          class="btn-proximo"
+        >
+          Próximo
+        </button>
+      </div>
+
+    </div>
+  </footer>
+
+  <script src="auth.js?v=32"></script>
+  <script src="agendamento.js?v=32"></script>
+
+</body>
+</html>

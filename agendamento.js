@@ -1,5 +1,14 @@
+// =========================
+// CONFIGURAÇÃO DA API
+// =========================
+
 const GUAPO_API_URL =
   "https://the-barber-guapo.onrender.com";
+
+
+// =========================
+// VERIFICAR LOGIN
+// =========================
 
 const usuarioLogado =
   pegarUsuarioLogado();
@@ -32,9 +41,25 @@ if (
   );
 }
 
+
+// =========================
+// ESTADO DO AGENDAMENTO
+// =========================
+
 let etapaAtual = 1;
+
 let servicosSelecionados = [];
+
 let horarioSelecionado = "";
+
+let envioEmAndamento = false;
+
+let agendamentoFinalizado = false;
+
+
+// =========================
+// ELEMENTOS
+// =========================
 
 const etapas = {
   1: document.getElementById(
@@ -120,6 +145,11 @@ const campoObservacao =
     "observacao"
   );
 
+
+// =========================
+// HORÁRIOS
+// =========================
+
 const horariosSemana = [
   "09:00",
   "09:30",
@@ -183,6 +213,11 @@ const meses = [
   "dez"
 ];
 
+
+// =========================
+// FUNÇÕES GERAIS
+// =========================
+
 function formatarMoeda(valor) {
   return valor.toLocaleString(
     "pt-BR",
@@ -210,6 +245,15 @@ function formatarDataISO(data) {
   return `${ano}-${mes}-${dia}`;
 }
 
+function obterDataISO(dataBanco) {
+  if (!dataBanco) {
+    return "";
+  }
+
+  return String(dataBanco)
+    .split("T")[0];
+}
+
 function formatarDataBR(
   dataISO
 ) {
@@ -219,6 +263,10 @@ function formatarDataBR(
 
   const partes =
     dataISO.split("-");
+
+  if (partes.length !== 3) {
+    return dataISO;
+  }
 
   return (
     `${partes[2]}/` +
@@ -235,9 +283,25 @@ function criarDataLocal(
   );
 }
 
-function diaPermitido(
-  data
-) {
+function normalizarTexto(texto) {
+  return String(texto || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, " ");
+}
+
+function aguardar(tempo) {
+  return new Promise(
+    function (resolve) {
+      setTimeout(
+        resolve,
+        tempo
+      );
+    }
+  );
+}
+
+function diaPermitido(data) {
   const diaSemana =
     data.getDay();
 
@@ -257,14 +321,18 @@ function obterHorariosDoDia(
     data.getDay();
 
   if (diaSemana === 6) {
-    return [...horariosSabado];
+    return [
+      ...horariosSabado
+    ];
   }
 
   if (
     diaSemana >= 2 &&
     diaSemana <= 5
   ) {
-    return [...horariosSemana];
+    return [
+      ...horariosSemana
+    ];
   }
 
   return [];
@@ -274,20 +342,26 @@ function horarioJaPassouHoje(
   dataISO,
   horario
 ) {
-  const hoje =
+  const agora =
     new Date();
 
   const hojeISO =
-    formatarDataISO(hoje);
+    formatarDataISO(agora);
 
   if (dataISO !== hojeISO) {
     return false;
   }
 
-  const [hora, minuto] =
+  const partes =
     horario
       .split(":")
       .map(Number);
+
+  const hora =
+    partes[0];
+
+  const minuto =
+    partes[1];
 
   const horarioData =
     new Date();
@@ -299,7 +373,7 @@ function horarioJaPassouHoje(
     0
   );
 
-  return horarioData <= hoje;
+  return horarioData <= agora;
 }
 
 async function buscarJSON(
@@ -339,6 +413,11 @@ async function buscarJSON(
   return dados;
 }
 
+
+// =========================
+// DATAS DO CARROSSEL
+// =========================
+
 function criarDatasCarrossel() {
   if (
     !datasCarrossel ||
@@ -348,12 +427,14 @@ function criarDatasCarrossel() {
     return;
   }
 
-  datasCarrossel.innerHTML = "";
+  datasCarrossel.innerHTML =
+    "";
 
   const hoje =
     new Date();
 
   let quantidadeCriada = 0;
+
   let diasAvancados = 0;
 
   while (
@@ -378,13 +459,17 @@ function criarDatasCarrossel() {
       formatarDataISO(data);
 
     const diaSemana =
-      diasSemana[data.getDay()];
+      diasSemana[
+        data.getDay()
+      ];
 
     const dia =
       data.getDate();
 
     const mes =
-      meses[data.getMonth()];
+      meses[
+        data.getMonth()
+      ];
 
     const ano =
       String(
@@ -396,7 +481,8 @@ function criarDatasCarrossel() {
         "button"
       );
 
-    botao.type = "button";
+    botao.type =
+      "button";
 
     botao.classList.add(
       "data-card"
@@ -406,9 +492,17 @@ function criarDatasCarrossel() {
       dataISO;
 
     botao.innerHTML = `
-      <span>${diaSemana}</span>
-      <strong>${dia}</strong>
-      <small>${mes}/${ano}</small>
+      <span>
+        ${diaSemana}
+      </span>
+
+      <strong>
+        ${dia}
+      </strong>
+
+      <small>
+        ${mes}/${ano}
+      </small>
     `;
 
     botao.addEventListener(
@@ -429,9 +523,10 @@ function criarDatasCarrossel() {
   }
 
   const primeiraData =
-    datasCarrossel.querySelector(
-      ".data-card"
-    );
+    datasCarrossel
+      .querySelector(
+        ".data-card"
+      );
 
   if (primeiraData) {
     primeiraData.click();
@@ -457,11 +552,13 @@ async function selecionarDataCarrossel(
     .querySelectorAll(
       ".data-card"
     )
-    .forEach(function (botao) {
-      botao.classList.remove(
-        "ativo"
-      );
-    });
+    .forEach(
+      function (botao) {
+        botao.classList.remove(
+          "ativo"
+        );
+      }
+    );
 
   botaoSelecionado
     .classList
@@ -473,6 +570,11 @@ async function selecionarDataCarrossel(
 
   validarEtapa();
 }
+
+
+// =========================
+// HORÁRIOS DISPONÍVEIS
+// =========================
 
 async function carregarHorariosDisponiveis(
   dataISO
@@ -492,33 +594,47 @@ async function carregarHorariosDisponiveis(
       await buscarJSON(
         `${GUAPO_API_URL}` +
         `/api/agendamentos` +
-        `?data=${encodeURIComponent(dataISO)}`
+        `?data=${
+          encodeURIComponent(
+            dataISO
+          )
+        }`
       );
 
     const listaAgendamentos =
-      Array.isArray(agendamentos)
+      Array.isArray(
+        agendamentos
+      )
         ? agendamentos
         : [];
 
     const horariosOcupados =
       listaAgendamentos
-        .filter(function (
-          agendamento
-        ) {
-          const status =
-            String(
-              agendamento.status || ""
-            ).toLowerCase();
+        .filter(
+          function (
+            agendamento
+          ) {
+            const status =
+              String(
+                agendamento.status ||
+                ""
+              ).toLowerCase();
 
-          return !status.includes(
-            "cancel"
-          );
-        })
-        .map(function (
-          agendamento
-        ) {
-          return agendamento.horario;
-        });
+            return !status.includes(
+              "cancel"
+            );
+          }
+        )
+        .map(
+          function (
+            agendamento
+          ) {
+            return String(
+              agendamento.horario ||
+              ""
+            ).slice(0, 5);
+          }
+        );
 
     const horariosDoDia =
       obterHorariosDoDia(
@@ -541,7 +657,8 @@ async function carregarHorariosDisponiveis(
       );
 
     if (
-      horariosDisponiveis.length === 0
+      horariosDisponiveis.length ===
+      0
     ) {
       horariosGrid.innerHTML = `
         <p class="horarios-msg">
@@ -597,8 +714,11 @@ async function carregarHorariosDisponiveis(
 
     horariosGrid.innerHTML = `
       <p class="horarios-msg">
-        Não foi possível carregar os horários.
-        Aguarde alguns segundos e tente novamente.
+        Não foi possível carregar
+        os horários.
+
+        Aguarde alguns segundos
+        e tente novamente.
       </p>
     `;
   }
@@ -620,11 +740,13 @@ function selecionarHorarioCarrossel(
     .querySelectorAll(
       ".horario-card"
     )
-    .forEach(function (botao) {
-      botao.classList.remove(
-        "ativo"
-      );
-    });
+    .forEach(
+      function (botao) {
+        botao.classList.remove(
+          "ativo"
+        );
+      }
+    );
 
   botaoSelecionado
     .classList
@@ -633,16 +755,23 @@ function selecionarHorarioCarrossel(
   validarEtapa();
 }
 
+
+// =========================
+// ETAPAS
+// =========================
+
 function atualizarPassos() {
   document
     .querySelectorAll(
       ".agenda-etapa"
     )
-    .forEach(function (etapa) {
-      etapa.classList.remove(
-        "ativa"
-      );
-    });
+    .forEach(
+      function (etapa) {
+        etapa.classList.remove(
+          "ativa"
+        );
+      }
+    );
 
   if (etapas[etapaAtual]) {
     etapas[etapaAtual]
@@ -654,18 +783,20 @@ function atualizarPassos() {
     .querySelectorAll(
       ".passo"
     )
-    .forEach(function (passo) {
-      const numeroPasso =
-        Number(
-          passo.dataset.passo
-        );
+    .forEach(
+      function (passo) {
+        const numeroPasso =
+          Number(
+            passo.dataset.passo
+          );
 
-      passo.classList.toggle(
-        "ativo",
-        numeroPasso ===
-        etapaAtual
-      );
-    });
+        passo.classList.toggle(
+          "ativo",
+          numeroPasso ===
+          etapaAtual
+        );
+      }
+    );
 
   btnVoltar.style.display =
     etapaAtual === 1
@@ -701,7 +832,8 @@ function atualizarResumo() {
     );
 
   if (
-    servicosSelecionados.length === 0
+    servicosSelecionados.length ===
+    0
   ) {
     resumoQuantidade.textContent =
       "Nenhum serviço selecionado";
@@ -713,18 +845,35 @@ function atualizarResumo() {
   }
 
   resumoQuantidade.textContent =
-    servicosSelecionados.length === 1
+    servicosSelecionados.length ===
+      1
       ? "1 serviço selecionado"
-      : `${servicosSelecionados.length} serviços selecionados`;
+      : (
+        `${servicosSelecionados.length} ` +
+        "serviços selecionados"
+      );
 
   resumoValor.textContent =
-    `Total estimado: ${formatarMoeda(total)}`;
+    `Total estimado: ${
+      formatarMoeda(total)
+    }`;
 }
 
 function validarEtapa() {
+  if (
+    envioEmAndamento ||
+    agendamentoFinalizado
+  ) {
+    btnProximo.disabled =
+      true;
+
+    return;
+  }
+
   if (etapaAtual === 1) {
     btnProximo.disabled =
-      servicosSelecionados.length === 0;
+      servicosSelecionados.length ===
+      0;
 
     return;
   }
@@ -741,83 +890,107 @@ function validarEtapa() {
     false;
 }
 
+
+// =========================
+// SELEÇÃO DE SERVIÇOS
+// =========================
+
 document
   .querySelectorAll(
     ".agenda-servico"
   )
-  .forEach(function (card) {
-    const botao =
-      card.querySelector(
-        "button"
-      );
+  .forEach(
+    function (card) {
+      const botao =
+        card.querySelector(
+          "button"
+        );
 
-    botao.addEventListener(
-      "click",
-      function () {
-        const nome =
-          card.dataset.nome;
+      if (!botao) {
+        return;
+      }
 
-        const preco =
-          Number(
-            card.dataset.preco
-          );
+      botao.addEventListener(
+        "click",
+        function () {
+          if (
+            envioEmAndamento ||
+            agendamentoFinalizado
+          ) {
+            return;
+          }
 
-        const tempo =
-          card.dataset.tempo;
+          const nome =
+            card.dataset.nome;
 
-        const apartir =
-          card.dataset.apartir ===
-          "true";
+          const preco =
+            Number(
+              card.dataset.preco
+            );
 
-        const jaSelecionado =
-          servicosSelecionados.find(
-            function (servico) {
-              return (
-                servico.nome ===
-                nome
-              );
-            }
-          );
+          const tempo =
+            card.dataset.tempo;
 
-        if (jaSelecionado) {
-          servicosSelecionados =
-            servicosSelecionados.filter(
+          const apartir =
+            card.dataset.apartir ===
+            "true";
+
+          const jaSelecionado =
+            servicosSelecionados.find(
               function (servico) {
                 return (
-                  servico.nome !==
+                  servico.nome ===
                   nome
                 );
               }
             );
 
-          card.classList.remove(
-            "selecionado"
-          );
+          if (jaSelecionado) {
+            servicosSelecionados =
+              servicosSelecionados.filter(
+                function (servico) {
+                  return (
+                    servico.nome !==
+                    nome
+                  );
+                }
+              );
 
-          botao.textContent =
-            "Selecionar";
+            card.classList.remove(
+              "selecionado"
+            );
 
-        } else {
-          servicosSelecionados.push({
-            nome,
-            preco,
-            tempo,
-            apartir
-          });
+            botao.textContent =
+              "Selecionar";
 
-          card.classList.add(
-            "selecionado"
-          );
+          } else {
+            servicosSelecionados.push({
+              nome,
+              preco,
+              tempo,
+              apartir
+            });
 
-          botao.textContent =
-            "Selecionado";
+            card.classList.add(
+              "selecionado"
+            );
+
+            botao.textContent =
+              "Selecionado";
+          }
+
+          atualizarResumo();
+
+          validarEtapa();
         }
+      );
+    }
+  );
 
-        atualizarResumo();
-        validarEtapa();
-      }
-    );
-  });
+
+// =========================
+// OBSERVAÇÃO
+// =========================
 
 if (campoObservacao) {
   campoObservacao.addEventListener(
@@ -831,11 +1004,24 @@ if (campoObservacao) {
   );
 }
 
+
+// =========================
+// BOTÕES DE NAVEGAÇÃO
+// =========================
+
 btnVoltar.addEventListener(
   "click",
   function () {
+    if (
+      envioEmAndamento ||
+      agendamentoFinalizado
+    ) {
+      return;
+    }
+
     if (etapaAtual > 1) {
       etapaAtual--;
+
       atualizarPassos();
     }
   }
@@ -844,6 +1030,13 @@ btnVoltar.addEventListener(
 btnProximo.addEventListener(
   "click",
   async function () {
+    if (
+      envioEmAndamento ||
+      agendamentoFinalizado
+    ) {
+      return;
+    }
+
     if (etapaAtual === 1) {
       if (
         servicosSelecionados.length ===
@@ -857,6 +1050,7 @@ btnProximo.addEventListener(
       }
 
       etapaAtual = 2;
+
       atualizarPassos();
 
       return;
@@ -877,6 +1071,7 @@ btnProximo.addEventListener(
       montarResumoFinal();
 
       etapaAtual = 3;
+
       atualizarPassos();
 
       return;
@@ -887,6 +1082,11 @@ btnProximo.addEventListener(
     }
   }
 );
+
+
+// =========================
+// RESUMO FINAL
+// =========================
 
 function montarResumoFinal() {
   const observacao =
@@ -910,26 +1110,31 @@ function montarResumoFinal() {
 
   const listaServicos =
     servicosSelecionados
-      .map(function (
-        servico
-      ) {
-        const textoPreco =
-          servico.apartir
-            ? `A partir de ${formatarMoeda(servico.preco)}`
-            : formatarMoeda(
+      .map(
+        function (servico) {
+          const textoPreco =
+            servico.apartir
+              ? (
+                "A partir de " +
+                formatarMoeda(
+                  servico.preco
+                )
+              )
+              : formatarMoeda(
                 servico.preco
               );
 
-        return `
-          <li>
-            ${servico.nome}
-            -
-            ${textoPreco}
-            -
-            ${servico.tempo}
-          </li>
-        `;
-      })
+          return `
+            <li>
+              ${servico.nome}
+              -
+              ${textoPreco}
+              -
+              ${servico.tempo}
+            </li>
+          `;
+        }
+      )
       .join("");
 
   if (confirmarNome) {
@@ -953,11 +1158,15 @@ function montarResumoFinal() {
   resumoFinal.innerHTML = `
     <p>
       <strong>Data:</strong>
-      ${formatarDataBR(campoData.value)}
+
+      ${formatarDataBR(
+        campoData.value
+      )}
     </p>
 
     <p>
       <strong>Horário:</strong>
+
       ${horarioSelecionado}
     </p>
 
@@ -971,17 +1180,181 @@ function montarResumoFinal() {
 
     <p>
       <strong>Total estimado:</strong>
+
       ${formatarMoeda(total)}
     </p>
 
     <p>
       <strong>Observação:</strong>
+
       ${observacao || "Sem observação"}
     </p>
   `;
 }
 
+
+// =========================
+// VERIFICAR SE FOI SALVO
+// =========================
+
+async function verificarAgendamentoSalvo(
+  dadosAgendamento
+) {
+  const totalTentativas = 5;
+
+  for (
+    let tentativa = 1;
+    tentativa <= totalTentativas;
+    tentativa++
+  ) {
+    try {
+      const agendamentos =
+        await buscarJSON(
+          `${GUAPO_API_URL}` +
+          `/api/agendamentos` +
+          `?clienteId=${
+            encodeURIComponent(
+              usuarioLogado.id
+            )
+          }`
+        );
+
+      const lista =
+        Array.isArray(
+          agendamentos
+        )
+          ? agendamentos
+          : [];
+
+      const encontrado =
+        lista.find(
+          function (agendamento) {
+            const mesmaData =
+              obterDataISO(
+                agendamento.data
+              ) ===
+              dadosAgendamento.data;
+
+            const mesmoHorario =
+              String(
+                agendamento.horario ||
+                ""
+              ).slice(0, 5) ===
+              dadosAgendamento.horario;
+
+            const mesmosServicos =
+              normalizarTexto(
+                agendamento.servicos ||
+                agendamento.servico
+              ) ===
+              normalizarTexto(
+                dadosAgendamento.servicos
+              );
+
+            const naoCancelado =
+              !String(
+                agendamento.status ||
+                ""
+              )
+                .toLowerCase()
+                .includes(
+                  "cancel"
+                );
+
+            return (
+              mesmaData &&
+              mesmoHorario &&
+              mesmosServicos &&
+              naoCancelado
+            );
+          }
+        );
+
+      if (encontrado) {
+        return encontrado;
+      }
+
+    } catch (erro) {
+      console.warn(
+        "Ainda não foi possível verificar o agendamento:",
+        erro
+      );
+    }
+
+    await aguardar(1000);
+  }
+
+  return null;
+}
+
+
+// =========================
+// FINALIZAR COM SUCESSO
+// =========================
+
+function finalizarAgendamentoComSucesso() {
+  if (agendamentoFinalizado) {
+    return;
+  }
+
+  agendamentoFinalizado =
+    true;
+
+  envioEmAndamento =
+    false;
+
+  mensagemStatus.textContent =
+    "Solicitação enviada com sucesso! Abrindo sua área...";
+
+  btnProximo.disabled =
+    true;
+
+  btnProximo.textContent =
+    "Enviado";
+
+  btnVoltar.style.display =
+    "none";
+
+  resumoQuantidade.textContent =
+    "Agendamento enviado";
+
+  resumoValor.textContent =
+    "Acompanhe a confirmação na sua área.";
+
+  localStorage.removeItem(
+    "guapo_redirect_apos_login"
+  );
+
+  salvarUsuarioLogado(
+    usuarioLogado
+  );
+
+  setTimeout(
+    function () {
+      window.location.replace(
+        "cliente.html"
+      );
+    },
+    800
+  );
+}
+
+
+// =========================
+// ENVIAR AGENDAMENTO
+// =========================
+
 async function enviarAgendamento() {
+  if (
+    envioEmAndamento ||
+    agendamentoFinalizado
+  ) {
+    return;
+  }
+
+  envioEmAndamento =
+    true;
+
   const observacao =
     campoObservacao
       ? campoObservacao.value.trim()
@@ -1003,22 +1376,27 @@ async function enviarAgendamento() {
 
   const servicosTexto =
     servicosSelecionados
-      .map(function (
-        servico
-      ) {
-        const preco =
-          servico.apartir
-            ? `A partir de ${formatarMoeda(servico.preco)}`
-            : formatarMoeda(
+      .map(
+        function (servico) {
+          const preco =
+            servico.apartir
+              ? (
+                "A partir de " +
+                formatarMoeda(
+                  servico.preco
+                )
+              )
+              : formatarMoeda(
                 servico.preco
               );
 
-        return (
-          `${servico.nome} - ` +
-          `${preco} - ` +
-          `${servico.tempo}`
-        );
-      })
+          return (
+            `${servico.nome} - ` +
+            `${preco} - ` +
+            `${servico.tempo}`
+          );
+        }
+      )
       .join(" | ");
 
   const dadosAgendamento = {
@@ -1059,9 +1437,26 @@ async function enviarAgendamento() {
   btnProximo.disabled =
     true;
 
+  btnProximo.textContent =
+    "Enviando...";
+
+  btnVoltar.disabled =
+    true;
+
+  const controlador =
+    new AbortController();
+
+  const tempoLimite =
+    setTimeout(
+      function () {
+        controlador.abort();
+      },
+      8000
+    );
+
   try {
-    const retorno =
-      await buscarJSON(
+    const resposta =
+      await fetch(
         `${GUAPO_API_URL}/api/agendamentos`,
         {
           method: "POST",
@@ -1074,64 +1469,106 @@ async function enviarAgendamento() {
           body:
             JSON.stringify(
               dadosAgendamento
-            )
+            ),
+
+          signal:
+            controlador.signal
         }
       );
 
-    if (!retorno.sucesso) {
-      throw new Error(
-        retorno.mensagem ||
-        "Não foi possível enviar."
-      );
+    clearTimeout(
+      tempoLimite
+    );
+
+    const texto =
+      await resposta.text();
+
+    let retorno = {};
+
+    try {
+      retorno =
+        texto
+          ? JSON.parse(texto)
+          : {};
+
+    } catch (erro) {
+      retorno = {};
     }
 
-    mensagemStatus.textContent =
-      "Solicitação enviada com sucesso! Você será direcionado para sua área.";
+    if (
+      resposta.ok &&
+      retorno.sucesso
+    ) {
+      finalizarAgendamentoComSucesso();
 
-    btnProximo.style.display =
-      "none";
+      return;
+    }
 
-    btnVoltar.style.display =
-      "none";
-
-    resumoQuantidade.textContent =
-      "Agendamento enviado";
-
-    resumoValor.textContent =
-      "O agendamento foi salvo no banco de dados.";
-
-    localStorage.removeItem(
-      "guapo_redirect_apos_login"
-    );
-
-    localStorage.setItem(
-      "guapo_usuario_logado",
-      JSON.stringify(
-        usuarioLogado
-      )
-    );
-
-    setTimeout(function () {
-      window.location.replace(
-        "cliente.html"
+    const salvo =
+      await verificarAgendamentoSalvo(
+        dadosAgendamento
       );
-    }, 1500);
+
+    if (salvo) {
+      finalizarAgendamentoComSucesso();
+
+      return;
+    }
+
+    throw new Error(
+      retorno.mensagem ||
+      retorno.erro ||
+      "Não foi possível enviar o agendamento."
+    );
 
   } catch (erro) {
+    clearTimeout(
+      tempoLimite
+    );
+
     console.error(
-      "Erro ao enviar para API:",
+      "Erro ou demora ao enviar agendamento:",
       erro
     );
 
     mensagemStatus.textContent =
-      erro.message ||
-      "Erro ao conectar com a API. Aguarde alguns segundos e tente novamente.";
+      "Verificando se o agendamento foi salvo...";
+
+    const salvo =
+      await verificarAgendamentoSalvo(
+        dadosAgendamento
+      );
+
+    if (salvo) {
+      finalizarAgendamentoComSucesso();
+
+      return;
+    }
+
+    envioEmAndamento =
+      false;
+
+    mensagemStatus.textContent =
+      "Não foi possível confirmar o envio. Tente novamente.";
 
     btnProximo.disabled =
+      false;
+
+    btnProximo.textContent =
+      "Enviar solicitação";
+
+    btnVoltar.disabled =
       false;
   }
 }
 
+
+// =========================
+// INICIAR
+// =========================
+
 criarDatasCarrossel();
+
 atualizarResumo();
+
 atualizarPassos();
