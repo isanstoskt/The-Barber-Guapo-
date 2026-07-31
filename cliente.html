@@ -18,16 +18,41 @@
   />
 
   <style>
+    /* ========================= */
+    /* NOTIFICAÇÕES RECOLHÍVEIS */
+    /* ========================= */
+
     .notificacoes-box {
       margin-top: 24px;
+      padding: 0;
+      overflow: hidden;
     }
 
     .notificacoes-topo {
+      margin: 0;
+    }
+
+    .btn-alternar-notificacoes {
+      width: 100%;
+      min-height: 76px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 16px;
-      margin-bottom: 16px;
+      padding: 20px 22px;
+      border: none;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .btn-alternar-notificacoes:hover,
+    .btn-alternar-notificacoes:focus-visible {
+      background: rgba(200, 164, 93, 0.07);
+      outline: none;
     }
 
     .notificacoes-titulo {
@@ -35,6 +60,8 @@
       align-items: center;
       gap: 10px;
       margin: 0;
+      font-size: 22px;
+      font-weight: 700;
     }
 
     .notificacoes-contador {
@@ -55,6 +82,63 @@
       display: inline-flex;
     }
 
+    .seta-notificacoes {
+      flex-shrink: 0;
+      width: 38px;
+      height: 38px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(200, 164, 93, 0.55);
+      border-radius: 50%;
+      color: #c8a45d;
+      font-size: 24px;
+      line-height: 1;
+      transition:
+        transform 0.3s ease,
+        background 0.2s ease,
+        color 0.2s ease;
+    }
+
+    .btn-alternar-notificacoes:hover
+    .seta-notificacoes {
+      background: #c8a45d;
+      color: #111111;
+    }
+
+    .btn-alternar-notificacoes[aria-expanded="true"]
+    .seta-notificacoes {
+      transform: rotate(180deg);
+    }
+
+    .notificacoes-conteudo {
+      display: grid;
+      grid-template-rows: 0fr;
+      opacity: 0;
+      visibility: hidden;
+      transition:
+        grid-template-rows 0.35s ease,
+        opacity 0.25s ease,
+        visibility 0.35s ease;
+    }
+
+    .notificacoes-conteudo.aberto {
+      grid-template-rows: 1fr;
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .notificacoes-conteudo-interno {
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .notificacoes-acoes {
+      display: flex;
+      justify-content: flex-end;
+      padding: 0 22px 16px;
+    }
+
     .btn-marcar-notificacoes {
       border: 1px solid #c8a45d;
       border-radius: 999px;
@@ -63,6 +147,14 @@
       color: inherit;
       cursor: pointer;
       font: inherit;
+      transition:
+        background 0.2s ease,
+        color 0.2s ease;
+    }
+
+    .btn-marcar-notificacoes:hover:not(:disabled) {
+      background: #c8a45d;
+      color: #111111;
     }
 
     .btn-marcar-notificacoes:disabled {
@@ -73,6 +165,7 @@
     .lista-notificacoes-cliente {
       display: grid;
       gap: 12px;
+      padding: 0 22px 22px;
     }
 
     .notificacao-cliente-item {
@@ -135,13 +228,31 @@
     }
 
     @media (max-width: 700px) {
-      .notificacoes-topo {
-        align-items: flex-start;
-        flex-direction: column;
+      .btn-alternar-notificacoes {
+        min-height: 68px;
+        padding: 17px 18px;
+      }
+
+      .notificacoes-titulo {
+        font-size: 19px;
+      }
+
+      .seta-notificacoes {
+        width: 34px;
+        height: 34px;
+        font-size: 21px;
+      }
+
+      .notificacoes-acoes {
+        padding: 0 18px 14px;
       }
 
       .btn-marcar-notificacoes {
         width: 100%;
+      }
+
+      .lista-notificacoes-cliente {
+        padding: 0 18px 18px;
       }
     }
   </style>
@@ -229,39 +340,72 @@
 
       </section>
 
+      <!-- ========================= -->
+      <!-- NOTIFICAÇÕES RECOLHÍVEIS -->
+      <!-- ========================= -->
+
       <section
         class="cliente-box notificacoes-box"
       >
         <div class="notificacoes-topo">
-          <h3 class="notificacoes-titulo">
-            Notificações
-
-            <span
-              id="badgeNotificacoesCliente"
-              class="notificacoes-contador"
-            >
-              0
-            </span>
-          </h3>
 
           <button
             type="button"
-            id="btnMarcarTodasLidas"
-            class="btn-marcar-notificacoes"
-            disabled
+            id="btnAlternarNotificacoes"
+            class="btn-alternar-notificacoes"
+            aria-expanded="false"
+            aria-controls="conteudoNotificacoesCliente"
           >
-            Marcar todas como lidas
+            <span class="notificacoes-titulo">
+              Notificações
+
+              <span
+                id="badgeNotificacoesCliente"
+                class="notificacoes-contador"
+              >
+                0
+              </span>
+            </span>
+
+            <span
+              class="seta-notificacoes"
+              aria-hidden="true"
+            >
+              ⌄
+            </span>
           </button>
+
         </div>
 
         <div
-          id="listaNotificacoesCliente"
-          class="lista-notificacoes-cliente"
-          aria-live="polite"
+          id="conteudoNotificacoesCliente"
+          class="notificacoes-conteudo"
+          aria-hidden="true"
         >
-          <p class="cliente-vazio">
-            Carregando notificações...
-          </p>
+          <div class="notificacoes-conteudo-interno">
+
+            <div class="notificacoes-acoes">
+              <button
+                type="button"
+                id="btnMarcarTodasLidas"
+                class="btn-marcar-notificacoes"
+                disabled
+              >
+                Marcar todas como lidas
+              </button>
+            </div>
+
+            <div
+              id="listaNotificacoesCliente"
+              class="lista-notificacoes-cliente"
+              aria-live="polite"
+            >
+              <p class="cliente-vazio">
+                Carregando notificações...
+              </p>
+            </div>
+
+          </div>
         </div>
       </section>
 
@@ -278,6 +422,7 @@
       </section>
 
       <div class="cliente-acoes-finais">
+
         <a
           href="index.html"
           class="botao-outline-dourado"
@@ -292,6 +437,7 @@
         >
           Sair
         </button>
+
       </div>
 
     </section>
@@ -300,8 +446,8 @@
   <script src="auth.js?v=31"></script>
 
   <script>
-     const CLIENTE_API_BASE_URL =
-  "https://the-barber-guapo.onrender.com";
+    const CLIENTE_API_BASE_URL =
+      "https://the-barber-guapo.onrender.com";
 
     const usuarioClienteLogado =
       pegarUsuarioLogado();
@@ -328,6 +474,10 @@
         "Esta área é exclusiva para clientes."
       );
     }
+
+    // =========================
+    // ELEMENTOS
+    // =========================
 
     const nomeCliente =
       document.getElementById(
@@ -377,6 +527,16 @@
     const btnMarcarTodasLidas =
       document.getElementById(
         "btnMarcarTodasLidas"
+      );
+
+    const btnAlternarNotificacoes =
+      document.getElementById(
+        "btnAlternarNotificacoes"
+      );
+
+    const conteudoNotificacoesCliente =
+      document.getElementById(
+        "conteudoNotificacoesCliente"
       );
 
     // =========================
@@ -545,6 +705,55 @@
       }
 
       return dados;
+    }
+
+    // =========================
+    // ABRIR E FECHAR NOTIFICAÇÕES
+    // =========================
+
+    function alternarNotificacoesCliente() {
+      if (
+        !btnAlternarNotificacoes ||
+        !conteudoNotificacoesCliente
+      ) {
+        return;
+      }
+
+      const estaAberto =
+        btnAlternarNotificacoes
+          .getAttribute(
+            "aria-expanded"
+          ) === "true";
+
+      const novoEstado =
+        !estaAberto;
+
+      btnAlternarNotificacoes
+        .setAttribute(
+          "aria-expanded",
+          String(novoEstado)
+        );
+
+      conteudoNotificacoesCliente
+        .setAttribute(
+          "aria-hidden",
+          String(!novoEstado)
+        );
+
+      conteudoNotificacoesCliente
+        .classList
+        .toggle(
+          "aberto",
+          novoEstado
+        );
+    }
+
+    if (btnAlternarNotificacoes) {
+      btnAlternarNotificacoes
+        .addEventListener(
+          "click",
+          alternarNotificacoesCliente
+        );
     }
 
     // =========================
@@ -735,6 +944,7 @@
 
       proximoCorte.innerHTML = `
         <div class="corte-card">
+
           <p>
             <strong>Serviço:</strong>
 
@@ -779,6 +989,7 @@
               "Não informado"
             )}
           </p>
+
         </div>
       `;
     }
@@ -803,6 +1014,7 @@
           ) {
             return `
               <div class="historico-item">
+
                 <p>
                   <strong>
                     ${escaparHTML(
@@ -834,6 +1046,7 @@
                     "Aguardando confirmação"
                   )}
                 </span>
+
               </div>
             `;
           })
@@ -876,6 +1089,7 @@
           badgeChatCliente
             .classList
             .add("ativo");
+
         } else {
           badgeChatCliente
             .classList
@@ -1002,6 +1216,7 @@
                 onclick="marcarNotificacaoComoLida(${notificacao.id})"
               >
                 <span class="notificacao-cliente-cabecalho">
+
                   <strong>
                     ${escaparHTML(
                       notificacao.titulo ||
@@ -1018,6 +1233,7 @@
                         </span>
                       `
                   }
+
                 </span>
 
                 <p>
@@ -1032,6 +1248,7 @@
                     notificacao.criadaEm
                   )}
                 </time>
+
               </button>
             `;
           })
@@ -1113,15 +1330,23 @@
     // =========================
 
     preencherDadosCliente();
+
     carregarAreaCliente();
+
     atualizarNotificacaoChatCliente();
+
     carregarNotificacoesCliente();
 
-    setInterval(function () {
-      carregarAreaCliente();
-      atualizarNotificacaoChatCliente();
-      carregarNotificacoesCliente();
-    }, 5000);
+    setInterval(
+      function () {
+        carregarAreaCliente();
+
+        atualizarNotificacaoChatCliente();
+
+        carregarNotificacoesCliente();
+      },
+      5000
+    );
   </script>
 
 </body>
