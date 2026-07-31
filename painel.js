@@ -204,15 +204,11 @@ function formatarTituloDoDia(
     );
 
   if (dataISO === hojeISO) {
-    return (
-      `Hoje — ${dataExtensa}`
-    );
+    return `Hoje — ${dataExtensa}`;
   }
 
   if (dataISO === amanhaISO) {
-    return (
-      `Amanhã — ${dataExtensa}`
-    );
+    return `Amanhã — ${dataExtensa}`;
   }
 
   return dataExtensa;
@@ -237,6 +233,14 @@ function formatarDataHoraMensagem(
 
   const data =
     new Date(dataISO);
+
+  if (
+    Number.isNaN(
+      data.getTime()
+    )
+  ) {
+    return "";
+  }
 
   return data.toLocaleString(
     "pt-BR",
@@ -518,7 +522,7 @@ async function carregarAgendamentos(
     listaAgendamentos.innerHTML = `
       <div class="painel-vazio">
         <h3>
-          Erro ao conectar com a API
+          Erro ao carregar agendamentos
         </h3>
 
         <p>
@@ -645,9 +649,7 @@ function renderizarCardAgendamento(
             ${formatarData(
               agendamento.data
             )}
-
             às
-
             ${escaparHTML(
               agendamento.horario ||
               "horário não informado"
@@ -674,7 +676,6 @@ function renderizarCardAgendamento(
 
         <p>
           <strong>Telefone:</strong>
-
           ${escaparHTML(
             agendamento.telefone ||
             "Não informado"
@@ -683,7 +684,6 @@ function renderizarCardAgendamento(
 
         <p>
           <strong>E-mail:</strong>
-
           ${escaparHTML(
             agendamento.email ||
             "Não informado"
@@ -692,7 +692,6 @@ function renderizarCardAgendamento(
 
         <p>
           <strong>Serviços:</strong>
-
           ${escaparHTML(
             agendamento.servicos ||
             agendamento.servico ||
@@ -702,7 +701,6 @@ function renderizarCardAgendamento(
 
         <p>
           <strong>Total:</strong>
-
           ${escaparHTML(
             agendamento.totalEstimado ||
             "Não informado"
@@ -711,7 +709,6 @@ function renderizarCardAgendamento(
 
         <p>
           <strong>Observação:</strong>
-
           ${escaparHTML(
             agendamento.observacao ||
             "Sem observação"
@@ -725,10 +722,7 @@ function renderizarCardAgendamento(
         <button
           type="button"
           class="btn-confirmar"
-          onclick="alterarStatus(
-            ${agendamento.id},
-            'Confirmado'
-          )"
+          onclick="alterarStatus(${agendamento.id}, 'Confirmado')"
         >
           Confirmar
         </button>
@@ -736,10 +730,7 @@ function renderizarCardAgendamento(
         <button
           type="button"
           class="btn-cancelar"
-          onclick="alterarStatus(
-            ${agendamento.id},
-            'Cancelado'
-          )"
+          onclick="alterarStatus(${agendamento.id}, 'Cancelado')"
         >
           Cancelar
         </button>
@@ -747,10 +738,7 @@ function renderizarCardAgendamento(
         <button
           type="button"
           class="btn-pendente"
-          onclick="alterarStatus(
-            ${agendamento.id},
-            'Aguardando confirmação'
-          )"
+          onclick="alterarStatus(${agendamento.id}, 'Aguardando confirmação')"
         >
           Pendente
         </button>
@@ -758,9 +746,7 @@ function renderizarCardAgendamento(
         <button
           type="button"
           class="btn-excluir"
-          onclick="excluirAgendamento(
-            ${agendamento.id}
-          )"
+          onclick="excluirAgendamento(${agendamento.id})"
         >
           Excluir
         </button>
@@ -1031,6 +1017,24 @@ function agruparMensagensPorCliente(
     }
   );
 
+  Object.values(conversas)
+    .forEach(
+      function (conversa) {
+        conversa.mensagens.sort(
+          function (a, b) {
+            return (
+              new Date(
+                a.dataHora
+              ).getTime() -
+              new Date(
+                b.dataHora
+              ).getTime()
+            );
+          }
+        );
+      }
+    );
+
   return Object.values(
     conversas
   );
@@ -1046,20 +1050,32 @@ function mensagemLidaBarbeiro(
   );
 }
 
+function quantidadeMensagensNaoLidas(
+  conversa
+) {
+  return conversa.mensagens
+    .filter(
+      function (mensagem) {
+        return (
+          mensagem.autor ===
+            "cliente" &&
+
+          !mensagemLidaBarbeiro(
+            mensagem
+          )
+        );
+      }
+    )
+    .length;
+}
+
 function temMensagemNaoLida(
   conversa
 ) {
-  return conversa.mensagens.some(
-    function (mensagem) {
-      return (
-        mensagem.autor ===
-          "cliente" &&
-
-        !mensagemLidaBarbeiro(
-          mensagem
-        )
-      );
-    }
+  return (
+    quantidadeMensagensNaoLidas(
+      conversa
+    ) > 0
   );
 }
 
@@ -1078,6 +1094,78 @@ function ultimaDataHora(
   return new Date(
     ultimaMensagem.dataHora
   ).getTime();
+}
+
+function formatarHoraListaConversa(
+  dataISO
+) {
+  if (!dataISO) {
+    return "";
+  }
+
+  const data =
+    new Date(dataISO);
+
+  if (
+    Number.isNaN(
+      data.getTime()
+    )
+  ) {
+    return "";
+  }
+
+  const hoje =
+    new Date();
+
+  const hojeISO =
+    formatarDataParaAPI(
+      hoje
+    );
+
+  const dataMensagemISO =
+    formatarDataParaAPI(
+      data
+    );
+
+  const ontem =
+    new Date();
+
+  ontem.setDate(
+    ontem.getDate() - 1
+  );
+
+  const ontemISO =
+    formatarDataParaAPI(
+      ontem
+    );
+
+  if (
+    dataMensagemISO ===
+    hojeISO
+  ) {
+    return data.toLocaleTimeString(
+      "pt-BR",
+      {
+        hour: "2-digit",
+        minute: "2-digit"
+      }
+    );
+  }
+
+  if (
+    dataMensagemISO ===
+    ontemISO
+  ) {
+    return "Ontem";
+  }
+
+  return data.toLocaleDateString(
+    "pt-BR",
+    {
+      day: "2-digit",
+      month: "2-digit"
+    }
+  );
 }
 
 async function marcarConversaComoLida(
@@ -1201,7 +1289,8 @@ async function renderizarMensagensAdmin(
       );
 
     if (!existeConversaAtiva) {
-      clienteAdminAtivo = null;
+      clienteAdminAtivo =
+        null;
     }
 
     const tirasHTML =
@@ -1216,8 +1305,8 @@ async function renderizarMensagensAdmin(
                 clienteAdminAtivo
               );
 
-            const naoLida =
-              temMensagemNaoLida(
+            const quantidadeNaoLidas =
+              quantidadeMensagensNaoLidas(
                 conversa
               );
 
@@ -1226,48 +1315,83 @@ async function renderizarMensagensAdmin(
                 conversa.mensagens.length - 1
               ];
 
-            const previa =
+            const previaOriginal =
               ultimaMensagem?.texto ||
               "Sem mensagem";
+
+            const prefixo =
+              ultimaMensagem?.autor ===
+                "barbeiro"
+                ? "Você: "
+                : "";
+
+            const previa =
+              `${prefixo}${previaOriginal}`;
+
+            const hora =
+              formatarHoraListaConversa(
+                ultimaMensagem?.dataHora
+              );
 
             return `
               <button
                 type="button"
-                class="tira-cliente ${
-                  ativa
-                    ? "tira-cliente-ativa"
-                    : ""
-                }"
-                onclick="selecionarConversaAdmin(
-                  '${conversa.clienteId}'
-                )"
+                class="
+                  conversa-lista-item
+                  ${ativa ? "ativa" : ""}
+                  ${
+                    quantidadeNaoLidas > 0
+                      ? "tem-nao-lida"
+                      : ""
+                  }
+                "
+                onclick="selecionarConversaAdmin('${conversa.clienteId}')"
               >
 
-                <span class="tira-cliente-conteudo">
+                <span class="conversa-lista-conteudo">
 
-                  <span class="tira-cliente-nome">
-                    ${escaparHTML(
-                      conversa.clienteNome
-                    )}
+                  <span class="conversa-lista-linha">
+
+                    <strong class="conversa-lista-nome">
+                      ${escaparHTML(
+                        conversa.clienteNome
+                      )}
+                    </strong>
+
+                    <span class="conversa-lista-hora">
+                      ${escaparHTML(
+                        hora
+                      )}
+                    </span>
+
                   </span>
 
-                  <span class="tira-cliente-previa">
-                    ${escaparHTML(
-                      previa
-                    )}
+                  <span
+                    class="
+                      conversa-lista-linha
+                      conversa-lista-inferior
+                    "
+                  >
+
+                    <span class="conversa-lista-previa">
+                      ${escaparHTML(
+                        previa
+                      )}
+                    </span>
+
+                    ${
+                      quantidadeNaoLidas > 0
+                        ? `
+                          <span class="conversa-lista-nao-lida">
+                            ${quantidadeNaoLidas}
+                          </span>
+                        `
+                        : ""
+                    }
+
                   </span>
 
                 </span>
-
-                ${
-                  naoLida
-                    ? `
-                      <span class="tira-cliente-dot">
-                      </span>
-                    `
-                    : ""
-                }
-
               </button>
             `;
           }
@@ -1288,7 +1412,8 @@ async function renderizarMensagensAdmin(
         }
       );
 
-    let conversaHTML = "";
+    let conversaHTML =
+      "";
 
     if (conversaAtiva) {
       const mensagensHTML =
@@ -1335,11 +1460,16 @@ async function renderizarMensagensAdmin(
           .join("");
 
       conversaHTML = `
-        <article class="conversa-admin-card">
+        <article
+          class="
+            conversa-admin-card
+            conversa-whatsapp-aberta
+          "
+        >
 
-          <div class="conversa-admin-topo">
+          <header class="conversa-whatsapp-cabecalho">
 
-            <div>
+            <div class="conversa-whatsapp-dados">
 
               <h3>
                 ${escaparHTML(
@@ -1363,40 +1493,49 @@ async function renderizarMensagensAdmin(
 
             </div>
 
-          </div>
+            <button
+              type="button"
+              class="btn-fechar-conversa"
+              onclick="selecionarConversaAdmin('${conversaAtiva.clienteId}')"
+            >
+              Fechar conversa
+            </button>
 
-          <div class="conversa-admin-mensagens">
+          </header>
+
+          <div class="conversa-whatsapp-mensagens">
             ${mensagensHTML}
           </div>
 
-          <form
-            class="form-resposta-admin"
-            onsubmit="responderCliente(
-              event,
-              '${conversaAtiva.clienteId}'
-            )"
-          >
+          <footer class="conversa-whatsapp-rodape">
 
-            <input
-              type="text"
-              id="respostaCliente-${conversaAtiva.clienteId}"
-              placeholder="Responder cliente..."
-              autocomplete="off"
-              required
-            />
+            <form
+              class="form-resposta-admin"
+              onsubmit="responderCliente(event, '${conversaAtiva.clienteId}')"
+            >
 
-            <button type="submit">
-              Responder
-            </button>
+              <input
+                type="text"
+                id="respostaCliente-${conversaAtiva.clienteId}"
+                placeholder="Digite uma mensagem..."
+                autocomplete="off"
+                required
+              />
 
-          </form>
+              <button type="submit">
+                Enviar
+              </button>
+
+            </form>
+
+          </footer>
 
         </article>
       `;
     }
 
     listaMensagensClientes.innerHTML = `
-      <div class="mensagens-tiras">
+      <div class="conversas-whatsapp-lista">
         ${tirasHTML}
       </div>
 
@@ -1406,7 +1545,7 @@ async function renderizarMensagensAdmin(
     const caixaMensagens =
       listaMensagensClientes
         .querySelector(
-          ".conversa-admin-mensagens"
+          ".conversa-whatsapp-mensagens"
         );
 
     if (caixaMensagens) {
@@ -1530,7 +1669,7 @@ async function responderCliente(
         false;
 
       botao.textContent =
-        "Responder";
+        "Enviar";
     }
   }
 }
@@ -1657,7 +1796,7 @@ renderizarMensagensAdmin();
 // ATUALIZAÇÃO AUTOMÁTICA
 // =========================
 
-// Mensagens atualizadas a cada 5 segundos.
+// Atualiza mensagens a cada 5 segundos.
 // Não atualiza enquanto o Guapo estiver digitando.
 
 setInterval(
@@ -1676,8 +1815,7 @@ setInterval(
   5000
 );
 
-// Agendamentos atualizados automaticamente
-// a cada 30 segundos.
+// Atualiza agendamentos a cada 30 segundos.
 
 setInterval(
   function () {
