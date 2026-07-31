@@ -2,1120 +2,234 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <title>Recuperar senha - Guapo The Barber</title>
 
   <link rel="stylesheet" href="style.css" />
-
-  <style>
-    /* =========================
-       ETAPAS
-    ========================= */
-
-    .recuperacao-etapa[hidden] {
-      display: none !important;
-    }
-
-    /* =========================
-       E-MAIL E CÓDIGO
-    ========================= */
-
-    .recuperacao-email {
-      margin: 0 0 20px;
-      padding: 14px 16px;
-
-      border: 1px solid rgba(212, 175, 55, 0.25);
-      border-radius: 16px;
-
-      background: rgba(255, 255, 255, 0.04);
-      color: #ffffff;
-
-      text-align: center;
-      font-size: 15px;
-      line-height: 1.5;
-
-      overflow-wrap: anywhere;
-    }
-
-    .codigo-recuperacao {
-      text-align: center;
-      font-size: 24px;
-      font-weight: 700;
-      letter-spacing: 10px;
-    }
-
-    /* =========================
-       BOTÕES DO CÓDIGO
-    ========================= */
-
-    .btn-principal-recuperacao {
-      width: 100%;
-      margin-top: 6px;
-    }
-
-    .acoes-secundarias-recuperacao {
-      display: flex;
-      gap: 12px;
-      margin-top: 14px;
-    }
-
-    .login-admin-form .btn-secundario-recuperacao {
-      flex: 1;
-
-      width: auto;
-      min-width: 0;
-      height: 48px;
-
-      margin: 0;
-      padding: 0 16px;
-
-      border: 1px solid rgba(212, 175, 55, 0.65);
-      border-radius: 999px;
-
-      background: transparent;
-      color: #ffffff;
-
-      font-size: 14px;
-      font-weight: 600;
-
-      cursor: pointer;
-
-      transition:
-        border-color 0.2s ease,
-        background-color 0.2s ease,
-        color 0.2s ease;
-    }
-
-    .login-admin-form .btn-secundario-recuperacao:hover {
-      transform: none !important;
-
-      border-color: #d4af37;
-      background: rgba(212, 175, 55, 0.08);
-      color: #d4af37;
-    }
-
-    /* =========================
-       CAMPOS DE SENHA
-    ========================= */
-
-    .campo-senha {
-      position: relative;
-      width: 100%;
-    }
-
-    .campo-senha input {
-      width: 100%;
-      padding-right: 62px !important;
-      box-sizing: border-box;
-    }
-
-    /*
-      O transform precisa permanecer igual
-      no normal, hover, foco e clique.
-    */
-
-    .campo-senha .btn-olho-senha {
-      position: absolute !important;
-
-      top: 50% !important;
-      right: 10px !important;
-
-      transform: translateY(-50%) !important;
-
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-
-      width: 42px !important;
-      min-width: 42px !important;
-      max-width: 42px !important;
-
-      height: 42px !important;
-      min-height: 42px !important;
-      max-height: 42px !important;
-
-      margin: 0 !important;
-      padding: 0 !important;
-
-      border: none !important;
-      border-radius: 50% !important;
-
-      background: transparent !important;
-      color: #d4af37 !important;
-
-      box-shadow: none !important;
-      cursor: pointer;
-
-      transition:
-        color 0.2s ease,
-        background-color 0.2s ease !important;
-    }
-
-    .campo-senha .btn-olho-senha:hover {
-      top: 50% !important;
-      right: 10px !important;
-
-      transform: translateY(-50%) !important;
-
-      background: rgba(212, 175, 55, 0.1) !important;
-      color: #ffffff !important;
-
-      box-shadow: none !important;
-    }
-
-    .campo-senha .btn-olho-senha:focus {
-      top: 50% !important;
-      right: 10px !important;
-
-      transform: translateY(-50%) !important;
-
-      background: rgba(212, 175, 55, 0.1) !important;
-      box-shadow: none !important;
-    }
-
-    .campo-senha .btn-olho-senha:focus-visible {
-      top: 50% !important;
-      right: 10px !important;
-
-      transform: translateY(-50%) !important;
-
-      outline: 2px solid #d4af37;
-      outline-offset: 2px;
-    }
-
-    .campo-senha .btn-olho-senha:active {
-      top: 50% !important;
-      right: 10px !important;
-
-      transform: translateY(-50%) !important;
-
-      background: rgba(212, 175, 55, 0.15) !important;
-      box-shadow: none !important;
-    }
-
-    .campo-senha .btn-olho-senha::before,
-    .campo-senha .btn-olho-senha::after {
-      display: none !important;
-    }
-
-    .btn-olho-senha svg {
-      display: block;
-
-      width: 22px;
-      height: 22px;
-
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-
-      pointer-events: none;
-    }
-
-    .icone-oculto {
-      display: none !important;
-    }
-
-    .bloco-mensagem-recuperacao {
-      margin-top: 18px;
-    }
-
-    /* =========================
-       RESPONSIVO
-    ========================= */
-
-    @media (max-width: 640px) {
-      .codigo-recuperacao {
-        font-size: 22px;
-        letter-spacing: 8px;
-      }
-
-      .acoes-secundarias-recuperacao {
-        flex-direction: column;
-      }
-
-      .login-admin-form .btn-secundario-recuperacao {
-        width: 100%;
-        flex: none;
-      }
-
-      .campo-senha .btn-olho-senha,
-      .campo-senha .btn-olho-senha:hover,
-      .campo-senha .btn-olho-senha:focus,
-      .campo-senha .btn-olho-senha:active {
-        top: 50% !important;
-        right: 8px !important;
-
-        transform: translateY(-50%) !important;
-      }
-    }
-  </style>
 </head>
-
 <body class="admin-body">
 
   <main class="login-admin-container">
-    <section class="login-admin-card">
-
-      <div class="login-admin-logo">
+    <section class="login-admin-card card-recuperar-centralizado">
+      <div class="login-admin-logo logo-recuperar-centralizado">
         <h1>Guapo</h1>
         <span>The Barber</span>
       </div>
 
-      <p class="admin-tag">
-        Recuperar acesso
+      <p class="admin-tag tag-recuperar-centralizado">Recuperar acesso</p>
+
+      <h2 class="titulo-recuperar-centralizado">Esqueci minha senha</h2>
+
+      <p class="login-admin-texto texto-recuperar-centralizado">
+        Informe seu e-mail, confirme o código enviado e depois crie uma nova senha.
       </p>
 
-      <h2 id="tituloRecuperacao">
-        Esqueci minha senha
-      </h2>
+      <!-- ETAPA 1 -->
+      <form id="formSolicitarCodigo" class="login-admin-form form-recuperar-centralizado">
+        <div id="etapaEmail" class="bloco-recuperacao">
+          <div class="campo-recuperacao">
+            <label for="email">E-mail cadastrado</label>
+            <input
+              type="email"
+              id="email"
+              placeholder="Digite seu e-mail"
+              required
+            />
+          </div>
 
-      <p
-        id="textoRecuperacao"
-        class="login-admin-texto"
-      >
-        Informe seu e-mail para receber um código de recuperação.
-      </p>
-
-      <!-- =========================
-           ETAPA 1: E-MAIL
-      ========================== -->
-
-      <form
-        id="formSolicitarCodigo"
-        class="login-admin-form recuperacao-etapa"
-      >
-        <label for="email">
-          E-mail cadastrado
-        </label>
-
-        <input
-          type="email"
-          id="email"
-          placeholder="Digite seu e-mail"
-          autocomplete="email"
-          required
-        />
-
-        <button
-          type="submit"
-          id="btnEnviarCodigo"
-        >
-          Enviar código
-        </button>
-      </form>
-
-      <!-- =========================
-           ETAPA 2: CÓDIGO
-      ========================== -->
-
-      <form
-        id="formVerificarCodigo"
-        class="login-admin-form recuperacao-etapa"
-        hidden
-      >
-        <p
-          id="emailEnviado"
-          class="recuperacao-email"
-        ></p>
-
-        <label for="codigo">
-          Código de 6 números
-        </label>
-
-        <input
-          type="text"
-          id="codigo"
-          class="codigo-recuperacao"
-          placeholder="000000"
-          inputmode="numeric"
-          maxlength="6"
-          autocomplete="one-time-code"
-          required
-        />
-
-        <button
-          type="submit"
-          id="btnVerificarCodigo"
-          class="btn-principal-recuperacao"
-        >
-          Confirmar código
-        </button>
-
-        <div class="acoes-secundarias-recuperacao">
-
-          <button
-            type="button"
-            id="btnReenviarCodigo"
-            class="btn-secundario-recuperacao"
-          >
-            Reenviar código
-          </button>
-
-          <button
-            type="button"
-            id="btnTrocarEmail"
-            class="btn-secundario-recuperacao"
-          >
-            Usar outro e-mail
-          </button>
-
+          <button type="submit" id="btnEnviarCodigo">Enviar código</button>
         </div>
       </form>
 
-      <!-- =========================
-           ETAPA 3: NOVA SENHA
-      ========================== -->
+      <!-- ETAPA 2 -->
+      <form id="formVerificarCodigo" class="login-admin-form form-recuperar-centralizado" style="display: none;">
+        <div id="etapaCodigo" class="bloco-recuperacao">
+          <div class="campo-recuperacao">
+            <label for="codigo">Código de verificação</label>
+            <input
+              type="text"
+              id="codigo"
+              placeholder="Digite o código de 6 dígitos"
+              maxlength="6"
+              required
+            />
+          </div>
 
-      <form
-        id="formRedefinirSenha"
-        class="login-admin-form recuperacao-etapa"
-        hidden
-      >
-        <label for="novaSenha">
-          Nova senha
-        </label>
-
-        <div class="campo-senha">
-          <input
-            type="password"
-            id="novaSenha"
-            placeholder="Mínimo de 6 caracteres"
-            minlength="6"
-            autocomplete="new-password"
-            required
-          />
-
-          <button
-            type="button"
-            class="btn-olho-senha"
-            data-campo="novaSenha"
-            aria-label="Mostrar nova senha"
-            aria-pressed="false"
-          >
-            <svg
-              class="icone-olho-aberto"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path
-                d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"
-              ></path>
-
-              <circle
-                cx="12"
-                cy="12"
-                r="3"
-              ></circle>
-            </svg>
-
-            <svg
-              class="icone-olho-fechado icone-oculto"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path d="M3 3l18 18"></path>
-
-              <path
-                d="M10.6 10.6a2 2 0 0 0 2.8 2.8"
-              ></path>
-
-              <path
-                d="M9.9 4.2A10.5 10.5 0 0 1 12 4c6.5 0 10 8 10 8a18.8 18.8 0 0 1-2.1 3.2"
-              ></path>
-
-              <path
-                d="M6.6 6.6C3.6 8.5 2 12 2 12s3.5 8 10 8a9.8 9.8 0 0 0 4.2-.9"
-              ></path>
-            </svg>
-          </button>
+          <button type="submit" id="btnConfirmarCodigo">Confirmar código</button>
         </div>
-
-        <label for="confirmarSenha">
-          Confirmar nova senha
-        </label>
-
-        <div class="campo-senha">
-          <input
-            type="password"
-            id="confirmarSenha"
-            placeholder="Digite novamente"
-            minlength="6"
-            autocomplete="new-password"
-            required
-          />
-
-          <button
-            type="button"
-            class="btn-olho-senha"
-            data-campo="confirmarSenha"
-            aria-label="Mostrar confirmação da senha"
-            aria-pressed="false"
-          >
-            <svg
-              class="icone-olho-aberto"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path
-                d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"
-              ></path>
-
-              <circle
-                cx="12"
-                cy="12"
-                r="3"
-              ></circle>
-            </svg>
-
-            <svg
-              class="icone-olho-fechado icone-oculto"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path d="M3 3l18 18"></path>
-
-              <path
-                d="M10.6 10.6a2 2 0 0 0 2.8 2.8"
-              ></path>
-
-              <path
-                d="M9.9 4.2A10.5 10.5 0 0 1 12 4c6.5 0 10 8 10 8a18.8 18.8 0 0 1-2.1 3.2"
-              ></path>
-
-              <path
-                d="M6.6 6.6C3.6 8.5 2 12 2 12s3.5 8 10 8a9.8 9.8 0 0 0 4.2-.9"
-              ></path>
-            </svg>
-          </button>
-        </div>
-
-        <button
-          type="submit"
-          id="btnRedefinirSenha"
-        >
-          Redefinir senha
-        </button>
       </form>
 
-      <p
-        id="mensagemRecuperar"
-        class="mensagem-login bloco-mensagem-recuperacao"
-      ></p>
+      <!-- ETAPA 3 -->
+      <form id="formRedefinirSenha" class="login-admin-form form-recuperar-centralizado" style="display: none;">
+        <div id="etapaSenha" class="bloco-recuperacao">
+          <div class="campo-recuperacao">
+            <label for="novaSenha">Nova senha</label>
+            <input
+              type="password"
+              id="novaSenha"
+              placeholder="Digite sua nova senha"
+              required
+            />
+          </div>
 
-      <div class="login-links">
+          <div class="campo-recuperacao">
+            <label for="confirmarSenha">Confirmar nova senha</label>
+            <input
+              type="password"
+              id="confirmarSenha"
+              placeholder="Digite novamente"
+              required
+            />
+          </div>
 
-        <a
-          href="login.html"
-          class="login-voltar destaque-link"
-        >
+          <button type="submit" id="btnRedefinirSenha">Redefinir senha</button>
+        </div>
+      </form>
+
+      <p id="mensagemRecuperar" class="mensagem-login mensagem-recuperar-centralizada"></p>
+
+      <div class="login-links links-recuperar-centralizado">
+        <a href="login.html" class="botao-outline-dourado">
           Voltar para o login
         </a>
 
-        <a
-          href="index.html"
-          class="login-voltar"
-        >
+        <a href="index.html" class="botao-outline-dourado">
           Voltar para o site
         </a>
-
       </div>
-
     </section>
   </main>
 
-  <script src="auth.js?v=26"></script>
+  <script src="auth.js"></script>
 
   <script>
-    const tituloRecuperacao =
-      document.getElementById(
-        "tituloRecuperacao"
-      );
+    const formSolicitarCodigo = document.getElementById("formSolicitarCodigo");
+    const formVerificarCodigo = document.getElementById("formVerificarCodigo");
+    const formRedefinirSenha = document.getElementById("formRedefinirSenha");
 
-    const textoRecuperacao =
-      document.getElementById(
-        "textoRecuperacao"
-      );
+    const mensagemRecuperar = document.getElementById("mensagemRecuperar");
 
-    const formSolicitarCodigo =
-      document.getElementById(
-        "formSolicitarCodigo"
-      );
-
-    const formVerificarCodigo =
-      document.getElementById(
-        "formVerificarCodigo"
-      );
-
-    const formRedefinirSenha =
-      document.getElementById(
-        "formRedefinirSenha"
-      );
-
-    const campoEmail =
-      document.getElementById(
-        "email"
-      );
-
-    const emailEnviado =
-      document.getElementById(
-        "emailEnviado"
-      );
-
-    const campoCodigo =
-      document.getElementById(
-        "codigo"
-      );
-
-    const campoNovaSenha =
-      document.getElementById(
-        "novaSenha"
-      );
-
-    const campoConfirmarSenha =
-      document.getElementById(
-        "confirmarSenha"
-      );
-
-    const mensagemRecuperar =
-      document.getElementById(
-        "mensagemRecuperar"
-      );
-
-    const btnEnviarCodigo =
-      document.getElementById(
-        "btnEnviarCodigo"
-      );
-
-    const btnVerificarCodigo =
-      document.getElementById(
-        "btnVerificarCodigo"
-      );
-
-    const btnReenviarCodigo =
-      document.getElementById(
-        "btnReenviarCodigo"
-      );
-
-    const btnTrocarEmail =
-      document.getElementById(
-        "btnTrocarEmail"
-      );
-
-    const btnRedefinirSenha =
-      document.getElementById(
-        "btnRedefinirSenha"
-      );
+    const btnEnviarCodigo = document.getElementById("btnEnviarCodigo");
+    const btnConfirmarCodigo = document.getElementById("btnConfirmarCodigo");
+    const btnRedefinirSenha = document.getElementById("btnRedefinirSenha");
 
     let emailRecuperacao = "";
-    let codigoConfirmado = "";
+    let codigoRecuperacao = "";
 
-    // =========================
-    // MENSAGENS
-    // =========================
+    function mostrarMensagem(texto, erro = false) {
+      mensagemRecuperar.textContent = texto;
 
-    function mostrarMensagem(
-      texto,
-      erro = false
-    ) {
-      mensagemRecuperar.textContent =
-        texto;
-
-      mensagemRecuperar
-        .classList
-        .toggle(
-          "erro",
-          erro
-        );
+      if (erro) {
+        mensagemRecuperar.classList.add("erro");
+      } else {
+        mensagemRecuperar.classList.remove("erro");
+      }
     }
 
-    // =========================
-    // MOSTRAR E OCULTAR SENHA
-    // =========================
+    formSolicitarCodigo.addEventListener("submit", async function (event) {
+      event.preventDefault();
 
-    document
-      .querySelectorAll(
-        ".btn-olho-senha"
-      )
-      .forEach(function (botao) {
-        botao.addEventListener(
-          "click",
-          function () {
-            const campoId =
-              botao.dataset.campo;
+      const email = document.getElementById("email").value.trim().toLowerCase();
 
-            const campoSenha =
-              document.getElementById(
-                campoId
-              );
-
-            if (!campoSenha) {
-              return;
-            }
-
-            const olhoAberto =
-              botao.querySelector(
-                ".icone-olho-aberto"
-              );
-
-            const olhoFechado =
-              botao.querySelector(
-                ".icone-olho-fechado"
-              );
-
-            const estaVisivel =
-              campoSenha.type === "text";
-
-            if (estaVisivel) {
-              campoSenha.type =
-                "password";
-
-              olhoAberto
-                .classList
-                .remove("icone-oculto");
-
-              olhoFechado
-                .classList
-                .add("icone-oculto");
-
-              botao.setAttribute(
-                "aria-label",
-                "Mostrar senha"
-              );
-
-              botao.setAttribute(
-                "aria-pressed",
-                "false"
-              );
-
-            } else {
-              campoSenha.type =
-                "text";
-
-              olhoAberto
-                .classList
-                .add("icone-oculto");
-
-              olhoFechado
-                .classList
-                .remove("icone-oculto");
-
-              botao.setAttribute(
-                "aria-label",
-                "Ocultar senha"
-              );
-
-              botao.setAttribute(
-                "aria-pressed",
-                "true"
-              );
-            }
-          }
-        );
-      });
-
-    function resetarOlhosSenha() {
-      campoNovaSenha.type =
-        "password";
-
-      campoConfirmarSenha.type =
-        "password";
-
-      document
-        .querySelectorAll(
-          ".btn-olho-senha"
-        )
-        .forEach(function (botao) {
-          const olhoAberto =
-            botao.querySelector(
-              ".icone-olho-aberto"
-            );
-
-          const olhoFechado =
-            botao.querySelector(
-              ".icone-olho-fechado"
-            );
-
-          olhoAberto
-            .classList
-            .remove("icone-oculto");
-
-          olhoFechado
-            .classList
-            .add("icone-oculto");
-
-          botao.setAttribute(
-            "aria-pressed",
-            "false"
-          );
-        });
-    }
-
-    // =========================
-    // CONTROLE DAS ETAPAS
-    // =========================
-
-    function esconderEtapas() {
-      formSolicitarCodigo.hidden =
-        true;
-
-      formVerificarCodigo.hidden =
-        true;
-
-      formRedefinirSenha.hidden =
-        true;
-    }
-
-    function mostrarEtapaEmail() {
-      esconderEtapas();
-
-      formSolicitarCodigo.hidden =
-        false;
-
-      tituloRecuperacao.textContent =
-        "Esqueci minha senha";
-
-      textoRecuperacao.textContent =
-        "Informe seu e-mail para receber um código de recuperação.";
-
-      mostrarMensagem("");
-
-      campoEmail.readOnly =
-        false;
-
-      campoEmail.focus();
-    }
-
-    function mostrarEtapaCodigo() {
-      esconderEtapas();
-
-      formVerificarCodigo.hidden =
-        false;
-
-      tituloRecuperacao.textContent =
-        "Digite o código";
-
-      textoRecuperacao.textContent =
-        "Enviamos um código de 6 números para o e-mail abaixo.";
-
-      emailEnviado.textContent =
-        emailRecuperacao;
-
-      mostrarMensagem(
-        "Verifique também a pasta de spam."
-      );
-
-      campoCodigo.value = "";
-
-      campoCodigo.focus();
-    }
-
-    function mostrarEtapaNovaSenha() {
-      esconderEtapas();
-
-      formRedefinirSenha.hidden =
-        false;
-
-      tituloRecuperacao.textContent =
-        "Crie uma nova senha";
-
-      textoRecuperacao.textContent =
-        "Código confirmado. Agora escolha sua nova senha.";
-
-      mostrarMensagem(
-        "Código confirmado com sucesso!"
-      );
-
-      campoNovaSenha.value = "";
-      campoConfirmarSenha.value = "";
-
-      resetarOlhosSenha();
-
-      campoNovaSenha.focus();
-    }
-
-    // =========================
-    // CAMPO DO CÓDIGO
-    // =========================
-
-    campoCodigo.addEventListener(
-      "input",
-      function () {
-        campoCodigo.value =
-          campoCodigo.value
-            .replace(/\D/g, "")
-            .slice(0, 6);
+      if (!email) {
+        mostrarMensagem("Informe seu e-mail.", true);
+        return;
       }
-    );
 
-    // =========================
-    // ENVIAR CÓDIGO
-    // =========================
+      btnEnviarCodigo.disabled = true;
+      btnEnviarCodigo.textContent = "Enviando...";
+      mostrarMensagem("Enviando código...");
 
-    formSolicitarCodigo.addEventListener(
-      "submit",
-      async function (event) {
-        event.preventDefault();
+      const retorno = await solicitarCodigoRecuperacao(email);
 
-        emailRecuperacao =
-          campoEmail.value
-            .trim()
-            .toLowerCase();
+      btnEnviarCodigo.disabled = false;
+      btnEnviarCodigo.textContent = "Enviar código";
 
-        btnEnviarCodigo.disabled =
-          true;
-
-        btnEnviarCodigo.textContent =
-          "Enviando...";
-
-        mostrarMensagem(
-          "Enviando código..."
-        );
-
-        const retorno =
-          await solicitarCodigoRecuperacao(
-            emailRecuperacao
-          );
-
-        btnEnviarCodigo.disabled =
-          false;
-
-        btnEnviarCodigo.textContent =
-          "Enviar código";
-
-        if (!retorno.sucesso) {
-          mostrarMensagem(
-            retorno.mensagem,
-            true
-          );
-
-          return;
-        }
-
-        mostrarEtapaCodigo();
+      if (!retorno.sucesso) {
+        mostrarMensagem(retorno.mensagem || "Não foi possível enviar o código.", true);
+        return;
       }
-    );
 
-    // =========================
-    // CONFIRMAR CÓDIGO
-    // =========================
+      emailRecuperacao = email;
+      mostrarMensagem("Código enviado com sucesso! Verifique seu e-mail.");
 
-    formVerificarCodigo.addEventListener(
-      "submit",
-      async function (event) {
-        event.preventDefault();
+      formSolicitarCodigo.style.display = "none";
+      formVerificarCodigo.style.display = "block";
+    });
 
-        const codigo =
-          campoCodigo.value.trim();
+    formVerificarCodigo.addEventListener("submit", async function (event) {
+      event.preventDefault();
 
-        if (!/^\d{6}$/.test(codigo)) {
-          mostrarMensagem(
-            "Digite o código completo de 6 números.",
-            true
-          );
+      const codigo = document.getElementById("codigo").value.trim();
 
-          return;
-        }
-
-        btnVerificarCodigo.disabled =
-          true;
-
-        btnVerificarCodigo.textContent =
-          "Confirmando...";
-
-        mostrarMensagem(
-          "Verificando código..."
-        );
-
-        const retorno =
-          await verificarCodigoRecuperacao(
-            emailRecuperacao,
-            codigo
-          );
-
-        btnVerificarCodigo.disabled =
-          false;
-
-        btnVerificarCodigo.textContent =
-          "Confirmar código";
-
-        if (!retorno.sucesso) {
-          mostrarMensagem(
-            retorno.mensagem,
-            true
-          );
-
-          return;
-        }
-
-        codigoConfirmado =
-          codigo;
-
-        mostrarEtapaNovaSenha();
+      if (!codigo) {
+        mostrarMensagem("Digite o código recebido.", true);
+        return;
       }
-    );
 
-    // =========================
-    // REENVIAR CÓDIGO
-    // =========================
+      btnConfirmarCodigo.disabled = true;
+      btnConfirmarCodigo.textContent = "Confirmando...";
+      mostrarMensagem("Validando código...");
 
-    btnReenviarCodigo.addEventListener(
-      "click",
-      async function () {
-        btnReenviarCodigo.disabled =
-          true;
+      const retorno = await verificarCodigoRecuperacao(emailRecuperacao, codigo);
 
-        btnReenviarCodigo.textContent =
-          "Reenviando...";
+      btnConfirmarCodigo.disabled = false;
+      btnConfirmarCodigo.textContent = "Confirmar código";
 
-        mostrarMensagem(
-          "Enviando um novo código..."
-        );
-
-        const retorno =
-          await solicitarCodigoRecuperacao(
-            emailRecuperacao
-          );
-
-        btnReenviarCodigo.disabled =
-          false;
-
-        btnReenviarCodigo.textContent =
-          "Reenviar código";
-
-        if (!retorno.sucesso) {
-          mostrarMensagem(
-            retorno.mensagem,
-            true
-          );
-
-          return;
-        }
-
-        campoCodigo.value = "";
-
-        mostrarMensagem(
-          "Novo código enviado. Verifique seu e-mail."
-        );
-
-        campoCodigo.focus();
+      if (!retorno.sucesso) {
+        mostrarMensagem(retorno.mensagem || "Código inválido.", true);
+        return;
       }
-    );
 
-    // =========================
-    // TROCAR E-MAIL
-    // =========================
+      codigoRecuperacao = codigo;
+      mostrarMensagem("Código confirmado. Agora crie sua nova senha.");
 
-    btnTrocarEmail.addEventListener(
-      "click",
-      function () {
-        emailRecuperacao = "";
-        codigoConfirmado = "";
+      formVerificarCodigo.style.display = "none";
+      formRedefinirSenha.style.display = "block";
+    });
 
-        campoEmail.value = "";
-        campoCodigo.value = "";
-        campoNovaSenha.value = "";
-        campoConfirmarSenha.value = "";
+    formRedefinirSenha.addEventListener("submit", async function (event) {
+      event.preventDefault();
 
-        resetarOlhosSenha();
-        mostrarEtapaEmail();
+      const novaSenha = document.getElementById("novaSenha").value.trim();
+      const confirmarSenha = document.getElementById("confirmarSenha").value.trim();
+
+      if (!novaSenha || !confirmarSenha) {
+        mostrarMensagem("Preencha os campos de senha.", true);
+        return;
       }
-    );
 
-    // =========================
-    // REDEFINIR SENHA
-    // =========================
-
-    formRedefinirSenha.addEventListener(
-      "submit",
-      async function (event) {
-        event.preventDefault();
-
-        const novaSenha =
-          campoNovaSenha.value;
-
-        const confirmarSenha =
-          campoConfirmarSenha.value;
-
-        if (novaSenha.length < 6) {
-          mostrarMensagem(
-            "A senha precisa ter pelo menos 6 caracteres.",
-            true
-          );
-
-          return;
-        }
-
-        if (
-          novaSenha !==
-          confirmarSenha
-        ) {
-          mostrarMensagem(
-            "As senhas não conferem.",
-            true
-          );
-
-          return;
-        }
-
-        btnRedefinirSenha.disabled =
-          true;
-
-        btnRedefinirSenha.textContent =
-          "Redefinindo...";
-
-        mostrarMensagem(
-          "Salvando sua nova senha..."
-        );
-
-        const retorno =
-          await redefinirSenha(
-            emailRecuperacao,
-            codigoConfirmado,
-            novaSenha
-          );
-
-        if (!retorno.sucesso) {
-          btnRedefinirSenha.disabled =
-            false;
-
-          btnRedefinirSenha.textContent =
-            "Redefinir senha";
-
-          mostrarMensagem(
-            retorno.mensagem,
-            true
-          );
-
-          return;
-        }
-
-        tituloRecuperacao.textContent =
-          "Senha alterada!";
-
-        textoRecuperacao.textContent =
-          "Sua nova senha foi cadastrada com sucesso.";
-
-        formRedefinirSenha.hidden =
-          true;
-
-        mostrarMensagem(
-          "Redirecionando para o login..."
-        );
-
-        setTimeout(function () {
-          window.location.replace(
-            "login.html"
-          );
-        }, 1800);
+      if (novaSenha.length < 6) {
+        mostrarMensagem("A senha deve ter no mínimo 6 caracteres.", true);
+        return;
       }
-    );
+
+      if (novaSenha !== confirmarSenha) {
+        mostrarMensagem("As senhas não conferem.", true);
+        return;
+      }
+
+      btnRedefinirSenha.disabled = true;
+      btnRedefinirSenha.textContent = "Salvando...";
+      mostrarMensagem("Redefinindo senha...");
+
+      const retorno = await redefinirSenha(emailRecuperacao, codigoRecuperacao, novaSenha);
+
+      btnRedefinirSenha.disabled = false;
+      btnRedefinirSenha.textContent = "Redefinir senha";
+
+      if (!retorno.sucesso) {
+        mostrarMensagem(retorno.mensagem || "Não foi possível redefinir a senha.", true);
+        return;
+      }
+
+      mostrarMensagem("Senha redefinida com sucesso! Redirecionando para o login...");
+
+      setTimeout(function () {
+        window.location.href = "login.html";
+      }, 1800);
+    });
   </script>
 
 </body>

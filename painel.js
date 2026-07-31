@@ -2,7 +2,6 @@
 // CONFIGURAÇÃO DA API
 // =========================
 
-// Nome exclusivo para não entrar em conflito com o auth.js
 const PAINEL_API_BASE_URL =
   "https://the-barber-guapo.onrender.com";
 
@@ -18,39 +17,70 @@ const API_MENSAGENS_URL =
 // =========================
 
 const listaAgendamentos =
-  document.getElementById("listaAgendamentos");
+  document.getElementById(
+    "listaAgendamentos"
+  );
 
 const filtroData =
-  document.getElementById("filtroData");
+  document.getElementById(
+    "filtroData"
+  );
 
 const btnHoje =
-  document.getElementById("btnHoje");
+  document.getElementById(
+    "btnHoje"
+  );
 
 const btnSemana =
-  document.getElementById("btnSemana");
+  document.getElementById(
+    "btnSemana"
+  );
 
 const btnTodos =
-  document.getElementById("btnTodos");
+  document.getElementById(
+    "btnTodos"
+  );
+
+const btnAtualizarAgendamentos =
+  document.getElementById(
+    "btnAtualizarAgendamentos"
+  );
 
 const totalAgendamentos =
-  document.getElementById("totalAgendamentos");
+  document.getElementById(
+    "totalAgendamentos"
+  );
 
 const totalPendentes =
-  document.getElementById("totalPendentes");
+  document.getElementById(
+    "totalPendentes"
+  );
 
 const totalConfirmados =
-  document.getElementById("totalConfirmados");
+  document.getElementById(
+    "totalConfirmados"
+  );
 
 const totalCancelados =
-  document.getElementById("totalCancelados");
+  document.getElementById(
+    "totalCancelados"
+  );
 
 const listaMensagensClientes =
-  document.getElementById("listaMensagensClientes");
+  document.getElementById(
+    "listaMensagensClientes"
+  );
 
 const btnAtualizarMensagens =
-  document.getElementById("btnAtualizarMensagens");
+  document.getElementById(
+    "btnAtualizarMensagens"
+  );
 
 let clienteAdminAtivo = null;
+
+let filtroAtualAgendamentos = {
+  tipo: "todos"
+};
 
 
 // =========================
@@ -58,94 +88,324 @@ let clienteAdminAtivo = null;
 // =========================
 
 function escaparHTML(texto) {
-  const div = document.createElement("div");
-  div.textContent = texto || "";
+  const div =
+    document.createElement("div");
+
+  div.textContent =
+    texto || "";
+
   return div.innerHTML;
 }
 
+function obterDataISO(data) {
+  if (!data) {
+    return "";
+  }
+
+  return String(data)
+    .split("T")[0];
+}
+
+function criarDataLocal(dataISO) {
+  if (!dataISO) {
+    return null;
+  }
+
+  const data =
+    new Date(
+      `${dataISO}T12:00:00`
+    );
+
+  if (
+    Number.isNaN(
+      data.getTime()
+    )
+  ) {
+    return null;
+  }
+
+  return data;
+}
+
 function formatarData(data) {
+  const dataISO =
+    obterDataISO(data);
+
+  if (!dataISO) {
+    return "Data não informada";
+  }
+
+  const partes =
+    dataISO.split("-");
+
+  if (partes.length !== 3) {
+    return dataISO;
+  }
+
+  return (
+    `${partes[2]}/` +
+    `${partes[1]}/` +
+    `${partes[0]}`
+  );
+}
+
+function primeiraLetraMaiuscula(
+  texto
+) {
+  const valor =
+    String(texto || "");
+
+  if (!valor) {
+    return "";
+  }
+
+  return (
+    valor.charAt(0).toUpperCase() +
+    valor.slice(1)
+  );
+}
+
+function formatarTituloDoDia(
+  dataISO
+) {
+  const data =
+    criarDataLocal(dataISO);
+
   if (!data) {
     return "Data não informada";
   }
 
-  const somenteData = String(data).split("T")[0];
-  const partes = somenteData.split("-");
+  const hojeISO =
+    dataHoje();
 
-  if (partes.length !== 3) {
-    return data;
+  const amanha =
+    new Date();
+
+  amanha.setDate(
+    amanha.getDate() + 1
+  );
+
+  const amanhaISO =
+    formatarDataParaAPI(
+      amanha
+    );
+
+  const dataExtensa =
+    primeiraLetraMaiuscula(
+      data.toLocaleDateString(
+        "pt-BR",
+        {
+          weekday: "long",
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric"
+        }
+      )
+    );
+
+  if (dataISO === hojeISO) {
+    return (
+      `Hoje — ${dataExtensa}`
+    );
   }
 
-  return `${partes[2]}/${partes[1]}/${partes[0]}`;
+  if (dataISO === amanhaISO) {
+    return (
+      `Amanhã — ${dataExtensa}`
+    );
+  }
+
+  return dataExtensa;
 }
 
-function formatarDataHoraMensagem(dataISO) {
+function formatarQuantidadeClientes(
+  quantidade
+) {
+  if (quantidade === 1) {
+    return "1 cliente";
+  }
+
+  return `${quantidade} clientes`;
+}
+
+function formatarDataHoraMensagem(
+  dataISO
+) {
   if (!dataISO) {
     return "";
   }
 
-  const data = new Date(dataISO);
+  const data =
+    new Date(dataISO);
 
-  return data.toLocaleString("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit"
-  });
+  return data.toLocaleString(
+    "pt-BR",
+    {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    }
+  );
 }
 
 function dataHoje() {
-  const hoje = new Date();
+  const hoje =
+    new Date();
 
-  const ano = hoje.getFullYear();
-  const mes = String(hoje.getMonth() + 1).padStart(2, "0");
-  const dia = String(hoje.getDate()).padStart(2, "0");
+  const ano =
+    hoje.getFullYear();
+
+  const mes =
+    String(
+      hoje.getMonth() + 1
+    ).padStart(2, "0");
+
+  const dia =
+    String(
+      hoje.getDate()
+    ).padStart(2, "0");
 
   return `${ano}-${mes}-${dia}`;
 }
 
-function formatarDataParaAPI(data) {
-  const ano = data.getFullYear();
-  const mes = String(data.getMonth() + 1).padStart(2, "0");
-  const dia = String(data.getDate()).padStart(2, "0");
+function formatarDataParaAPI(
+  data
+) {
+  const ano =
+    data.getFullYear();
+
+  const mes =
+    String(
+      data.getMonth() + 1
+    ).padStart(2, "0");
+
+  const dia =
+    String(
+      data.getDate()
+    ).padStart(2, "0");
 
   return `${ano}-${mes}-${dia}`;
 }
 
 function obterSemanaAtual() {
-  const hoje = new Date();
-  const diaSemana = hoje.getDay();
+  const hoje =
+    new Date();
 
-  const segunda = new Date(hoje);
+  const diaSemana =
+    hoje.getDay();
+
+  const segunda =
+    new Date(hoje);
 
   const diferencaParaSegunda =
-    diaSemana === 0 ? -6 : 1 - diaSemana;
+    diaSemana === 0
+      ? -6
+      : 1 - diaSemana;
 
   segunda.setDate(
-    hoje.getDate() + diferencaParaSegunda
+    hoje.getDate() +
+    diferencaParaSegunda
   );
 
-  const domingo = new Date(segunda);
+  const domingo =
+    new Date(segunda);
 
   domingo.setDate(
     segunda.getDate() + 6
   );
 
   return {
-    inicio: formatarDataParaAPI(segunda),
-    fim: formatarDataParaAPI(domingo)
+    inicio:
+      formatarDataParaAPI(
+        segunda
+      ),
+
+    fim:
+      formatarDataParaAPI(
+        domingo
+      )
   };
 }
 
-async function buscarJSON(url, opcoes = {}) {
-  const resposta = await fetch(url, opcoes);
+function compararAgendamentos(
+  a,
+  b
+) {
+  const dataA =
+    obterDataISO(a.data);
 
-  const texto = await resposta.text();
+  const dataB =
+    obterDataISO(b.data);
+
+  const horarioA =
+    String(
+      a.horario || "23:59"
+    );
+
+  const horarioB =
+    String(
+      b.horario || "23:59"
+    );
+
+  const valorA =
+    `${dataA}T${horarioA}`;
+
+  const valorB =
+    `${dataB}T${horarioB}`;
+
+  return valorA.localeCompare(
+    valorB
+  );
+}
+
+function atualizarBotoesDeFiltro() {
+  if (btnHoje) {
+    btnHoje.classList.toggle(
+      "ativo",
+      filtroAtualAgendamentos.tipo ===
+        "hoje"
+    );
+  }
+
+  if (btnSemana) {
+    btnSemana.classList.toggle(
+      "ativo",
+      filtroAtualAgendamentos.tipo ===
+        "semana"
+    );
+  }
+
+  if (btnTodos) {
+    btnTodos.classList.toggle(
+      "ativo",
+      filtroAtualAgendamentos.tipo ===
+        "todos"
+    );
+  }
+}
+
+async function buscarJSON(
+  url,
+  opcoes = {}
+) {
+  const resposta =
+    await fetch(
+      url,
+      opcoes
+    );
+
+  const texto =
+    await resposta.text();
 
   let dados = null;
 
   try {
-    dados = texto ? JSON.parse(texto) : null;
+    dados = texto
+      ? JSON.parse(texto)
+      : null;
+
   } catch (erro) {
     throw new Error(
       "A API não retornou um JSON válido."
@@ -169,12 +429,19 @@ async function buscarJSON(url, opcoes = {}) {
 // =========================
 
 async function carregarAgendamentos(
-  filtro = {},
+  filtro = filtroAtualAgendamentos,
   mostrarCarregando = true
 ) {
   if (!listaAgendamentos) {
     return;
   }
+
+  filtroAtualAgendamentos = {
+    tipo: "todos",
+    ...filtro
+  };
+
+  atualizarBotoesDeFiltro();
 
   if (mostrarCarregando) {
     listaAgendamentos.innerHTML = `
@@ -184,26 +451,63 @@ async function carregarAgendamentos(
     `;
   }
 
+  if (btnAtualizarAgendamentos) {
+    btnAtualizarAgendamentos.disabled =
+      true;
+
+    btnAtualizarAgendamentos.textContent =
+      "Atualizando...";
+  }
+
   try {
-    let url = API_AGENDAMENTOS_URL;
+    let url =
+      API_AGENDAMENTOS_URL;
 
-    if (filtro.data) {
-      url =
-        `${API_AGENDAMENTOS_URL}?data=${encodeURIComponent(filtro.data)}`;
-    }
-
-    if (filtro.inicio && filtro.fim) {
+    if (
+      filtroAtualAgendamentos.data
+    ) {
       url =
         `${API_AGENDAMENTOS_URL}` +
-        `?inicio=${encodeURIComponent(filtro.inicio)}` +
-        `&fim=${encodeURIComponent(filtro.fim)}`;
+        `?data=${
+          encodeURIComponent(
+            filtroAtualAgendamentos.data
+          )
+        }`;
     }
 
-    const agendamentos =
+    if (
+      filtroAtualAgendamentos.inicio &&
+      filtroAtualAgendamentos.fim
+    ) {
+      url =
+        `${API_AGENDAMENTOS_URL}` +
+        `?inicio=${
+          encodeURIComponent(
+            filtroAtualAgendamentos.inicio
+          )
+        }` +
+        `&fim=${
+          encodeURIComponent(
+            filtroAtualAgendamentos.fim
+          )
+        }`;
+    }
+
+    const resposta =
       await buscarJSON(url);
 
-    renderizarResumo(agendamentos);
-    renderizarAgendamentos(agendamentos);
+    const agendamentos =
+      Array.isArray(resposta)
+        ? resposta
+        : [];
+
+    renderizarResumo(
+      agendamentos
+    );
+
+    renderizarAgendamentos(
+      agendamentos
+    );
 
   } catch (erro) {
     console.error(
@@ -213,54 +517,262 @@ async function carregarAgendamentos(
 
     listaAgendamentos.innerHTML = `
       <div class="painel-vazio">
-        <h3>Erro ao conectar com a API</h3>
+        <h3>
+          Erro ao conectar com a API
+        </h3>
 
         <p>
-          Confirme se a API está ligada em:
-          <strong>https://the-barber-guapo.onrender.com</strong>
+          Aguarde alguns segundos
+          e tente atualizar novamente.
         </p>
       </div>
     `;
 
     renderizarResumo([]);
+
+  } finally {
+    if (btnAtualizarAgendamentos) {
+      btnAtualizarAgendamentos.disabled =
+        false;
+
+      btnAtualizarAgendamentos.textContent =
+        "Atualizar agendamentos";
+    }
   }
 }
 
-function renderizarResumo(agendamentos) {
-  const lista = Array.isArray(agendamentos)
-    ? agendamentos
-    : [];
+function renderizarResumo(
+  agendamentos
+) {
+  const lista =
+    Array.isArray(agendamentos)
+      ? agendamentos
+      : [];
 
-  const pendentes = lista.filter(function (item) {
-    return item.status === "Aguardando confirmação";
-  });
+  const pendentes =
+    lista.filter(
+      function (item) {
+        return (
+          item.status ===
+          "Aguardando confirmação"
+        );
+      }
+    );
 
-  const confirmados = lista.filter(function (item) {
-    return item.status === "Confirmado";
-  });
+  const confirmados =
+    lista.filter(
+      function (item) {
+        return (
+          item.status ===
+          "Confirmado"
+        );
+      }
+    );
 
-  const cancelados = lista.filter(function (item) {
-    return item.status === "Cancelado";
-  });
+  const cancelados =
+    lista.filter(
+      function (item) {
+        return (
+          item.status ===
+          "Cancelado"
+        );
+      }
+    );
 
   if (totalAgendamentos) {
-    totalAgendamentos.textContent = lista.length;
+    totalAgendamentos.textContent =
+      lista.length;
   }
 
   if (totalPendentes) {
-    totalPendentes.textContent = pendentes.length;
+    totalPendentes.textContent =
+      pendentes.length;
   }
 
   if (totalConfirmados) {
-    totalConfirmados.textContent = confirmados.length;
+    totalConfirmados.textContent =
+      confirmados.length;
   }
 
   if (totalCancelados) {
-    totalCancelados.textContent = cancelados.length;
+    totalCancelados.textContent =
+      cancelados.length;
   }
 }
 
-function renderizarAgendamentos(agendamentos) {
+function agruparAgendamentosPorData(
+  agendamentos
+) {
+  const grupos = {};
+
+  agendamentos.forEach(
+    function (agendamento) {
+      const dataISO =
+        obterDataISO(
+          agendamento.data
+        ) || "sem-data";
+
+      if (!grupos[dataISO]) {
+        grupos[dataISO] = [];
+      }
+
+      grupos[dataISO].push(
+        agendamento
+      );
+    }
+  );
+
+  return grupos;
+}
+
+function renderizarCardAgendamento(
+  agendamento
+) {
+  return `
+    <article class="agendamento-admin-card">
+
+      <div class="agendamento-admin-topo">
+
+        <div>
+          <h3>
+            ${escaparHTML(
+              agendamento.nome ||
+              "Cliente sem nome"
+            )}
+          </h3>
+
+          <p>
+            ${formatarData(
+              agendamento.data
+            )}
+
+            às
+
+            ${escaparHTML(
+              agendamento.horario ||
+              "horário não informado"
+            )}
+          </p>
+        </div>
+
+        <span
+          class="status-agendamento ${
+            classeStatus(
+              agendamento.status
+            )
+          }"
+        >
+          ${escaparHTML(
+            agendamento.status ||
+            "Aguardando confirmação"
+          )}
+        </span>
+
+      </div>
+
+      <div class="agendamento-admin-info">
+
+        <p>
+          <strong>Telefone:</strong>
+
+          ${escaparHTML(
+            agendamento.telefone ||
+            "Não informado"
+          )}
+        </p>
+
+        <p>
+          <strong>E-mail:</strong>
+
+          ${escaparHTML(
+            agendamento.email ||
+            "Não informado"
+          )}
+        </p>
+
+        <p>
+          <strong>Serviços:</strong>
+
+          ${escaparHTML(
+            agendamento.servicos ||
+            agendamento.servico ||
+            "Não informado"
+          )}
+        </p>
+
+        <p>
+          <strong>Total:</strong>
+
+          ${escaparHTML(
+            agendamento.totalEstimado ||
+            "Não informado"
+          )}
+        </p>
+
+        <p>
+          <strong>Observação:</strong>
+
+          ${escaparHTML(
+            agendamento.observacao ||
+            "Sem observação"
+          )}
+        </p>
+
+      </div>
+
+      <div class="agendamento-admin-botoes">
+
+        <button
+          type="button"
+          class="btn-confirmar"
+          onclick="alterarStatus(
+            ${agendamento.id},
+            'Confirmado'
+          )"
+        >
+          Confirmar
+        </button>
+
+        <button
+          type="button"
+          class="btn-cancelar"
+          onclick="alterarStatus(
+            ${agendamento.id},
+            'Cancelado'
+          )"
+        >
+          Cancelar
+        </button>
+
+        <button
+          type="button"
+          class="btn-pendente"
+          onclick="alterarStatus(
+            ${agendamento.id},
+            'Aguardando confirmação'
+          )"
+        >
+          Pendente
+        </button>
+
+        <button
+          type="button"
+          class="btn-excluir"
+          onclick="excluirAgendamento(
+            ${agendamento.id}
+          )"
+        >
+          Excluir
+        </button>
+
+      </div>
+    </article>
+  `;
+}
+
+function renderizarAgendamentos(
+  agendamentos
+) {
   if (!listaAgendamentos) {
     return;
   }
@@ -271,133 +783,108 @@ function renderizarAgendamentos(agendamentos) {
   ) {
     listaAgendamentos.innerHTML = `
       <div class="painel-vazio">
-        <h3>Nenhum agendamento encontrado</h3>
+
+        <h3>
+          Nenhum agendamento encontrado
+        </h3>
 
         <p>
-          Quando um cliente solicitar um horário,
-          ele aparecerá aqui.
+          Quando um cliente solicitar
+          um horário, ele aparecerá aqui.
         </p>
+
       </div>
     `;
 
     return;
   }
 
+  const listaOrdenada =
+    [...agendamentos]
+      .sort(
+        compararAgendamentos
+      );
+
+  const grupos =
+    agruparAgendamentosPorData(
+      listaOrdenada
+    );
+
+  const datasOrdenadas =
+    Object.keys(grupos)
+      .sort(
+        function (a, b) {
+          if (a === "sem-data") {
+            return 1;
+          }
+
+          if (b === "sem-data") {
+            return -1;
+          }
+
+          return a.localeCompare(b);
+        }
+      );
+
   listaAgendamentos.innerHTML =
-    agendamentos.map(function (agendamento) {
-      return `
-        <article class="agendamento-admin-card">
+    datasOrdenadas
+      .map(
+        function (dataISO) {
+          const itensDoDia =
+            grupos[dataISO]
+              .sort(
+                compararAgendamentos
+              );
 
-          <div class="agendamento-admin-topo">
-            <div>
-              <h3>
-                ${escaparHTML(
-                  agendamento.nome ||
-                  "Cliente sem nome"
-                )}
-              </h3>
+          const tituloDoDia =
+            dataISO === "sem-data"
+              ? "Data não informada"
+              : formatarTituloDoDia(
+                  dataISO
+                );
 
-              <p>
-                ${formatarData(agendamento.data)}
-                às
-                ${escaparHTML(
-                  agendamento.horario ||
-                  "horário não informado"
-                )}
-              </p>
-            </div>
+          const classeHoje =
+            dataISO === dataHoje()
+              ? "dia-hoje"
+              : "";
 
-            <span
-              class="status-agendamento ${classeStatus(agendamento.status)}"
+          const cardsHTML =
+            itensDoDia
+              .map(
+                renderizarCardAgendamento
+              )
+              .join("");
+
+          return `
+            <section
+              class="grupo-dia-agendamentos ${classeHoje}"
             >
-              ${escaparHTML(
-                agendamento.status ||
-                "Aguardando confirmação"
-              )}
-            </span>
-          </div>
 
-          <div class="agendamento-admin-info">
-            <p>
-              <strong>Telefone:</strong>
-              ${escaparHTML(
-                agendamento.telefone ||
-                "Não informado"
-              )}
-            </p>
+              <header class="grupo-dia-cabecalho">
 
-            <p>
-              <strong>E-mail:</strong>
-              ${escaparHTML(
-                agendamento.email ||
-                "Não informado"
-              )}
-            </p>
+                <h3>
+                  ${escaparHTML(
+                    tituloDoDia
+                  )}
+                </h3>
 
-            <p>
-              <strong>Serviços:</strong>
-              ${escaparHTML(
-                agendamento.servicos ||
-                agendamento.servico ||
-                "Não informado"
-              )}
-            </p>
+                <span class="grupo-dia-quantidade">
+                  ${formatarQuantidadeClientes(
+                    itensDoDia.length
+                  )}
+                </span>
 
-            <p>
-              <strong>Total:</strong>
-              ${escaparHTML(
-                agendamento.totalEstimado ||
-                "Não informado"
-              )}
-            </p>
+              </header>
 
-            <p>
-              <strong>Observação:</strong>
-              ${escaparHTML(
-                agendamento.observacao ||
-                "Sem observação"
-              )}
-            </p>
-          </div>
+              <div class="grupo-dia-lista">
+                ${cardsHTML}
+              </div>
 
-          <div class="agendamento-admin-botoes">
-
-            <button
-              type="button"
-              class="btn-confirmar"
-              onclick="alterarStatus(${agendamento.id}, 'Confirmado')"
-            >
-              Confirmar
-            </button>
-
-            <button
-              type="button"
-              class="btn-cancelar"
-              onclick="alterarStatus(${agendamento.id}, 'Cancelado')"
-            >
-              Cancelar
-            </button>
-
-            <button
-              type="button"
-              class="btn-pendente"
-              onclick="alterarStatus(${agendamento.id}, 'Aguardando confirmação')"
-            >
-              Pendente
-            </button>
-
-            <button
-              type="button"
-              class="btn-excluir"
-              onclick="excluirAgendamento(${agendamento.id})"
-            >
-              Excluir
-            </button>
-
-          </div>
-        </article>
-      `;
-    }).join("");
+            </section>
+          `;
+        }
+      )
+      .join("");
 }
 
 function classeStatus(status) {
@@ -412,7 +899,10 @@ function classeStatus(status) {
   return "status-pendente";
 }
 
-async function alterarStatus(id, status) {
+async function alterarStatus(
+  id,
+  status
+) {
   try {
     await buscarJSON(
       `${API_AGENDAMENTOS_URL}/${id}/status`,
@@ -420,7 +910,8 @@ async function alterarStatus(id, status) {
         method: "PATCH",
 
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type":
+            "application/json"
         },
 
         body: JSON.stringify({
@@ -429,19 +920,10 @@ async function alterarStatus(id, status) {
       }
     );
 
-    if (filtroData && filtroData.value) {
-      await carregarAgendamentos(
-        {
-          data: filtroData.value
-        },
-        false
-      );
-    } else {
-      await carregarAgendamentos(
-        {},
-        false
-      );
-    }
+    await carregarAgendamentos(
+      filtroAtualAgendamentos,
+      false
+    );
 
   } catch (erro) {
     console.error(
@@ -455,10 +937,13 @@ async function alterarStatus(id, status) {
   }
 }
 
-async function excluirAgendamento(id) {
-  const confirmou = confirm(
-    "Tem certeza que deseja excluir este agendamento?"
-  );
+async function excluirAgendamento(
+  id
+) {
+  const confirmou =
+    confirm(
+      "Tem certeza que deseja excluir este agendamento?"
+    );
 
   if (!confirmou) {
     return;
@@ -472,19 +957,10 @@ async function excluirAgendamento(id) {
       }
     );
 
-    if (filtroData && filtroData.value) {
-      await carregarAgendamentos(
-        {
-          data: filtroData.value
-        },
-        false
-      );
-    } else {
-      await carregarAgendamentos(
-        {},
-        false
-      );
-    }
+    await carregarAgendamentos(
+      filtroAtualAgendamentos,
+      false
+    );
 
   } catch (erro) {
     console.error(
@@ -505,49 +981,64 @@ async function excluirAgendamento(id) {
 
 async function carregarMensagensChat() {
   const mensagens =
-    await buscarJSON(API_MENSAGENS_URL);
+    await buscarJSON(
+      API_MENSAGENS_URL
+    );
 
   return Array.isArray(mensagens)
     ? mensagens
     : [];
 }
 
-function agruparMensagensPorCliente(mensagens) {
+function agruparMensagensPorCliente(
+  mensagens
+) {
   const conversas = {};
 
-  mensagens.forEach(function (mensagem) {
-    const clienteId =
-      String(mensagem.clienteId);
+  mensagens.forEach(
+    function (mensagem) {
+      const clienteId =
+        String(
+          mensagem.clienteId
+        );
 
-    if (!conversas[clienteId]) {
-      conversas[clienteId] = {
-        clienteId: clienteId,
+      if (!conversas[clienteId]) {
+        conversas[clienteId] = {
+          clienteId:
+            clienteId,
 
-        clienteNome:
-          mensagem.clienteNome ||
-          "Cliente",
+          clienteNome:
+            mensagem.clienteNome ||
+            "Cliente",
 
-        clienteEmail:
-          mensagem.clienteEmail ||
-          "",
+          clienteEmail:
+            mensagem.clienteEmail ||
+            "",
 
-        clienteTelefone:
-          mensagem.clienteTelefone ||
-          "",
+          clienteTelefone:
+            mensagem.clienteTelefone ||
+            "",
 
-        mensagens: []
-      };
+          mensagens: []
+        };
+      }
+
+      conversas[
+        clienteId
+      ].mensagens.push(
+        mensagem
+      );
     }
+  );
 
-    conversas[clienteId].mensagens.push(
-      mensagem
-    );
-  });
-
-  return Object.values(conversas);
+  return Object.values(
+    conversas
+  );
 }
 
-function mensagemLidaBarbeiro(mensagem) {
+function mensagemLidaBarbeiro(
+  mensagem
+) {
   return (
     mensagem.lidaBarbeiro === true ||
     mensagem.lidaBarbeiro === 1 ||
@@ -555,18 +1046,26 @@ function mensagemLidaBarbeiro(mensagem) {
   );
 }
 
-function temMensagemNaoLida(conversa) {
+function temMensagemNaoLida(
+  conversa
+) {
   return conversa.mensagens.some(
     function (mensagem) {
       return (
-        mensagem.autor === "cliente" &&
-        !mensagemLidaBarbeiro(mensagem)
+        mensagem.autor ===
+          "cliente" &&
+
+        !mensagemLidaBarbeiro(
+          mensagem
+        )
       );
     }
   );
 }
 
-function ultimaDataHora(conversa) {
+function ultimaDataHora(
+  conversa
+) {
   const ultimaMensagem =
     conversa.mensagens[
       conversa.mensagens.length - 1
@@ -609,7 +1108,9 @@ async function selecionarConversaAdmin(
   ) {
     clienteAdminAtivo = null;
 
-    await renderizarMensagensAdmin(false);
+    await renderizarMensagensAdmin(
+      false
+    );
 
     return;
   }
@@ -621,7 +1122,9 @@ async function selecionarConversaAdmin(
     clienteAdminAtivo
   );
 
-  await renderizarMensagensAdmin(false);
+  await renderizarMensagensAdmin(
+    false
+  );
 }
 
 async function renderizarMensagensAdmin(
@@ -652,12 +1155,16 @@ async function renderizarMensagensAdmin(
     if (mensagens.length === 0) {
       listaMensagensClientes.innerHTML = `
         <div class="painel-vazio">
-          <h3>Nenhuma mensagem encontrada</h3>
+
+          <h3>
+            Nenhuma mensagem encontrada
+          </h3>
 
           <p>
-            Quando um cliente enviar uma mensagem,
-            ela aparecerá aqui.
+            Quando um cliente enviar
+            uma mensagem, ela aparecerá aqui.
           </p>
+
         </div>
       `;
 
@@ -667,116 +1174,173 @@ async function renderizarMensagensAdmin(
     }
 
     const conversas =
-      agruparMensagensPorCliente(mensagens)
-        .sort(function (a, b) {
-          return (
-            ultimaDataHora(b) -
-            ultimaDataHora(a)
-          );
-        });
+      agruparMensagensPorCliente(
+        mensagens
+      )
+        .sort(
+          function (a, b) {
+            return (
+              ultimaDataHora(b) -
+              ultimaDataHora(a)
+            );
+          }
+        );
 
     const existeConversaAtiva =
-      conversas.some(function (conversa) {
-        return (
-          String(conversa.clienteId) ===
-          String(clienteAdminAtivo)
-        );
-      });
+      conversas.some(
+        function (conversa) {
+          return (
+            String(
+              conversa.clienteId
+            ) ===
+            String(
+              clienteAdminAtivo
+            )
+          );
+        }
+      );
 
     if (!existeConversaAtiva) {
       clienteAdminAtivo = null;
     }
 
     const tirasHTML =
-      conversas.map(function (conversa) {
-        const ativa =
-          String(conversa.clienteId) ===
-          String(clienteAdminAtivo);
+      conversas
+        .map(
+          function (conversa) {
+            const ativa =
+              String(
+                conversa.clienteId
+              ) ===
+              String(
+                clienteAdminAtivo
+              );
 
-        const naoLida =
-          temMensagemNaoLida(conversa);
+            const naoLida =
+              temMensagemNaoLida(
+                conversa
+              );
 
-        const ultimaMensagem =
-          conversa.mensagens[
-            conversa.mensagens.length - 1
-          ];
+            const ultimaMensagem =
+              conversa.mensagens[
+                conversa.mensagens.length - 1
+              ];
 
-        const previa =
-          ultimaMensagem?.texto ||
-          "Sem mensagem";
+            const previa =
+              ultimaMensagem?.texto ||
+              "Sem mensagem";
 
-        return `
-          <button
-            type="button"
-            class="tira-cliente ${ativa ? "tira-cliente-ativa" : ""}"
-            onclick="selecionarConversaAdmin('${conversa.clienteId}')"
-          >
-            <span class="tira-cliente-conteudo">
-              <span class="tira-cliente-nome">
-                ${escaparHTML(conversa.clienteNome)}
-              </span>
+            return `
+              <button
+                type="button"
+                class="tira-cliente ${
+                  ativa
+                    ? "tira-cliente-ativa"
+                    : ""
+                }"
+                onclick="selecionarConversaAdmin(
+                  '${conversa.clienteId}'
+                )"
+              >
 
-              <span class="tira-cliente-previa">
-                ${escaparHTML(previa)}
-              </span>
-            </span>
+                <span class="tira-cliente-conteudo">
 
-            ${naoLida
-              ? '<span class="tira-cliente-dot"></span>'
-              : ""
-            }
-          </button>
-        `;
-      }).join("");
+                  <span class="tira-cliente-nome">
+                    ${escaparHTML(
+                      conversa.clienteNome
+                    )}
+                  </span>
+
+                  <span class="tira-cliente-previa">
+                    ${escaparHTML(
+                      previa
+                    )}
+                  </span>
+
+                </span>
+
+                ${
+                  naoLida
+                    ? `
+                      <span class="tira-cliente-dot">
+                      </span>
+                    `
+                    : ""
+                }
+
+              </button>
+            `;
+          }
+        )
+        .join("");
 
     const conversaAtiva =
-      conversas.find(function (conversa) {
-        return (
-          String(conversa.clienteId) ===
-          String(clienteAdminAtivo)
-        );
-      });
+      conversas.find(
+        function (conversa) {
+          return (
+            String(
+              conversa.clienteId
+            ) ===
+            String(
+              clienteAdminAtivo
+            )
+          );
+        }
+      );
 
     let conversaHTML = "";
 
     if (conversaAtiva) {
       const mensagensHTML =
         conversaAtiva.mensagens
-          .map(function (mensagem) {
-            const classe =
-              mensagem.autor === "cliente"
-                ? "msg-admin-cliente"
-                : "msg-admin-barbeiro";
+          .map(
+            function (mensagem) {
+              const classe =
+                mensagem.autor ===
+                  "cliente"
+                  ? "msg-admin-cliente"
+                  : "msg-admin-barbeiro";
 
-            const autor =
-              mensagem.autor === "cliente"
-                ? conversaAtiva.clienteNome
-                : "Guapo";
+              const autor =
+                mensagem.autor ===
+                  "cliente"
+                  ? conversaAtiva.clienteNome
+                  : "Guapo";
 
-            return `
-              <div class="msg-admin ${classe}">
-                <strong>
-                  ${escaparHTML(autor)}
-                </strong>
+              return `
+                <div class="msg-admin ${classe}">
 
-                <p>
-                  ${escaparHTML(mensagem.texto)}
-                </p>
+                  <strong>
+                    ${escaparHTML(
+                      autor
+                    )}
+                  </strong>
 
-                <span>
-                  ${formatarDataHoraMensagem(
-                    mensagem.dataHora
-                  )}
-                </span>
-              </div>
-            `;
-          }).join("");
+                  <p>
+                    ${escaparHTML(
+                      mensagem.texto
+                    )}
+                  </p>
+
+                  <span>
+                    ${formatarDataHoraMensagem(
+                      mensagem.dataHora
+                    )}
+                  </span>
+
+                </div>
+              `;
+            }
+          )
+          .join("");
 
       conversaHTML = `
         <article class="conversa-admin-card">
 
           <div class="conversa-admin-topo">
+
             <div>
+
               <h3>
                 ${escaparHTML(
                   conversaAtiva.clienteNome
@@ -796,7 +1360,9 @@ async function renderizarMensagensAdmin(
                   "Telefone não informado"
                 )}
               </p>
+
             </div>
+
           </div>
 
           <div class="conversa-admin-mensagens">
@@ -805,8 +1371,12 @@ async function renderizarMensagensAdmin(
 
           <form
             class="form-resposta-admin"
-            onsubmit="responderCliente(event, '${conversaAtiva.clienteId}')"
+            onsubmit="responderCliente(
+              event,
+              '${conversaAtiva.clienteId}'
+            )"
           >
+
             <input
               type="text"
               id="respostaCliente-${conversaAtiva.clienteId}"
@@ -818,6 +1388,7 @@ async function renderizarMensagensAdmin(
             <button type="submit">
               Responder
             </button>
+
           </form>
 
         </article>
@@ -833,9 +1404,10 @@ async function renderizarMensagensAdmin(
     `;
 
     const caixaMensagens =
-      listaMensagensClientes.querySelector(
-        ".conversa-admin-mensagens"
-      );
+      listaMensagensClientes
+        .querySelector(
+          ".conversa-admin-mensagens"
+        );
 
     if (caixaMensagens) {
       caixaMensagens.scrollTop =
@@ -850,12 +1422,16 @@ async function renderizarMensagensAdmin(
 
     listaMensagensClientes.innerHTML = `
       <div class="painel-vazio">
-        <h3>Erro ao carregar mensagens</h3>
+
+        <h3>
+          Erro ao carregar mensagens
+        </h3>
 
         <p>
-          Confirme se a API está ligada em:
-          <strong>http://localhost:3000</strong>
+          Aguarde alguns segundos
+          e tente atualizar novamente.
         </p>
+
       </div>
     `;
   }
@@ -867,7 +1443,8 @@ async function responderCliente(
 ) {
   event.preventDefault();
 
-  const formulario = event.currentTarget;
+  const formulario =
+    event.currentTarget;
 
   const inputResposta =
     document.getElementById(
@@ -886,11 +1463,16 @@ async function responderCliente(
   }
 
   const botao =
-    formulario.querySelector("button");
+    formulario.querySelector(
+      "button"
+    );
 
   if (botao) {
-    botao.disabled = true;
-    botao.textContent = "Enviando...";
+    botao.disabled =
+      true;
+
+    botao.textContent =
+      "Enviando...";
   }
 
   try {
@@ -900,23 +1482,32 @@ async function responderCliente(
         method: "POST",
 
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type":
+            "application/json"
         },
 
         body: JSON.stringify({
-          clienteId: Number(clienteId),
-          autor: "barbeiro",
-          texto: texto
+          clienteId:
+            Number(clienteId),
+
+          autor:
+            "barbeiro",
+
+          texto:
+            texto
         })
       }
     );
 
-    inputResposta.value = "";
+    inputResposta.value =
+      "";
 
     clienteAdminAtivo =
       String(clienteId);
 
-    await renderizarMensagensAdmin(false);
+    await renderizarMensagensAdmin(
+      false
+    );
 
   } catch (erro) {
     console.error(
@@ -929,9 +1520,17 @@ async function responderCliente(
     );
 
   } finally {
-    if (botao && document.body.contains(botao)) {
-      botao.disabled = false;
-      botao.textContent = "Responder";
+    if (
+      botao &&
+      document.body.contains(
+        botao
+      )
+    ) {
+      botao.disabled =
+        false;
+
+      botao.textContent =
+        "Responder";
     }
   }
 }
@@ -941,29 +1540,39 @@ async function responderCliente(
 // EVENTOS DOS FILTROS
 // =========================
 
-if (btnHoje && filtroData) {
+if (
+  btnHoje &&
+  filtroData
+) {
   btnHoje.addEventListener(
     "click",
     function () {
-      filtroData.value = dataHoje();
+      filtroData.value =
+        dataHoje();
 
       carregarAgendamentos({
+        tipo: "hoje",
         data: filtroData.value
       });
     }
   );
 }
 
-if (btnSemana && filtroData) {
+if (
+  btnSemana &&
+  filtroData
+) {
   btnSemana.addEventListener(
     "click",
     function () {
-      filtroData.value = "";
+      filtroData.value =
+        "";
 
       const semana =
         obterSemanaAtual();
 
       carregarAgendamentos({
+        tipo: "semana",
         inicio: semana.inicio,
         fim: semana.fim
       });
@@ -971,13 +1580,19 @@ if (btnSemana && filtroData) {
   );
 }
 
-if (btnTodos && filtroData) {
+if (
+  btnTodos &&
+  filtroData
+) {
   btnTodos.addEventListener(
     "click",
     function () {
-      filtroData.value = "";
+      filtroData.value =
+        "";
 
-      carregarAgendamentos();
+      carregarAgendamentos({
+        tipo: "todos"
+      });
     }
   );
 }
@@ -988,22 +1603,42 @@ if (filtroData) {
     function () {
       if (filtroData.value) {
         carregarAgendamentos({
+          tipo: "data",
           data: filtroData.value
         });
+
       } else {
-        carregarAgendamentos();
+        carregarAgendamentos({
+          tipo: "todos"
+        });
       }
     }
   );
 }
 
+if (btnAtualizarAgendamentos) {
+  btnAtualizarAgendamentos
+    .addEventListener(
+      "click",
+      function () {
+        carregarAgendamentos(
+          filtroAtualAgendamentos,
+          true
+        );
+      }
+    );
+}
+
 if (btnAtualizarMensagens) {
-  btnAtualizarMensagens.addEventListener(
-    "click",
-    function () {
-      renderizarMensagensAdmin(true);
-    }
-  );
+  btnAtualizarMensagens
+    .addEventListener(
+      "click",
+      function () {
+        renderizarMensagensAdmin(
+          true
+        );
+      }
+    );
 }
 
 
@@ -1011,7 +1646,10 @@ if (btnAtualizarMensagens) {
 // INICIAR PAINEL
 // =========================
 
-carregarAgendamentos();
+carregarAgendamentos({
+  tipo: "todos"
+});
+
 renderizarMensagensAdmin();
 
 
@@ -1019,16 +1657,34 @@ renderizarMensagensAdmin();
 // ATUALIZAÇÃO AUTOMÁTICA
 // =========================
 
-// Atualiza sem mostrar "Carregando..." e sem apagar
-// o texto enquanto o Guapo estiver digitando.
+// Mensagens atualizadas a cada 5 segundos.
+// Não atualiza enquanto o Guapo estiver digitando.
 
-setInterval(function () {
-  const inputRespostaAtivo =
-    document.querySelector(
-      ".form-resposta-admin input:focus"
+setInterval(
+  function () {
+    const inputRespostaAtivo =
+      document.querySelector(
+        ".form-resposta-admin input:focus"
+      );
+
+    if (!inputRespostaAtivo) {
+      renderizarMensagensAdmin(
+        false
+      );
+    }
+  },
+  5000
+);
+
+// Agendamentos atualizados automaticamente
+// a cada 30 segundos.
+
+setInterval(
+  function () {
+    carregarAgendamentos(
+      filtroAtualAgendamentos,
+      false
     );
-
-  if (!inputRespostaAtivo) {
-    renderizarMensagensAdmin(false);
-  }
-}, 5000);
+  },
+  30000
+);

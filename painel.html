@@ -2,10 +2,185 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Painel Administrativo - Guapo The Barber</title>
-  <link rel="stylesheet" href="style.css" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>
+    Painel Administrativo - Guapo The Barber
+  </title>
+
+  <link
+    rel="stylesheet"
+    href="style.css?v=42"
+  />
+
+  <style>
+    .admin-filtros-direita {
+      display: flex;
+      align-items: flex-end;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn-atualizar-agendamentos {
+      border: 1px solid #d4af37;
+      border-radius: 999px;
+      padding: 12px 18px;
+      background: #d4af37;
+      color: #080808;
+      font-family: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.25s ease;
+      min-height: 42px;
+    }
+
+    .btn-atualizar-agendamentos:hover {
+      transform: translateY(-2px);
+      opacity: 0.92;
+    }
+
+    .btn-atualizar-agendamentos:disabled {
+      cursor: wait;
+      opacity: 0.65;
+      transform: none;
+    }
+
+    .admin-botoes-filtro button.ativo {
+      background: #d4af37;
+      color: #080808;
+    }
+
+    .grupo-dia-agendamentos {
+      margin-bottom: 28px;
+      border: 1px solid rgba(212, 175, 55, 0.18);
+      border-radius: 22px;
+      overflow: hidden;
+      background: #141414;
+    }
+
+    .grupo-dia-agendamentos:last-child {
+      margin-bottom: 0;
+    }
+
+    .grupo-dia-agendamentos.dia-hoje {
+      border-color: rgba(212, 175, 55, 0.55);
+
+      box-shadow:
+        0 0 0 3px
+        rgba(212, 175, 55, 0.08);
+    }
+
+    .grupo-dia-cabecalho {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 20px;
+
+      background:
+        linear-gradient(
+          135deg,
+          rgba(212, 175, 55, 0.16),
+          rgba(255, 255, 255, 0.03)
+        );
+
+      border-bottom:
+        1px solid
+        rgba(212, 175, 55, 0.16);
+    }
+
+    .grupo-dia-cabecalho h3 {
+      margin: 0;
+      color: #ffffff;
+      font-size: 21px;
+      line-height: 1.35;
+    }
+
+    .grupo-dia-quantidade {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 104px;
+      min-height: 36px;
+      padding: 8px 13px;
+      border-radius: 999px;
+      background: #d4af37;
+      color: #080808;
+      font-size: 13px;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .grupo-dia-lista {
+      padding: 18px;
+    }
+
+    .grupo-dia-lista
+    .agendamento-admin-card:last-child {
+      margin-bottom: 0;
+    }
+
+    .admin-lista-subtitulo {
+      margin: 7px 0 0;
+      color: #bdbdbd;
+      font-size: 14px;
+    }
+
+    @media (max-width: 900px) {
+      .admin-filtros-direita {
+        width: 100%;
+        align-items: stretch;
+      }
+
+      .admin-filtros-direita
+      .admin-filtro-data {
+        flex: 1;
+        min-width: 210px;
+      }
+
+      .btn-atualizar-agendamentos {
+        flex: 1;
+        min-width: 210px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .admin-filtros-direita {
+        flex-direction: column;
+      }
+
+      .admin-filtros-direita
+      .admin-filtro-data,
+      .btn-atualizar-agendamentos {
+        width: 100%;
+        min-width: 100%;
+      }
+
+      .grupo-dia-cabecalho {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .grupo-dia-cabecalho h3 {
+        font-size: 18px;
+      }
+
+      .grupo-dia-quantidade {
+        min-width: auto;
+      }
+
+      .grupo-dia-lista {
+        padding: 12px;
+      }
+    }
+  </style>
 </head>
+
 <body class="admin-body">
 
   <header class="admin-header">
@@ -15,10 +190,22 @@
     </div>
 
     <div class="admin-header-acoes">
-      <a href="index.html" class="admin-voltar">Voltar para o site</a>
-      <button type="button" class="admin-voltar btn-sair-admin" onclick="sairAdmin()">
+
+      <a
+        href="index.html"
+        class="admin-voltar"
+      >
+        Voltar para o site
+      </a>
+
+      <button
+        type="button"
+        class="admin-voltar btn-sair-admin"
+        onclick="sairAdmin()"
+      >
         Sair
       </button>
+
     </div>
   </header>
 
@@ -26,92 +213,212 @@
 
     <section class="admin-intro">
       <div>
-        <p class="admin-tag">Painel administrativo</p>
-        <h2>Agendamentos</h2>
-        <p>Gerencie os horários solicitados pelos clientes.</p>
+
+        <p class="admin-tag">
+          Painel administrativo
+        </p>
+
+        <h2>
+          Agendamentos
+        </h2>
+
+        <p>
+          Gerencie os horários solicitados
+          pelos clientes.
+        </p>
+
       </div>
     </section>
 
     <section class="admin-resumo">
+
       <div class="admin-card-resumo">
         <span>Total</span>
-        <strong id="totalAgendamentos">0</strong>
+
+        <strong id="totalAgendamentos">
+          0
+        </strong>
       </div>
 
       <div class="admin-card-resumo">
         <span>Pendentes</span>
-        <strong id="totalPendentes">0</strong>
+
+        <strong id="totalPendentes">
+          0
+        </strong>
       </div>
 
       <div class="admin-card-resumo">
         <span>Confirmados</span>
-        <strong id="totalConfirmados">0</strong>
+
+        <strong id="totalConfirmados">
+          0
+        </strong>
       </div>
 
       <div class="admin-card-resumo">
         <span>Cancelados</span>
-        <strong id="totalCancelados">0</strong>
+
+        <strong id="totalCancelados">
+          0
+        </strong>
       </div>
+
     </section>
 
     <section class="admin-filtros">
+
       <div class="admin-botoes-filtro">
-        <button id="btnHoje" type="button">Hoje</button>
-        <button id="btnSemana" type="button">Semana</button>
-        <button id="btnTodos" type="button">Todos</button>
+
+        <button
+          id="btnHoje"
+          type="button"
+        >
+          Hoje
+        </button>
+
+        <button
+          id="btnSemana"
+          type="button"
+        >
+          Semana
+        </button>
+
+        <button
+          id="btnTodos"
+          type="button"
+        >
+          Todos
+        </button>
+
       </div>
 
-      <div class="admin-filtro-data">
-        <label for="filtroData">Filtrar por data</label>
-        <input type="date" id="filtroData" />
+      <div class="admin-filtros-direita">
+
+        <div class="admin-filtro-data">
+
+          <label for="filtroData">
+            Filtrar por data
+          </label>
+
+          <input
+            type="date"
+            id="filtroData"
+          />
+
+        </div>
+
+        <button
+          type="button"
+          id="btnAtualizarAgendamentos"
+          class="btn-atualizar-agendamentos"
+        >
+          Atualizar agendamentos
+        </button>
+
       </div>
     </section>
 
     <section class="admin-mensagens">
+
       <div class="admin-lista-topo mensagens-topo">
+
         <div>
-          <h2>Mensagens dos clientes</h2>
-          <p>Veja e responda as mensagens enviadas pelos clientes.</p>
+
+          <h2>
+            Mensagens dos clientes
+          </h2>
+
+          <p>
+            Veja e responda as mensagens
+            enviadas pelos clientes.
+          </p>
+
         </div>
 
-        <button type="button" id="btnAtualizarMensagens" class="btn-atualizar-mensagens">
+        <button
+          type="button"
+          id="btnAtualizarMensagens"
+          class="btn-atualizar-mensagens"
+        >
           Atualizar mensagens
         </button>
+
       </div>
 
-      <div id="listaMensagensClientes" class="lista-mensagens-clientes">
-        <p class="painel-carregando">Carregando mensagens...</p>
+      <div
+        id="listaMensagensClientes"
+        class="lista-mensagens-clientes"
+      >
+        <p class="painel-carregando">
+          Carregando mensagens...
+        </p>
       </div>
+
     </section>
 
     <section class="admin-lista">
+
       <div class="admin-lista-topo">
-        <h2>Lista de agendamentos</h2>
+
+        <h2>
+          Lista de agendamentos
+        </h2>
+
+        <p class="admin-lista-subtitulo">
+          Os clientes são separados por dia
+          e organizados por horário.
+        </p>
+
       </div>
 
       <div id="listaAgendamentos">
-        <p class="painel-carregando">Carregando agendamentos...</p>
+
+        <p class="painel-carregando">
+          Carregando agendamentos...
+        </p>
+
       </div>
+
     </section>
 
   </main>
 
-  <script src="auth.js"></script>
+  <script src="auth.js?v=32"></script>
 
-<script>
-  const usuarioLogadoPainel = pegarUsuarioLogado();
+  <script>
+    const usuarioLogadoPainel =
+      pegarUsuarioLogado();
 
-  if (!usuarioLogadoPainel || usuarioLogadoPainel.tipo !== "barbeiro") {
-    window.location.href = "login.html";
-  }
+    if (
+      !usuarioLogadoPainel ||
+      usuarioLogadoPainel.tipo !==
+        "barbeiro"
+    ) {
+      window.location.replace(
+        "login.html"
+      );
 
-  function sairAdmin() {
-    localStorage.removeItem("guapo_usuario_logado");
-    localStorage.removeItem("guapo_redirect_apos_login");
-    window.location.href = "login.html";
-  }
-</script>
+      throw new Error(
+        "Acesso permitido apenas para o barbeiro."
+      );
+    }
 
-<script src="painel.js?v=10"></script>
+    function sairAdmin() {
+      localStorage.removeItem(
+        "guapo_usuario_logado"
+      );
+
+      localStorage.removeItem(
+        "guapo_redirect_apos_login"
+      );
+
+      window.location.href =
+        "login.html";
+    }
+  </script>
+
+  <script src="painel.js?v=11"></script>
+
 </body>
 </html>
