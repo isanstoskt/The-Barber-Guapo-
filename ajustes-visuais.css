@@ -1,0 +1,460 @@
+/* ========================================================= */
+/* AJUSTES VISUAIS - REDES, MODAL DE CONTATO E LOGIN */
+/* ========================================================= */
+
+body.modal-aberto {
+  overflow: hidden;
+}
+
+/* ========================= */
+/* REDES SOCIAIS */
+/* ========================= */
+
+.redes-box-novo {
+  max-width: 680px;
+  padding: 30px;
+  border: 1px solid rgba(212, 168, 82, 0.42);
+  border-radius: 24px;
+  background:
+    radial-gradient(
+      circle at top,
+      rgba(212, 168, 82, 0.10),
+      transparent 58%
+    ),
+    linear-gradient(
+      145deg,
+      #171717,
+      #0f0f0f
+    );
+  box-shadow:
+    0 22px 55px
+    rgba(0, 0, 0, 0.38);
+}
+
+.redes-box-novo p {
+  color: #ffffff;
+  font-size: 20px;
+  line-height: 1.4;
+}
+
+.redes-box-novo .redes-botoes {
+  width: 100%;
+  max-width: 430px;
+  display: grid;
+  grid-template-columns:
+    repeat(2, 1fr);
+  gap: 12px;
+}
+
+.redes-box-novo .rede {
+  width: 100%;
+  min-height: 52px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 13px 20px;
+  border: 1px solid #d4a852;
+  border-radius: 999px;
+  background: transparent;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 700;
+  text-align: center;
+  box-shadow: none;
+}
+
+.redes-box-novo .rede.instagram,
+.redes-box-novo .rede.tiktok {
+  border-radius: 999px;
+  background: transparent;
+  color: #ffffff;
+}
+
+.redes-box-novo .rede:hover,
+.redes-box-novo .rede:focus-visible,
+.redes-box-novo .rede.instagram:hover,
+.redes-box-novo .rede.tiktok:hover {
+  background: #d4a852;
+  color: #111111;
+  transform: translateY(-2px);
+  outline: none;
+  box-shadow:
+    0 10px 24px
+    rgba(212, 168, 82, 0.18);
+}
+
+/* ========================= */
+/* MODAL DE CONTATO */
+/* ========================= */
+
+.modal-telefone.ativo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 22px;
+}
+
+.modal-telefone-overlay {
+  background:
+    rgba(0, 0, 0, 0.80);
+  backdrop-filter: blur(5px);
+}
+
+.modal-telefone-conteudo {
+  width: 100%;
+  max-width: 480px;
+  margin: 0;
+  border:
+    1px solid
+    rgba(212, 168, 82, 0.55);
+  border-radius: 24px;
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(212, 168, 82, 0.12),
+      transparent 42%
+    ),
+    linear-gradient(
+      145deg,
+      #181818,
+      #0d0d0d
+    );
+  color: #ffffff;
+  box-shadow:
+    0 30px 80px
+    rgba(0, 0, 0, 0.65);
+  overflow: hidden;
+  animation:
+    modalTelefoneEntrada
+    0.22s ease;
+}
+
+@keyframes modalTelefoneEntrada {
+  from {
+    opacity: 0;
+    transform:
+      translateY(18px)
+      scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform:
+      translateY(0)
+      scale(1);
+  }
+}
+
+.modal-telefone-topo {
+  min-height: 118px;
+  padding: 26px 28px;
+  border-bottom:
+    1px solid
+    rgba(212, 168, 82, 0.28);
+  background: transparent;
+}
+
+.modal-telefone-etiqueta {
+  margin: 0 0 4px;
+  color: #d4a852;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+}
+
+.modal-telefone-topo h3 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 26px;
+  line-height: 1.2;
+}
+
+.modal-telefone-numero {
+  margin: 8px 0 0;
+  color: #d7d7d7;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.fechar-modal {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border:
+    1px solid
+    rgba(212, 168, 82, 0.38);
+  border-radius: 50%;
+  background: #171717;
+  color: #ffffff;
+  font-size: 26px;
+  line-height: 1;
+  transition: 0.2s ease;
+}
+
+.fechar-modal:hover,
+.fechar-modal:focus-visible {
+  border-color: #d4a852;
+  background: #d4a852;
+  color: #111111;
+  outline: none;
+  transform: rotate(4deg);
+}
+
+.modal-telefone-acoes {
+  padding: 24px 28px 28px;
+  display: grid;
+  grid-template-columns:
+    repeat(2, 1fr);
+  gap: 12px;
+}
+
+.acao-telefone,
+.acao-copiar,
+.acao-telefone.ligar,
+.acao-telefone.whatsapp,
+.acao-telefone.mensagem {
+  min-height: 54px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 13px 18px;
+  border:
+    1px solid
+    rgba(212, 168, 82, 0.60);
+  border-radius: 999px;
+  background: #191919;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: none;
+}
+
+.acao-telefone:hover,
+.acao-telefone:focus-visible,
+.acao-copiar:hover,
+.acao-copiar:focus-visible {
+  border-color: #d4a852;
+  background: #d4a852;
+  color: #111111;
+  outline: none;
+  transform: translateY(-2px);
+  box-shadow:
+    0 10px 24px
+    rgba(212, 168, 82, 0.16);
+}
+
+.btn-opcoes-telefone {
+  min-height: 46px;
+  padding: 12px 20px;
+  border: 1px solid #d4a852;
+  border-radius: 999px;
+  background: transparent;
+  color: #ffffff;
+}
+
+.btn-opcoes-telefone:hover,
+.btn-opcoes-telefone:focus-visible {
+  background: #d4a852;
+  color: #111111;
+  outline: none;
+}
+
+/* ========================= */
+/* LOGIN */
+/* ========================= */
+
+.login-admin-card {
+  max-width: 470px;
+  padding: 40px;
+}
+
+.login-admin-form {
+  gap: 14px;
+}
+
+.login-admin-form input {
+  width: 100%;
+  min-height: 54px;
+  padding: 14px 18px;
+  font-size: 16px;
+}
+
+.campo-senha-login {
+  position: relative;
+  width: 100%;
+}
+
+.campo-senha-login input {
+  padding-right: 60px;
+}
+
+.login-admin-form
+.botao-olho-senha {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  width: 42px;
+  height: 42px;
+  min-height: 42px;
+  margin: 0;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: #d4a852;
+  transform:
+    translateY(-50%);
+  opacity: 1;
+  box-shadow: none;
+  z-index: 2;
+}
+
+.login-admin-form
+.botao-olho-senha:hover,
+.login-admin-form
+.botao-olho-senha:focus-visible {
+  background:
+    rgba(212, 168, 82, 0.12);
+  color: #f2c96b;
+  transform:
+    translateY(-50%);
+  opacity: 1;
+  outline: none;
+}
+
+.icone-olho {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.icone-olho-fechado {
+  display: none;
+}
+
+.botao-olho-senha.senha-visivel
+.icone-olho-aberto {
+  display: none;
+}
+
+.botao-olho-senha.senha-visivel
+.icone-olho-fechado {
+  display: block;
+}
+
+.link-esqueceu-senha {
+  margin: 0 0 4px;
+  align-self: flex-start;
+  font-size: 15px;
+}
+
+.login-admin-form #btnEntrar,
+.login-links
+.botao-outline-dourado {
+  width: 100%;
+  max-width: none;
+  min-height: 54px;
+  box-sizing: border-box;
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.login-admin-form #btnEntrar {
+  margin-top: 12px;
+  padding: 14px 22px;
+}
+
+.login-admin-form
+#btnEntrar:disabled {
+  cursor: wait;
+  opacity: 0.72;
+  transform: none;
+}
+
+.login-links {
+  width: 100%;
+  margin-top: 22px;
+  gap: 12px;
+  align-items: stretch;
+}
+
+.login-links
+.botao-outline-dourado {
+  display: flex;
+}
+
+/* ========================= */
+/* CELULAR */
+/* ========================= */
+
+@media (max-width: 600px) {
+  .redes-box-novo {
+    padding: 26px 20px;
+  }
+
+  .redes-box-novo
+  .redes-botoes {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-telefone.ativo {
+    padding: 16px;
+  }
+
+  .modal-telefone-conteudo {
+    max-width: 420px;
+  }
+
+  .modal-telefone-topo {
+    min-height: 108px;
+    padding: 22px 20px;
+  }
+
+  .modal-telefone-topo h3 {
+    font-size: 23px;
+  }
+
+  .modal-telefone-acoes {
+    padding: 20px;
+    grid-template-columns: 1fr;
+  }
+
+  .login-admin-container {
+    padding: 20px 14px;
+  }
+
+  .login-admin-card {
+    max-width: 100%;
+    padding: 28px 22px;
+    border-radius: 22px;
+  }
+
+  .login-admin-logo {
+    margin-bottom: 22px;
+  }
+
+  .login-admin-card h2 {
+    font-size: 29px;
+  }
+
+  .login-admin-form #btnEntrar,
+  .login-links
+  .botao-outline-dourado {
+    min-height: 52px;
+  }
+}

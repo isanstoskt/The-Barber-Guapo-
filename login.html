@@ -2,115 +2,316 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
 
   <title>Login - Guapo The Barber</title>
 
-  <link rel="stylesheet" href="style.css" />
+  <link
+    rel="stylesheet"
+    href="style.css?v=41"
+  />
+
+  <link
+    rel="stylesheet"
+    href="ajustes-visuais.css?v=1"
+  />
 </head>
+
 <body class="admin-body">
 
   <main class="login-admin-container">
     <section class="login-admin-card">
+
       <div class="login-admin-logo">
         <h1>Guapo</h1>
         <span>The Barber</span>
       </div>
 
-      <p class="admin-tag">Área de acesso</p>
-
-      <h2>Entrar na conta</h2>
-
-      <p class="login-admin-texto">
-        Acesse sua conta para agendar, acompanhar seus cortes ou gerenciar os horários.
+      <p class="admin-tag">
+        Área de acesso
       </p>
 
-      <form id="formLogin" class="login-admin-form">
-        <label for="email">E-mail</label>
-        <input 
-          type="email" 
-          id="email" 
-          placeholder="Digite seu e-mail" 
-          required 
+      <h2>
+        Entrar na conta
+      </h2>
+
+      <p class="login-admin-texto">
+        Acesse sua conta para agendar,
+        acompanhar seus cortes ou gerenciar
+        os horários.
+      </p>
+
+      <form
+        id="formLogin"
+        class="login-admin-form"
+      >
+        <label for="email">
+          E-mail
+        </label>
+
+        <input
+          type="email"
+          id="email"
+          name="email"
+          placeholder="Digite seu e-mail"
+          autocomplete="email"
+          required
         />
 
-        <label for="senha">Senha</label>
-        <input 
-          type="password" 
-          id="senha" 
-          placeholder="Digite sua senha" 
-          required 
-        />
+        <label for="senha">
+          Senha
+        </label>
 
-        <a href="recuperar-senha.html" class="link-esqueceu-senha">
+        <div class="campo-senha-login">
+          <input
+            type="password"
+            id="senha"
+            name="senha"
+            placeholder="Digite sua senha"
+            autocomplete="current-password"
+            required
+          />
+
+          <button
+            type="button"
+            id="btnMostrarSenha"
+            class="botao-olho-senha"
+            aria-label="Mostrar senha"
+            aria-pressed="false"
+          >
+            <svg
+              class="icone-olho icone-olho-aberto"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"
+              ></path>
+
+              <circle
+                cx="12"
+                cy="12"
+                r="3"
+              ></circle>
+            </svg>
+
+            <svg
+              class="icone-olho icone-olho-fechado"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                d="M3 3l18 18"
+              ></path>
+
+              <path
+                d="M10.6 6.2A10.7 10.7 0 0 1 12 6c6 0 9.5 6 9.5 6a17 17 0 0 1-2.2 2.9"
+              ></path>
+
+              <path
+                d="M6.2 6.2C3.8 7.8 2.5 12 2.5 12S6 18 12 18c1.7 0 3.2-.5 4.5-1.2"
+              ></path>
+            </svg>
+          </button>
+        </div>
+
+        <a
+          href="recuperar-senha.html"
+          class="link-esqueceu-senha"
+        >
           Esqueci minha senha
         </a>
 
-        <button type="submit" id="btnEntrar">Entrar</button>
+        <button
+          type="submit"
+          id="btnEntrar"
+        >
+          Entrar
+        </button>
       </form>
 
-      <p id="mensagemLogin" class="mensagem-login"></p>
+      <p
+        id="mensagemLogin"
+        class="mensagem-login"
+        aria-live="polite"
+      ></p>
 
       <div class="login-links">
-        <a href="cadastro.html" class="botao-outline-dourado">
+        <a
+          href="cadastro.html"
+          class="botao-outline-dourado"
+        >
           Criar conta
         </a>
 
-        <a href="index.html" class="botao-outline-dourado">
+        <a
+          href="index.html"
+          class="botao-outline-dourado"
+        >
           Voltar para o site
         </a>
       </div>
+
     </section>
   </main>
 
-  <script src="auth.js"></script>
+  <script src="auth.js?v=32"></script>
 
   <script>
-    const formLogin = document.getElementById("formLogin");
-    const mensagemLogin = document.getElementById("mensagemLogin");
-    const btnEntrar = document.getElementById("btnEntrar");
+    const formLogin =
+      document.getElementById(
+        "formLogin"
+      );
 
-    formLogin.addEventListener("submit", async function (event) {
-      event.preventDefault();
+    const mensagemLogin =
+      document.getElementById(
+        "mensagemLogin"
+      );
 
-      const email = document.getElementById("email").value.trim();
-      const senha = document.getElementById("senha").value.trim();
+    const btnEntrar =
+      document.getElementById(
+        "btnEntrar"
+      );
 
-      mensagemLogin.textContent = "Entrando...";
-      mensagemLogin.classList.remove("erro");
-      btnEntrar.disabled = true;
-      btnEntrar.textContent = "Entrando...";
+    const campoSenha =
+      document.getElementById(
+        "senha"
+      );
 
-      const retorno = await fazerLogin(email, senha);
+    const btnMostrarSenha =
+      document.getElementById(
+        "btnMostrarSenha"
+      );
 
-      if (!retorno.sucesso) {
-        mensagemLogin.textContent = retorno.mensagem;
-        mensagemLogin.classList.add("erro");
-        btnEntrar.disabled = false;
-        btnEntrar.textContent = "Entrar";
-        return;
+    btnMostrarSenha.addEventListener(
+      "click",
+      function () {
+        const senhaEstaVisivel =
+          campoSenha.type === "text";
+
+        campoSenha.type =
+          senhaEstaVisivel
+            ? "password"
+            : "text";
+
+        btnMostrarSenha.classList.toggle(
+          "senha-visivel",
+          !senhaEstaVisivel
+        );
+
+        btnMostrarSenha.setAttribute(
+          "aria-label",
+          senhaEstaVisivel
+            ? "Mostrar senha"
+            : "Ocultar senha"
+        );
+
+        btnMostrarSenha.setAttribute(
+          "aria-pressed",
+          String(!senhaEstaVisivel)
+        );
+
+        campoSenha.focus();
       }
+    );
 
-      mensagemLogin.textContent = "";
-      mensagemLogin.classList.remove("erro");
+    formLogin.addEventListener(
+      "submit",
+      async function (event) {
+        event.preventDefault();
 
-      const usuario = retorno.usuario;
+        const email =
+          document
+            .getElementById("email")
+            .value
+            .trim();
 
-      if (usuario.tipo === "barbeiro") {
-        localStorage.removeItem("guapo_redirect_apos_login");
-        window.location.href = "painel.html";
-        return;
+        const senha =
+          campoSenha.value;
+
+        mensagemLogin.textContent =
+          "Entrando...";
+
+        mensagemLogin.classList.remove(
+          "erro"
+        );
+
+        btnEntrar.disabled =
+          true;
+
+        btnEntrar.textContent =
+          "Entrando...";
+
+        const retorno =
+          await fazerLogin(
+            email,
+            senha
+          );
+
+        if (!retorno.sucesso) {
+          mensagemLogin.textContent =
+            retorno.mensagem;
+
+          mensagemLogin.classList.add(
+            "erro"
+          );
+
+          btnEntrar.disabled =
+            false;
+
+          btnEntrar.textContent =
+            "Entrar";
+
+          return;
+        }
+
+        mensagemLogin.textContent =
+          "";
+
+        mensagemLogin.classList.remove(
+          "erro"
+        );
+
+        const usuario =
+          retorno.usuario;
+
+        if (
+          usuario.tipo ===
+          "barbeiro"
+        ) {
+          localStorage.removeItem(
+            "guapo_redirect_apos_login"
+          );
+
+          window.location.href =
+            "painel.html";
+
+          return;
+        }
+
+        const redirect =
+          localStorage.getItem(
+            "guapo_redirect_apos_login"
+          );
+
+        if (redirect) {
+          localStorage.removeItem(
+            "guapo_redirect_apos_login"
+          );
+
+          window.location.href =
+            redirect;
+
+        } else {
+          window.location.href =
+            "cliente.html";
+        }
       }
-
-      const redirect = localStorage.getItem("guapo_redirect_apos_login");
-
-      if (redirect) {
-        localStorage.removeItem("guapo_redirect_apos_login");
-        window.location.href = redirect;
-      } else {
-        window.location.href = "cliente.html";
-      }
-    });
+    );
   </script>
 
 </body>
