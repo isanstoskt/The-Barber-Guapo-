@@ -18,7 +18,10 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const PORT = process.env.PORT || 3000;
+const PORT =
+  process.env.PORT_SERVER ||
+  process.env.PORT ||
+  3000;
 const BCRYPT_ROUNDS = 10;
 
 const STATUS_PERMITIDOS = [

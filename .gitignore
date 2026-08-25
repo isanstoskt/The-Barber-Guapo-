@@ -1,3 +1,4 @@
+@"
 # Dependências
 node_modules/
 api/node_modules/
@@ -8,8 +9,17 @@ api/.env
 
 # Certificados
 *.pem
-api/*.pem
+certificados/
 
-# Arquivos temporários
+# Backups de banco
+*.sql
+
+# Logs
 *.log
+
+# Sistema
 .DS_Store
+"@ | Set-Content ".gitignore" -Encoding UTF8
+# Arquivos que nao pertencem ao projeto
+SaveClip*.jpg
+git/
