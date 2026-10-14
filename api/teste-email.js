@@ -14,7 +14,7 @@ if (!emailUsuario || !emailSenhaApp) {
 
   process.exit(1);
 }
-
+  
 const transportador = nodemailer.createTransport({
   service: "gmail",
 
